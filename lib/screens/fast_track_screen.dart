@@ -32,11 +32,39 @@ class _FastTrackScreenState extends State<FastTrackScreen> {
   }
 
   Future<void> _openRulesQuiz(FastTrackCurriculum curriculum) async {
-    final items = curriculum.buildRulesQuiz(limit: 24);
+    final items = curriculum.buildRulesQuiz(limit: 40);
     await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => FastTrackRulesQuizScreen(items: items),
       ),
+    );
+  }
+
+  Future<void> _confirmReset() async {
+    final l = L10n.of(context);
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l.ftResetTitle),
+        content: Text(l.ftResetBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l.ftResetConfirm),
+          ),
+        ],
+      ),
+    );
+    if (ok != true || !mounted) return;
+    HapticFeedback.mediumImpact();
+    await context.read<AppState>().resetFtPractice();
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l.ftResetDone)),
     );
   }
 
@@ -232,6 +260,61 @@ class _FastTrackScreenState extends State<FastTrackScreen> {
                     Text(l.ftHowItWorks, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 15)),
                     const SizedBox(height: 8),
                     Text(l.ftHowItWorksBody, style: const TextStyle(color: AppColors.textSecondary, height: 1.45)),
+                    const SizedBox(height: 10),
+                    Text(
+                      l.ftCoverageLine(
+                        tricks.deck.length,
+                        tricks.matrix.length,
+                        tricks.signCards.length,
+                        tricks.jobRules.length,
+                      ),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 12,
+                        color: AppColors.inkSoft,
+                        height: 1.35,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+              PremiumCard(
+                borderColor: AppColors.coral.withValues(alpha: 0.28),
+                onTap: _confirmReset,
+                child: Row(
+                  children: [
+                    Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: AppColors.coralDim,
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: const Icon(Icons.restart_alt_rounded, color: AppColors.coral),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            l.ftResetTitle,
+                            style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 15),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            l.ftResetHint,
+                            style: const TextStyle(
+                              color: AppColors.textSecondary,
+                              fontSize: 12,
+                              height: 1.35,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Icon(Icons.chevron_right_rounded, color: AppColors.textMuted),
                   ],
                 ),
               ),

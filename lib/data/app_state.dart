@@ -116,6 +116,15 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Reset Fast Track practice: re-open every lesson slide and clear mastery gate.
+  Future<void> resetFtPractice() async {
+    await _store.resetFtProgress();
+    _ftMaxSlide = 0;
+    _ftMasteryPassed = false;
+    _ftMasteryScore = 0;
+    notifyListeners();
+  }
+
   /// Chooses the interface language and remembers that the first-run
   /// picker has been answered, so it never interrupts again.
   Future<void> setLanguage(AppLang lang) async {

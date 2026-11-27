@@ -432,8 +432,8 @@ class L10n {
   String get ftOpenExam => p('Apri l\'esame', 'Open exam');
   String get ftHowItWorks => p('Come funziona', 'How it works');
   String get ftHowItWorksBody => p(
-      'Ogni slide ti dice: «Ora impara questa regola». Tocchi «Ho imparato →» e passi alla successiva. Alla fine, un test verifica se ricordi i trigger, gli assoluti e il cheat sheet. Solo dopo puoi andare all\'esame.',
-      'Every slide tells you: “Learn this rule now.” Tap “I learned this →” and move on. At the end, a test checks if you remember triggers, absolutes and the cheat sheet. Only then can you go to the exam.');
+      'Percorso completo Zero Italian: forme, job di forma, griglia forma×verbo, 25 francobolli, ambiti di capitolo, gemelli-trappola, verdi/assoluti, 44 carte segnale. Poi test memoria (≥85%) e esame.',
+      'Full Zero Italian path: shapes, shape jobs, shape×verb grid, 25 letter stamps, chapter scopes, twin traps, greens/absolutes, 44 sign cards. Then memory test (≥85%) and exam.');
   String get ftFinishSlidesFirst => p(
       'Prima finisci tutte le slide delle regole.',
       'Finish all rule slides first.');
@@ -462,6 +462,20 @@ class L10n {
       'Review the slides and retry the test. You need at least 85%.');
   String get ftGoExam => p('Vai all\'esame', 'Go to exam');
   String get ftRetryRules => p('Riprova il test', 'Retry the test');
+  String get ftResetTitle => p('Reset pratica regole', 'Reset rules practice');
+  String get ftResetHint => p(
+      'Ricomincia lezioni + test da zero per memorizzare di nuovo',
+      'Restart lessons + test from zero to memorize again');
+  String get ftResetBody => p(
+      'Cancella il progresso delle slide e il test memoria. Potrai ripassare tutte le regole e rifare il test. L\'esame ufficiale non viene cancellato.',
+      'Clears slide progress and the memory test. You can re-learn every rule and retake the test. The official exam history is not cleared.');
+  String get ftResetConfirm => p('Reset ora', 'Reset now');
+  String get ftResetDone => p(
+      'Pratica Fast Track resettata. Riparti dalla lezione 1.',
+      'Fast Track practice reset. Start again from lesson 1.');
+  String ftCoverageLine(int stamps, int matrix, int cards, int jobs) => p(
+      'Copertura: $stamps francobolli · $matrix celle griglia · $cards carte segnale · $jobs job di forma',
+      'Coverage: $stamps letter stamps · $matrix grid cells · $cards sign cards · $jobs shape jobs');
   String get turboPlan => p('Piano Turbo', 'Turbo Plan');
   String get turboPlanSubtitle => p(
       'Zero italiano → pronto per l\'esame\nin 1–4 giorni intensivi',

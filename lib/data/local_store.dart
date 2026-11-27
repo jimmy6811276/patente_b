@@ -570,6 +570,25 @@ class LocalStore {
     );
   }
 
+  /// Clears guided lesson progress + rules mastery so the user can practice again.
+  Future<void> resetFtProgress() async {
+    await db.insert(
+      'meta',
+      {'key': _ftSlideKey, 'value': '0'},
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+    await db.insert(
+      'meta',
+      {'key': _ftMasteryKey, 'value': '0'},
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+    await db.insert(
+      'meta',
+      {'key': _ftMasteryScoreKey, 'value': '0'},
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
   static const _langKey = 'app_language';
   static const _langChosenKey = 'app_language_chosen';
 
