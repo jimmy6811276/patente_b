@@ -18,6 +18,10 @@ class QuizScreen extends StatefulWidget {
     this.questions,
     this.mistakeMode = false,
     this.bookmarkMode = false,
+    this.hardMode = false,
+    this.quickMode = false,
+    this.dailyMode = false,
+    this.secondsPerQuestion = 30,
   });
 
   final String? title;
@@ -25,6 +29,10 @@ class QuizScreen extends StatefulWidget {
   final List<QuizQuestion>? questions;
   final bool mistakeMode;
   final bool bookmarkMode;
+  final bool hardMode;
+  final bool quickMode;
+  final bool dailyMode;
+  final int secondsPerQuestion;
 
   @override
   State<QuizScreen> createState() => _QuizScreenState();
@@ -44,6 +52,9 @@ class _QuizScreenState extends State<QuizScreen> {
     final state = context.read<AppState>();
     if (widget.mistakeMode) return state.loadMistakeQuiz();
     if (widget.bookmarkMode) return state.loadBookmarks();
+    if (widget.hardMode) return state.loadHardQuiz(limit: 20);
+    if (widget.quickMode) return state.loadQuickQuiz(limit: 10);
+    if (widget.dailyMode) return state.loadDailyChallenge(limit: 10);
     return state.loadQuiz(limit: 20, chapterId: widget.chapterId);
   }
 
@@ -114,6 +125,8 @@ class _QuizScreenState extends State<QuizScreen> {
           title: widget.title ?? l.quizTitle,
           questions: questions,
           mistakeMode: widget.mistakeMode,
+          dailyMode: widget.dailyMode,
+          secondsPerQuestion: widget.secondsPerQuestion,
         );
       },
     );
@@ -125,11 +138,15 @@ class _QuizSession extends StatefulWidget {
     required this.title,
     required this.questions,
     required this.mistakeMode,
+    this.dailyMode = false,
+    this.secondsPerQuestion = 30,
   });
 
   final String title;
   final List<QuizQuestion> questions;
   final bool mistakeMode;
+  final bool dailyMode;
+  final int secondsPerQuestion;
 
   @override
   State<_QuizSession> createState() => _QuizSessionState();
@@ -153,6 +170,7 @@ class _QuizSessionState extends State<_QuizSession> {
   void initState() {
     super.initState();
     _bookmarked = false;
+    _seconds = widget.secondsPerQuestion;
     _syncBookmark();
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (!mounted) return;
@@ -209,13 +227,17 @@ class _QuizSessionState extends State<_QuizSession> {
       _answeredTrue = null;
       _showHint = false;
       _bookmarked = false;
-      _seconds = 30;
+      _seconds = widget.secondsPerQuestion;
     });
     _syncBookmark();
   }
 
-  void _finish() {
+  Future<void> _finish() async {
     _timer?.cancel();
+    if (widget.dailyMode) {
+      await context.read<AppState>().completeDailyChallenge();
+    }
+    if (!mounted) return;
     final l = L10n.read(context);
     showModalBottomSheet(
       context: context,

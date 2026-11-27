@@ -343,6 +343,76 @@ class _StatsScreenState extends State<StatsScreen> {
             l.passProbability((stats.readiness * 100).round()),
             style: const TextStyle(fontSize: 11, color: AppColors.textMuted, height: 1.4),
           ),
+          const SizedBox(height: 22),
+          Text(
+            l.examHistory,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
+          ),
+          const SizedBox(height: 10),
+          if (state.examHistory.isEmpty)
+            PremiumCard(
+              child: Text(
+                l.noExamsYet,
+                style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+              ),
+            )
+          else
+            ...state.examHistory.take(8).map(
+              (e) => Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: PremiumCard(
+                  padding: const EdgeInsets.all(14),
+                  borderColor: (e.passed ? AppColors.neon : AppColors.red)
+                      .withValues(alpha: 0.28),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: (e.passed ? AppColors.neon : AppColors.red)
+                              .withValues(alpha: 0.14),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(
+                          e.passed ? Icons.verified_rounded : Icons.cancel_rounded,
+                          color: e.passed ? AppColors.neonSoft : AppColors.redSoft,
+                          size: 22,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              e.passed ? l.examPassedShort : l.examFailedShort,
+                              style: const TextStyle(fontWeight: FontWeight.w800),
+                            ),
+                            Text(
+                              l.examHistoryLine(e.correct, e.wrong),
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: AppColors.textMuted,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Text(
+                        '${e.createdAt.day.toString().padLeft(2, '0')}/'
+                        '${e.createdAt.month.toString().padLeft(2, '0')}',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppColors.textMuted,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
     );

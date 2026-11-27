@@ -8,13 +8,18 @@ import '../data/app_state.dart';
 import '../l10n/app_lang.dart';
 import '../l10n/strings.dart';
 import '../theme/app_colors.dart';
+import '../widgets/grid_icons.dart';
+import '../widgets/license_chip.dart';
 import '../widgets/premium_scaffold.dart';
 import '../widgets/readiness_ring.dart';
+import 'chapters_screen.dart';
 import 'exam_screen.dart';
 import 'fast_track_lock_screen.dart';
 import 'fast_track_screen.dart';
+import 'license_coming_soon_screen.dart';
 import 'mistakes_screen.dart';
 import 'quiz_screen.dart';
+import 'sign_games_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -22,7 +27,7 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
-    final l = L10n(context.watch<AppState>().lang);
+    final l = L10n(state.lang);
     final stats = state.stats;
     final weak = state.weakTopics;
     final nextAction = weak.isNotEmpty
@@ -48,7 +53,7 @@ class HomeScreen extends StatelessWidget {
                             _FlagRibbon(),
                             const SizedBox(width: 10),
                             Text(
-                              'PATENTE B',
+                              'PATENTE ${state.selectedLicense.code}',
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w800,
@@ -69,7 +74,8 @@ class HomeScreen extends StatelessWidget {
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  const Icon(Icons.offline_bolt_rounded, size: 11, color: AppColors.neonSoft),
+                                  const Icon(Icons.offline_bolt_rounded,
+                                      size: 11, color: AppColors.neonSoft),
                                   const SizedBox(width: 3),
                                   Text(
                                     l.offlineBadge,
@@ -89,7 +95,7 @@ class HomeScreen extends StatelessWidget {
                         Text(
                           l.greeting(state.userName),
                           style: const TextStyle(
-                            fontSize: 32,
+                            fontSize: 30,
                             fontWeight: FontWeight.w900,
                             letterSpacing: -1,
                             height: 1.05,
@@ -100,7 +106,7 @@ class HomeScreen extends StatelessWidget {
                           l.homeSubtitle,
                           style: const TextStyle(
                             color: AppColors.textSecondary,
-                            fontSize: 14,
+                            fontSize: 13,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -114,37 +120,60 @@ class HomeScreen extends StatelessWidget {
           ),
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.only(top: 26),
-              child: Center(
-                child: ReadinessRing(
-                  progress: stats.readiness,
-                  label: l.readinessLabel(stats),
+              padding: const EdgeInsets.fromLTRB(22, 18, 22, 8),
+              child: Text(
+                l.chooseLicense,
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.textMuted,
+                  letterSpacing: 0.3,
                 ),
               ),
             ),
           ),
           SliverToBoxAdapter(
+            child: LicenseChipStrip(
+              selected: state.selectedLicense,
+              isEnglish: state.lang.isEnglish,
+              onSelected: (cat) async {
+                await context.read<AppState>().setSelectedLicense(cat);
+                if (!cat.isPlayable && context.mounted) {
+                  _push(context, LicenseComingSoonScreen(category: cat));
+                }
+              },
+            ),
+          ),
+          SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(22, 24, 22, 0),
+              padding: const EdgeInsets.fromLTRB(22, 18, 22, 0),
               child: Row(
                 children: [
-                  Expanded(
-                    child: _MetricCard(
-                      emoji: '🔥',
-                      value: '${stats.streak}',
-                      label: l.streakLabel,
-                      accent: AppColors.orange,
-                    ),
+                  ReadinessRing(
+                    progress: stats.readiness,
+                    label: l.readinessLabel(stats),
+                    size: 118,
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 14),
                   Expanded(
-                    child: _MetricCard(
-                      emoji: '⭐',
-                      value: stats.totalAnswers == 0
-                          ? '—'
-                          : '${(stats.accuracy * 100).round()}%',
-                      label: l.accuracyLabel,
-                      accent: AppColors.gold,
+                    child: Column(
+                      children: [
+                        _MiniMetric(
+                          emoji: '🔥',
+                          value: '${stats.streak}',
+                          label: l.streakLabel,
+                          accent: AppColors.orange,
+                        ),
+                        const SizedBox(height: 10),
+                        _MiniMetric(
+                          emoji: '⭐',
+                          value: stats.totalAnswers == 0
+                              ? '—'
+                              : '${(stats.accuracy * 100).round()}%',
+                          label: l.accuracyLabel,
+                          accent: AppColors.gold,
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -153,7 +182,7 @@ class HomeScreen extends StatelessWidget {
           ),
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(22, 14, 22, 0),
+              padding: const EdgeInsets.fromLTRB(22, 16, 22, 0),
               child: PremiumCard(
                 padding: const EdgeInsets.all(14),
                 borderColor: AppColors.electric.withValues(alpha: 0.25),
@@ -200,28 +229,138 @@ class HomeScreen extends StatelessWidget {
                         ],
                       ),
                     ),
-                    const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: AppColors.textMuted),
+                    const Icon(Icons.arrow_forward_ios_rounded,
+                        size: 14, color: AppColors.textMuted),
                   ],
                 ),
               ),
             ),
           ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(22, 20, 22, 8),
+              child: Text(
+                l.studyModes,
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.textMuted,
+                  letterSpacing: 0.3,
+                ),
+              ),
+            ),
+          ),
           SliverPadding(
-            padding: const EdgeInsets.fromLTRB(22, 18, 22, 28),
+            padding: const EdgeInsets.fromLTRB(18, 0, 18, 28),
             sliver: SliverGrid(
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                mainAxisSpacing: 14,
-                crossAxisSpacing: 14,
-                childAspectRatio: 1.05,
+                crossAxisCount: 3,
+                mainAxisSpacing: 12,
+                crossAxisSpacing: 12,
+                childAspectRatio: 0.88,
               ),
               delegate: SliverChildListDelegate([
-                _ActionCard(
-                  title: l.fastTrackSectionRow,
-                  subtitle: l.fastTrackSubtitle,
-                  icon: Icons.bolt_rounded,
+                _HubTile(
+                  title: l.quizTitle,
+                  subtitle: l.questionsCount(state.totalQuestions),
+                  kind: HubIconKind.quiz,
+                  gradient: AppColors.electricGradient,
+                  glow: AppColors.electricGlow,
+                  delay: 0,
+                  onTap: () => _push(context, QuizScreen(title: l.quizTitle)),
+                ),
+                _HubTile(
+                  title: l.simulationTitle,
+                  subtitle: l.officialExam,
+                  kind: HubIconKind.exam,
+                  gradient: AppColors.pinkGradient,
+                  glow: AppColors.pinkGlow,
+                  delay: 40,
+                  onTap: () => _push(context, const ExamScreen()),
+                ),
+                _HubTile(
+                  title: l.hubChapters,
+                  subtitle: l.chaptersShort,
+                  kind: HubIconKind.chapters,
+                  gradient: const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [Color(0xFF5B8CFF), Color(0xFF2A4FC8)],
+                  ),
+                  glow: AppColors.electricGlow,
+                  delay: 80,
+                  onTap: () => _push(context, const ChaptersScreen()),
+                ),
+                _HubTile(
+                  title: l.myMistakes,
+                  subtitle: l.toReview(state.mistakes.length),
+                  kind: HubIconKind.mistakes,
+                  gradient: AppColors.orangeGradient,
+                  glow: AppColors.orangeGlow,
+                  delay: 120,
+                  onTap: () => _push(context, const MistakesScreen()),
+                ),
+                _HubTile(
+                  title: l.hubSigns,
+                  subtitle: l.signsSubtitle,
+                  kind: HubIconKind.signs,
+                  gradient: const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [Color(0xFFFFC14D), Color(0xFFE07A00)],
+                  ),
+                  glow: AppColors.orangeGlow,
+                  delay: 160,
+                  onTap: () => _push(context, const SignGamesScreen()),
+                ),
+                _HubTile(
+                  title: l.hubHard,
+                  subtitle: l.hardSubtitle,
+                  kind: HubIconKind.hard,
+                  gradient: const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [Color(0xFFFF6B73), Color(0xFFC9182B)],
+                  ),
+                  glow: AppColors.redGlow,
+                  delay: 200,
+                  onTap: () => _push(
+                    context,
+                    QuizScreen(title: l.hardQuizTitle, hardMode: true),
+                  ),
+                ),
+                _HubTile(
+                  title: l.hubDaily,
+                  subtitle: state.dailyChallengeDone ? l.dailyDone : l.dailyAvailable,
+                  kind: HubIconKind.daily,
                   gradient: AppColors.neonGradient,
                   glow: AppColors.neonGlow,
+                  delay: 240,
+                  dimmed: state.dailyChallengeDone,
+                  onTap: () {
+                    if (state.dailyChallengeDone) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(l.dailyAlreadyDone)),
+                      );
+                      return;
+                    }
+                    _push(
+                      context,
+                      QuizScreen(
+                        title: l.dailyChallengeTitle,
+                        dailyMode: true,
+                        secondsPerQuestion: 25,
+                      ),
+                    );
+                  },
+                ),
+                _HubTile(
+                  title: l.fastTrackSectionRow,
+                  subtitle: l.fastTrackSubtitle,
+                  kind: HubIconKind.fastTrack,
+                  gradient: AppColors.neonGradient,
+                  glow: AppColors.neonGlow,
+                  delay: 280,
                   locked: !state.fastTrackUnlocked,
                   lockedLabel: l.privateBadge,
                   onTap: () => _push(
@@ -231,29 +370,24 @@ class HomeScreen extends StatelessWidget {
                         : const FastTrackLockScreen(),
                   ),
                 ),
-                _ActionCard(
-                  title: l.quizTitle,
-                  subtitle: l.questionsCount(state.totalQuestions),
-                  icon: Icons.play_arrow_rounded,
-                  gradient: AppColors.electricGradient,
-                  glow: AppColors.electricGlow,
-                  onTap: () => _push(context, const QuizScreen()),
-                ),
-                _ActionCard(
-                  title: l.simulationTitle,
-                  subtitle: l.officialExam,
-                  icon: Icons.flag_rounded,
-                  gradient: AppColors.pinkGradient,
-                  glow: AppColors.pinkGlow,
-                  onTap: () => _push(context, const ExamScreen()),
-                ),
-                _ActionCard(
-                  title: l.myMistakes,
-                  subtitle: l.toReview(state.mistakes.length),
-                  icon: Icons.error_outline_rounded,
-                  gradient: AppColors.orangeGradient,
-                  glow: AppColors.orangeGlow,
-                  onTap: () => _push(context, const MistakesScreen()),
+                _HubTile(
+                  title: l.hubBookmarks,
+                  subtitle: l.hubBookmarksSub,
+                  kind: HubIconKind.bookmarks,
+                  gradient: const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [Color(0xFFFFD60A), Color(0xFFE0A800)],
+                  ),
+                  glow: const Color(0x66FFD60A),
+                  delay: 320,
+                  onTap: () => _push(
+                    context,
+                    QuizScreen(
+                      title: l.hubBookmarks,
+                      bookmarkMode: true,
+                    ),
+                  ),
                 ),
               ]),
             ),
@@ -268,7 +402,8 @@ class HomeScreen extends StatelessWidget {
     Navigator.of(context).push(
       PageRouteBuilder(
         pageBuilder: (context, animation, secondaryAnimation) => page,
-        transitionsBuilder: (context, animation, secondaryAnimation, child) => FadeTransition(
+        transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+            FadeTransition(
           opacity: animation,
           child: SlideTransition(
             position: Tween<Offset>(
@@ -348,8 +483,8 @@ class _LangButton extends StatelessWidget {
   }
 }
 
-class _MetricCard extends StatelessWidget {
-  const _MetricCard({
+class _MiniMetric extends StatelessWidget {
+  const _MiniMetric({
     required this.emoji,
     required this.value,
     required this.label,
@@ -364,12 +499,12 @@ class _MetricCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PremiumCard(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       borderColor: accent.withValues(alpha: 0.22),
       child: Row(
         children: [
-          Text(emoji, style: const TextStyle(fontSize: 26)),
-          const SizedBox(width: 10),
+          Text(emoji, style: const TextStyle(fontSize: 20)),
+          const SizedBox(width: 8),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -377,15 +512,15 @@ class _MetricCard extends StatelessWidget {
                 Text(
                   value,
                   style: const TextStyle(
-                    fontSize: 22,
+                    fontSize: 18,
                     fontWeight: FontWeight.w900,
-                    letterSpacing: -0.6,
+                    letterSpacing: -0.4,
                   ),
                 ),
                 Text(
                   label,
                   style: const TextStyle(
-                    fontSize: 11,
+                    fontSize: 10,
                     color: AppColors.textMuted,
                     fontWeight: FontWeight.w600,
                   ),
@@ -399,134 +534,183 @@ class _MetricCard extends StatelessWidget {
   }
 }
 
-class _ActionCard extends StatelessWidget {
-  const _ActionCard({
+class _HubTile extends StatefulWidget {
+  const _HubTile({
     required this.title,
     required this.subtitle,
-    required this.icon,
+    required this.kind,
     required this.gradient,
     required this.glow,
     required this.onTap,
+    this.delay = 0,
     this.locked = false,
     this.lockedLabel = 'Privato',
+    this.dimmed = false,
   });
 
   final String title;
   final String subtitle;
-  final IconData icon;
+  final HubIconKind kind;
   final Gradient gradient;
   final Color glow;
   final VoidCallback onTap;
-
-  /// Veils the card and shows a lock chip — used for credential-gated sections.
+  final int delay;
   final bool locked;
   final String lockedLabel;
+  final bool dimmed;
+
+  @override
+  State<_HubTile> createState() => _HubTileState();
+}
+
+class _HubTileState extends State<_HubTile> with SingleTickerProviderStateMixin {
+  late final AnimationController _ctrl;
+  late final Animation<double> _fade;
+  late final Animation<Offset> _slide;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 420),
+    );
+    _fade = CurvedAnimation(parent: _ctrl, curve: Curves.easeOut);
+    _slide = Tween<Offset>(
+      begin: const Offset(0, 0.12),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOutCubic));
+    Future<void>.delayed(Duration(milliseconds: widget.delay), () {
+      if (mounted) _ctrl.forward();
+    });
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(color: glow, blurRadius: 22, offset: const Offset(0, 10)),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(24),
-          child: Ink(
+    return FadeTransition(
+      opacity: _fade,
+      child: SlideTransition(
+        position: _slide,
+        child: Opacity(
+          opacity: widget.dimmed ? 0.72 : 1,
+          child: Container(
             decoration: BoxDecoration(
-              gradient: gradient,
-              borderRadius: BorderRadius.circular(24),
+              borderRadius: BorderRadius.circular(22),
+              boxShadow: [
+                BoxShadow(color: widget.glow, blurRadius: 18, offset: const Offset(0, 8)),
+              ],
             ),
-            child: Stack(
-              children: [
-                Positioned(
-                  right: -18,
-                  top: -18,
-                  child: Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white.withValues(alpha: 0.12),
-                    ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: widget.onTap,
+                borderRadius: BorderRadius.circular(22),
+                child: Ink(
+                  decoration: BoxDecoration(
+                    gradient: widget.gradient,
+                    borderRadius: BorderRadius.circular(22),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Stack(
                     children: [
-                      ImageFiltered(
-                        imageFilter: ImageFilter.blur(
-                          sigmaX: locked ? 2.2 : 0,
-                          sigmaY: locked ? 2.2 : 0,
-                        ),
+                      Positioned(
+                        right: -14,
+                        top: -14,
                         child: Container(
-                          width: 42,
-                          height: 42,
+                          width: 56,
+                          height: 56,
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.22),
-                            borderRadius: BorderRadius.circular(14),
+                            shape: BoxShape.circle,
+                            color: Colors.white.withValues(alpha: 0.12),
                           ),
-                          child: Icon(icon, color: Colors.white, size: 24),
                         ),
                       ),
-                      const Spacer(),
-                      Text(
-                        title,
-                        style: const TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w900,
-                          color: Colors.white,
-                          letterSpacing: -0.2,
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            ImageFiltered(
+                              imageFilter: ImageFilter.blur(
+                                sigmaX: widget.locked ? 2.0 : 0,
+                                sigmaY: widget.locked ? 2.0 : 0,
+                              ),
+                              child: Container(
+                                width: 38,
+                                height: 38,
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(alpha: 0.2),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Center(
+                                  child: HubGridIcon(kind: widget.kind, size: 22),
+                                ),
+                              ),
+                            ),
+                            const Spacer(),
+                            Text(
+                              widget.title,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w900,
+                                color: Colors.white,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              widget.subtitle,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: Colors.white.withValues(alpha: 0.88),
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      const SizedBox(height: 2),
-                      Text(
-                        subtitle,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.white.withValues(alpha: 0.88),
-                          fontWeight: FontWeight.w600,
+                      if (widget.locked)
+                        Positioned(
+                          top: 8,
+                          right: 8,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withValues(alpha: 0.42),
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.32),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.lock_rounded, size: 9, color: Colors.white),
+                                const SizedBox(width: 2),
+                                Text(
+                                  widget.lockedLabel,
+                                  style: const TextStyle(
+                                    fontSize: 8,
+                                    fontWeight: FontWeight.w800,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
-                      ),
                     ],
                   ),
                 ),
-                if (locked)
-                  Positioned(
-                    top: 12,
-                    right: 12,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.42),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: Colors.white.withValues(alpha: 0.32)),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.lock_rounded, size: 11, color: Colors.white),
-                          const SizedBox(width: 3),
-                          Text(
-                            lockedLabel,
-                            style: const TextStyle(
-                              fontSize: 9,
-                              fontWeight: FontWeight.w800,
-                              color: Colors.white,
-                              letterSpacing: 0.2,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-              ],
+              ),
             ),
           ),
         ),

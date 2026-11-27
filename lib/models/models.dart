@@ -185,3 +185,21 @@ class MistakeItem {
   final int wrongCount;
   final DateTime lastWrongAt;
 }
+
+class ExamRecord {
+  const ExamRecord({
+    required this.id,
+    required this.total,
+    required this.correct,
+    required this.wrong,
+    required this.passed,
+    required this.createdAt,
+  });
+
+  final int id;
+  final int total;
+  final int correct;
+  final int wrong;
+  final bool passed;
+  final DateTime createdAt;
+}

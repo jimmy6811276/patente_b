@@ -32,7 +32,7 @@ class PatenteBApp extends StatelessWidget {
         builder: (context, appState, _) => MaterialApp(
           title: 'Patente B',
           debugShowCheckedModeBanner: false,
-          theme: AppTheme.dark,
+          theme: AppTheme.dark(readable: appState.readableFont),
           locale: Locale(appState.lang.code),
           supportedLocales: const [Locale('it'), Locale('en')],
           home: const AppShell(),

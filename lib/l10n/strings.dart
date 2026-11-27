@@ -340,4 +340,68 @@ class L10n {
       'You can change it anytime in settings.');
   String get welcomeTitle => p('Benvenuto', 'Welcome');
   String get continueLabel => p('Continua', 'Continue');
+
+  // ── Advanced hub ───────────────────────────────────────────────────────────
+  String get chooseLicense => p('Scegli la patente', 'Choose your licence');
+  String get studyModes => p('Modalità di studio', 'Study modes');
+  String get hubChapters => p('Capitoli', 'Chapters');
+  String get hubSigns => p('Segnali', 'Signs');
+  String get hubHard => p('Difficili', 'Hard');
+  String get hubDaily => p('Sfida', 'Daily');
+  String get hubBookmarks => p('Segnalibri', 'Bookmarks');
+  String get dailyAvailable => p('Disponibile', 'Available');
+  String get dailyDone => p('Completata', 'Done');
+  String get hardSubtitle => p('Domande toste', 'Tough questions');
+  String get signsSubtitle => p('Giochi interattivi', 'Interactive games');
+  String get dailySubtitle => p('10 domande oggi', '10 questions today');
+  String get hubBookmarksSub => p('Salvate offline', 'Saved offline');
+  String get chaptersShort => p('Per argomento', 'By topic');
+
+  String get comingSoonTitle => p('In preparazione', 'Coming soon');
+  String comingSoonBody(String code) => p(
+      'Il database ufficiale per la patente $code arriverà a breve.\n'
+      'Nel frattempo Patente B è completamente disponibile offline.',
+      'The official question bank for licence $code is on the way.\n'
+      'Patente B is fully available offline in the meantime.');
+  String get backToB => p('Torna a Patente B', 'Back to Patente B');
+  String get playableNow => p('Disponibile ora', 'Available now');
+
+  // ── Sign games ─────────────────────────────────────────────────────────────
+  String get signGamesTitle => p('Giochi sui segnali', 'Sign games');
+  String get guessSign => p('Indovina il segnale', 'Guess the sign');
+  String get guessSignSub =>
+      p('Guarda il cartello e scegli il nome corretto', 'Look at the sign and pick the right name');
+  String get fourSigns => p('4 segnali 1 parola', '4 signs 1 word');
+  String get fourSignsSub =>
+      p('Trova il segnale che corrisponde alla parola', 'Find the sign that matches the word');
+  String get whichSign => p('Quale segnale è?', 'Which sign is this?');
+  String get pickMatchingSign =>
+      p('Quale segnale corrisponde?', 'Which sign matches?');
+  String get correctShort => p('Corretto!', 'Correct!');
+  String get wrongShort => p('Sbagliato', 'Wrong');
+  String get playAgain => p('Gioca ancora', 'Play again');
+  String scoreLabel(int score, int total) =>
+      p('Punteggio $score/$total', 'Score $score/$total');
+
+  // ── Daily / hard / quick ───────────────────────────────────────────────────
+  String get dailyChallengeTitle => p('Sfida del giorno', 'Daily challenge');
+  String get hardQuizTitle => p('Quiz difficili', 'Hard quiz');
+  String get quickQuizTitle => p('Quiz rapido', 'Quick quiz');
+  String get dailyAlreadyDone =>
+      p('Hai già completato la sfida di oggi. Torna domani!',
+          'You already finished today’s challenge. Come back tomorrow!');
+
+  // ── Exam history / readable font ───────────────────────────────────────────
+  String get examHistory => p('Storico esami', 'Exam history');
+  String get noExamsYet =>
+      p('Nessuna simulazione ancora. Prova un esame ufficiale.',
+          'No mock exams yet. Try an official simulation.');
+  String get examPassedShort => p('Superato', 'Passed');
+  String get examFailedShort => p('Non superato', 'Failed');
+  String examHistoryLine(int correct, int wrong) =>
+      p('$correct corrette · $wrong errori', '$correct correct · $wrong wrong');
+  String get readableFont => p('Lettura facilitata', 'Readable text');
+  String get readableFontSub => p(
+      'Spaziatura più ampia per una lettura più chiara',
+      'Wider spacing for clearer reading');
 }

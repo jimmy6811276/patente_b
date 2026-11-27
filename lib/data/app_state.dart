@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../l10n/app_lang.dart';
+import '../models/license_category.dart';
 import '../models/models.dart';
 import 'fast_track_access.dart';
 import 'local_store.dart';
@@ -27,6 +28,10 @@ class AppState extends ChangeNotifier {
   bool _offlineReady = false;
   AppLang _lang = AppLang.it;
   bool _langChosen = false;
+  LicenseCategory _selectedLicense = LicenseCategory.b;
+  bool _readableFont = false;
+  bool _dailyChallengeDone = false;
+  List<ExamRecord> _examHistory = const [];
 
   bool get loading => _loading;
   String? get error => _error;
@@ -39,6 +44,10 @@ class AppState extends ChangeNotifier {
   bool get offlineReady => _offlineReady;
   AppLang get lang => _lang;
   bool get langChosen => _langChosen;
+  LicenseCategory get selectedLicense => _selectedLicense;
+  bool get readableFont => _readableFont;
+  bool get dailyChallengeDone => _dailyChallengeDone;
+  List<ExamRecord> get examHistory => _examHistory;
   LocalStore get store => _store;
 
   Future<void> init() async {
@@ -67,6 +76,11 @@ class AppState extends ChangeNotifier {
     _fastTrackUnlocked = await _store.isFastTrackUnlocked();
     _lang = AppLang.fromCode(await _store.getLanguageCode());
     _langChosen = await _store.hasChosenLanguage();
+    _selectedLicense =
+        LicenseCategory.fromCode(await _store.getSelectedLicenseCode());
+    _readableFont = await _store.isReadableFont();
+    _dailyChallengeDone = await _store.isDailyChallengeDone();
+    _examHistory = await _store.getExamHistory();
     notifyListeners();
   }
 
@@ -77,6 +91,24 @@ class AppState extends ChangeNotifier {
     _langChosen = true;
     notifyListeners();
     await _store.setLanguageCode(lang.code);
+  }
+
+  Future<void> setSelectedLicense(LicenseCategory license) async {
+    _selectedLicense = license;
+    notifyListeners();
+    await _store.setSelectedLicenseCode(license.code);
+  }
+
+  Future<void> setReadableFont(bool enabled) async {
+    _readableFont = enabled;
+    notifyListeners();
+    await _store.setReadableFont(enabled);
+  }
+
+  Future<void> completeDailyChallenge() async {
+    await _store.markDailyChallengeDone();
+    _dailyChallengeDone = true;
+    notifyListeners();
   }
 
   /// Returns false when the username/password pair does not match.
@@ -111,6 +143,15 @@ class AppState extends ChangeNotifier {
   }) {
     return _store.randomQuestions(limit: limit, chapterId: chapterId);
   }
+
+  Future<List<QuizQuestion>> loadHardQuiz({int limit = 20}) =>
+      _store.hardQuestions(limit: limit);
+
+  Future<List<QuizQuestion>> loadQuickQuiz({int limit = 10}) =>
+      _store.randomQuestions(limit: limit);
+
+  Future<List<QuizQuestion>> loadDailyChallenge({int limit = 10}) =>
+      _store.randomQuestions(limit: limit);
 
   Future<List<QuizQuestion>> loadExam() => _store.randomQuestions(limit: 30);
 

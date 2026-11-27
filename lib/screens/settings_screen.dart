@@ -86,6 +86,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: Column(
               children: [
                 _Toggle(
+                  title: l.readableFont,
+                  subtitle: l.readableFontSub,
+                  value: state.readableFont,
+                  onChanged: (v) => context.read<AppState>().setReadableFont(v),
+                ),
+                const Divider(color: AppColors.stroke, height: 28),
+                _Toggle(
                   title: l.translationEnglish,
                   subtitle: l.translationSubtitle,
                   value: _en,

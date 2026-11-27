@@ -533,6 +533,129 @@ class LocalStore {
     );
   }
 
+  static const _licenseKey = 'selected_license';
+  static const _readableFontKey = 'readable_font';
+
+  Future<String?> getSelectedLicenseCode() async {
+    final rows = await db.query(
+      'meta',
+      where: 'key = ?',
+      whereArgs: [_licenseKey],
+      limit: 1,
+    );
+    return rows.isEmpty ? null : rows.first['value'] as String?;
+  }
+
+  Future<void> setSelectedLicenseCode(String code) async {
+    await db.insert(
+      'meta',
+      {'key': _licenseKey, 'value': code},
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<bool> isReadableFont() async {
+    final rows = await db.query(
+      'meta',
+      where: 'key = ?',
+      whereArgs: [_readableFontKey],
+      limit: 1,
+    );
+    return rows.isNotEmpty && rows.first['value'] == '1';
+  }
+
+  Future<void> setReadableFont(bool enabled) async {
+    await db.insert(
+      'meta',
+      {'key': _readableFontKey, 'value': enabled ? '1' : '0'},
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  static String dailyChallengeKeyFor(DateTime day) {
+    final y = day.year.toString().padLeft(4, '0');
+    final m = day.month.toString().padLeft(2, '0');
+    final d = day.day.toString().padLeft(2, '0');
+    return 'daily_challenge_$y-$m-$d';
+  }
+
+  Future<bool> isDailyChallengeDone({DateTime? day}) async {
+    final key = dailyChallengeKeyFor(day ?? DateTime.now());
+    final rows = await db.query(
+      'meta',
+      where: 'key = ?',
+      whereArgs: [key],
+      limit: 1,
+    );
+    return rows.isNotEmpty && rows.first['value'] == '1';
+  }
+
+  Future<void> markDailyChallengeDone({DateTime? day}) async {
+    final key = dailyChallengeKeyFor(day ?? DateTime.now());
+    await db.insert(
+      'meta',
+      {'key': key, 'value': '1'},
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  /// Prefer numeric / hard-tagged questions; fall back to random if the pool is thin.
+  Future<List<QuizQuestion>> hardQuestions({int limit = 20}) async {
+    final hard = await db.rawQuery(
+      '''
+      SELECT q.*, c.name_it FROM questions q
+      JOIN chapters c ON c.id = q.chapter_id
+      WHERE q.tags LIKE '%num%' OR q.tags LIKE '%hard%'
+      ORDER BY RANDOM() LIMIT ?
+      ''',
+      [limit],
+    );
+    if (hard.length >= limit) return hard.map(_mapQuestion).toList();
+
+    final weakChapterIds = await db.rawQuery('''
+      SELECT chapter_id FROM chapter_progress
+      WHERE seen >= 3
+      ORDER BY CAST(correct AS REAL) / seen ASC
+      LIMIT 5
+    ''');
+    if (weakChapterIds.isNotEmpty) {
+      final ids = weakChapterIds.map((r) => r['chapter_id'] as int).toList();
+      final placeholders = List.filled(ids.length, '?').join(',');
+      final fromWeak = await db.rawQuery(
+        '''
+        SELECT q.*, c.name_it FROM questions q
+        JOIN chapters c ON c.id = q.chapter_id
+        WHERE q.chapter_id IN ($placeholders)
+        ORDER BY RANDOM() LIMIT ?
+        ''',
+        [...ids, limit],
+      );
+      if (fromWeak.isNotEmpty) return fromWeak.map(_mapQuestion).toList();
+    }
+
+    return randomQuestions(limit: limit);
+  }
+
+  Future<List<ExamRecord>> getExamHistory({int limit = 20}) async {
+    final rows = await db.query(
+      'exams',
+      orderBy: 'created_at DESC',
+      limit: limit,
+    );
+    return rows
+        .map(
+          (r) => ExamRecord(
+            id: r['id'] as int,
+            total: r['total'] as int,
+            correct: r['correct'] as int,
+            wrong: r['wrong'] as int,
+            passed: (r['passed'] as int) == 1,
+            createdAt: DateTime.fromMillisecondsSinceEpoch(r['created_at'] as int),
+          ),
+        )
+        .toList();
+  }
+
   Future<void> resetProgress() async {
     await db.transaction((txn) async {
       await txn.delete('attempts');

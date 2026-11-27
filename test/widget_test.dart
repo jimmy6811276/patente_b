@@ -3,8 +3,10 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patente_b/data/fast_track_access.dart';
+import 'package:patente_b/data/local_store.dart';
 import 'package:patente_b/l10n/app_lang.dart';
 import 'package:patente_b/l10n/strings.dart';
+import 'package:patente_b/models/license_category.dart';
 import 'package:patente_b/models/models.dart';
 
 void main() {
@@ -151,6 +153,37 @@ void main() {
       expect(it.questionText(q), q.textIt);
       expect(en.questionText(q), q.textEn);
       expect(en.questionTextSecondary(q), q.textIt);
+    });
+  });
+
+  group('License hub', () {
+    test('only B is playable and codes round-trip', () {
+      expect(LicenseCategory.b.isPlayable, isTrue);
+      expect(LicenseCategory.c.isPlayable, isFalse);
+      expect(LicenseCategory.cqc.isPlayable, isFalse);
+      expect(LicenseCategory.fromCode('C'), LicenseCategory.c);
+      expect(LicenseCategory.fromCode('CQC'), LicenseCategory.cqc);
+      expect(LicenseCategory.fromCode(null), LicenseCategory.b);
+      expect(LicenseCategory.fromCode('ZZ'), LicenseCategory.b);
+    });
+
+    test('daily challenge meta key is calendar-day scoped', () {
+      final key = LocalStore.dailyChallengeKeyFor(DateTime(2026, 11, 27));
+      expect(key, 'daily_challenge_2026-11-27');
+      expect(
+        LocalStore.dailyChallengeKeyFor(DateTime(2026, 11, 28)),
+        isNot(key),
+      );
+    });
+
+    test('hub copy exists in both languages', () {
+      const it = L10n(AppLang.it);
+      const en = L10n(AppLang.en);
+      expect(it.guessSign, isNot(en.guessSign));
+      expect(it.fourSigns, isNot(en.fourSigns));
+      expect(it.comingSoonTitle, isNot(en.comingSoonTitle));
+      expect(it.examHistory, isNot(en.examHistory));
+      expect(it.readableFont, isNot(en.readableFont));
     });
   });
 }

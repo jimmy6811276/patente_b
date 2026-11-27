@@ -47,9 +47,16 @@ class _ChaptersScreenState extends State<ChaptersScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(22, 12, 22, 0),
+            padding: const EdgeInsets.fromLTRB(8, 8, 22, 0),
             child: Row(
               children: [
+                if (Navigator.of(context).canPop())
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.arrow_back_ios_new_rounded),
+                  )
+                else
+                  const SizedBox(width: 14),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
