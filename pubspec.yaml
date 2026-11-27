@@ -1,0 +1,26 @@
+name: patente_b
+description: Patente B — Intelligent bilingual Italian driving licence learning platform (100% offline).
+publish_to: "none"
+version: 1.0.0+1011319819
+
+environment:
+  sdk: ^3.11.5
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  fl_chart: ^0.70.2
+  provider: ^6.1.5
+  sqflite: ^2.4.1
+  path: ^1.9.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/data/seed.json

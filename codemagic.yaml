@@ -1,0 +1,221 @@
+# Codemagic CI/CD — Patente B (Flutter, iOS + Android)
+#
+# This project must be built with the codemagic.yaml workflow editor.
+# In Codemagic UI:  App settings → Build configuration → "codemagic.yaml" must be selected.
+#
+# Required team integrations (already connected on this account):
+#   • GitHub App ........ jimmy6811276  (source of truth for this repo)
+#   • Developer Portal .. key "Awawdeh Codemagic"  (automatic iOS code signing)
+#   • Distribution certificate + provisioning profile are fetched automatically
+#     for com.patenteb.patenteb during the iOS workflow.
+#
+# Required environment variable group: "patente_b_credentials"
+#   CM_KEYSTORE            base64 of android release .jks
+#   CM_KEYSTORE_PASSWORD   keystore password
+#   CM_KEY_ALIAS           key alias (patente_b)
+#   CM_KEY_PASSWORD        key password
+#
+# Workflows:
+#   • android-release  → signed APK + AAB artifacts
+#   • ios-testflight   → signed IPA artifact (TestFlight upload when ASC key has App Manager rights)
+#   • release-both     → both platforms, triggered by a v* tag
+
+definitions:
+  android_signing_script: &android_signing_script
+    name: Configure Android release signing
+    script: |
+      set -e
+      if [ -z "${CM_KEYSTORE:-}" ]; then
+        echo "ERROR: CM_KEYSTORE is missing. Add the patente_b_credentials variable group."
+        exit 1
+      fi
+      echo "$CM_KEYSTORE" | base64 --decode > "$CM_BUILD_DIR/android/patente-b-release.jks"
+      cat > "$CM_BUILD_DIR/android/key.properties" <<EOF
+      storePassword=$CM_KEYSTORE_PASSWORD
+      keyPassword=$CM_KEY_PASSWORD
+      keyAlias=$CM_KEY_ALIAS
+      storeFile=../patente-b-release.jks
+      EOF
+      echo "Android signing configured (alias: $CM_KEY_ALIAS)"
+
+  flutter_quality_script: &flutter_quality_script
+    name: Analyze and test
+    script: |
+      set -e
+      flutter analyze
+      flutter test
+      # Fail fast if the bundled offline database seed is missing from the artifact.
+      test -s assets/data/seed.json && echo "Offline seed present: $(du -h assets/data/seed.json | cut -f1)"
+
+workflows:
+  # ─────────────────────────────────────────────────────────────────────────
+  # ANDROID
+  # ─────────────────────────────────────────────────────────────────────────
+  android-release:
+    name: Android Release (APK + AAB)
+    max_build_duration: 60
+    instance_type: linux_x2
+    environment:
+      flutter: stable
+      java: 17
+      groups:
+        - patente_b_credentials
+      vars:
+        PACKAGE_NAME: com.patenteb.patente_b
+    cache:
+      cache_paths:
+        - $HOME/.pub-cache
+        - $HOME/.gradle/caches
+        - $HOME/.gradle/wrapper
+    scripts:
+      - name: Get Flutter packages
+        script: flutter pub get
+      - *flutter_quality_script
+      - *android_signing_script
+      - name: Build Android artifacts
+        script: |
+          set -e
+          BASE=1011319819
+          OFFSET=${PROJECT_BUILD_NUMBER:-${BUILD_NUMBER:-0}}
+          VERSION_CODE=$((BASE + OFFSET))
+          echo "→ versionCode=$VERSION_CODE versionName=1.0.0"
+          flutter build apk --release --build-number="$VERSION_CODE" --build-name="1.0.0"
+          flutter build appbundle --release --build-number="$VERSION_CODE" --build-name="1.0.0"
+          echo "APK : $(ls -1 build/app/outputs/flutter-apk/*.apk)"
+          echo "AAB : $(ls -1 build/app/outputs/bundle/release/*.aab)"
+    artifacts:
+      - build/app/outputs/flutter-apk/*.apk
+      - build/app/outputs/bundle/release/*.aab
+      - build/app/outputs/mapping/release/mapping.txt
+    publishing:
+      email:
+        recipients:
+          - jayforjamshaid@gmail.com
+        notify:
+          success: true
+          failure: true
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # iOS
+  # ─────────────────────────────────────────────────────────────────────────
+  ios-testflight:
+    name: iOS TestFlight
+    max_build_duration: 90
+    instance_type: mac_mini_m2
+    integrations:
+      app_store_connect: Awawdeh Codemagic
+    environment:
+      flutter: stable
+      xcode: latest
+      cocoapods: default
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.patenteb.patenteb
+      vars:
+        BUNDLE_ID: com.patenteb.patenteb
+        APP_NAME: Patente B
+    cache:
+      cache_paths:
+        - $HOME/.pub-cache
+        - $HOME/Library/Caches/CocoaPods
+    scripts:
+      - name: Get Flutter packages
+        script: |
+          set -e
+          flutter pub get
+          cd ios && pod install --repo-update
+      - *flutter_quality_script
+      - name: Set unique CFBundleVersion
+        script: |
+          set -e
+          # 12-digit timestamp keeps every TestFlight upload unique and increasing.
+          BUILD_NUMBER=$(date -u +%y%m%d%H%M%S)
+          echo "→ CFBundleVersion=$BUILD_NUMBER"
+          echo "BUILD_NUMBER=$BUILD_NUMBER" >> "$CM_ENV"
+      - name: Build signed IPA
+        script: |
+          set -e
+          flutter build ipa --release \
+            --build-number="$BUILD_NUMBER" \
+            --build-name="1.0.0"
+          IPA=$(ls -1 build/ios/ipa/*.ipa | head -1)
+          echo "IPA: $IPA"
+          TMP=$(mktemp -d)
+          unzip -q "$IPA" -d "$TMP" "Payload/*.app/Info.plist"
+          PLIST=$(find "$TMP/Payload" -name Info.plist | head -1)
+          ACTUAL=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$PLIST")
+          echo "IPA CFBundleVersion=$ACTUAL (expected $BUILD_NUMBER)"
+          [ "$ACTUAL" = "$BUILD_NUMBER" ] || { echo "ERROR: build number mismatch"; exit 1; }
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+      - flutter_drive.log
+    publishing:
+      email:
+        recipients:
+          - jayforjamshaid@gmail.com
+        notify:
+          success: true
+          failure: true
+      # TestFlight upload requires the App Store Connect key to have App Manager
+      # rights and an app record for com.patenteb.patenteb to exist in App Store Connect.
+      # Remove the leading "#" from the block below once that app record exists.
+      # app_store_connect:
+      #   auth: integration
+      #   submit_to_testflight: true
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # BOTH — triggered by tagging a release: git tag v1.0.0 && git push --tags
+  # ─────────────────────────────────────────────────────────────────────────
+  release-both:
+    name: Release Both Platforms
+    max_build_duration: 120
+    instance_type: mac_mini_m2
+    triggering:
+      events:
+        - tag
+      tag_patterns:
+        - pattern: "v*"
+          include: true
+    integrations:
+      app_store_connect: Awawdeh Codemagic
+    environment:
+      flutter: stable
+      xcode: latest
+      cocoapods: default
+      java: 17
+      groups:
+        - patente_b_credentials
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.patenteb.patenteb
+      vars:
+        BUNDLE_ID: com.patenteb.patenteb
+    scripts:
+      - name: Get Flutter packages
+        script: flutter pub get
+      - *flutter_quality_script
+      - *android_signing_script
+      - name: Build Android artifacts
+        script: |
+          set -e
+          VERSION_CODE=$((1011319819 + ${PROJECT_BUILD_NUMBER:-${BUILD_NUMBER:-0}}))
+          flutter build apk --release --build-number="$VERSION_CODE" --build-name="1.0.0"
+          flutter build appbundle --release --build-number="$VERSION_CODE" --build-name="1.0.0"
+      - name: Build iOS IPA
+        script: |
+          set -e
+          BUILD_NUMBER=$(date -u +%y%m%d%H%M%S)
+          echo "→ CFBundleVersion=$BUILD_NUMBER"
+          flutter build ipa --release --build-number="$BUILD_NUMBER" --build-name="1.0.0"
+    artifacts:
+      - build/app/outputs/flutter-apk/*.apk
+      - build/app/outputs/bundle/release/*.aab
+      - build/ios/ipa/*.ipa
+    publishing:
+      email:
+        recipients:
+          - jayforjamshaid@gmail.com
+        notify:
+          success: true
+          failure: true
