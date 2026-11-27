@@ -268,49 +268,104 @@ class _RoadPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-/// Small circular chapter icon with colored badge.
+/// Chapter thumb — real ministerial sign when available, else numbered badge.
 class ChapterBadge extends StatelessWidget {
   const ChapterBadge({
     super.key,
     required this.id,
     required this.color,
+    this.imageAsset,
+    this.size = 56,
   });
 
+  final int id;
+  final Color color;
+  final String? imageAsset;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    final radius = BorderRadius.circular(size * 0.3);
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        borderRadius: radius,
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            color.withValues(alpha: 0.22),
+            color.withValues(alpha: 0.08),
+          ],
+        ),
+        border: Border.all(color: color.withValues(alpha: 0.35)),
+        boxShadow: [
+          BoxShadow(
+            color: color.withValues(alpha: 0.22),
+            blurRadius: 14,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: radius,
+        child: imageAsset != null
+            ? Stack(
+                fit: StackFit.expand,
+                children: [
+                  ColoredBox(color: Colors.white),
+                  Padding(
+                    padding: EdgeInsets.all(size * 0.1),
+                    child: Image.asset(
+                      imageAsset!,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) =>
+                          _ChapterNumber(id: id, color: color),
+                    ),
+                  ),
+                  Positioned(
+                    right: 3,
+                    bottom: 3,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: color.withValues(alpha: 0.92),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        '$id'.padLeft(2, '0'),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w900,
+                          fontSize: 9,
+                          height: 1.1,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              )
+            : _ChapterNumber(id: id, color: color),
+      ),
+    );
+  }
+}
+
+class _ChapterNumber extends StatelessWidget {
+  const _ChapterNumber({required this.id, required this.color});
   final int id;
   final Color color;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 48,
-      height: 48,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            color.withValues(alpha: 0.35),
-            color.withValues(alpha: 0.12),
-          ],
-        ),
-        border: Border.all(color: color.withValues(alpha: 0.45)),
-        boxShadow: [
-          BoxShadow(
-            color: color.withValues(alpha: 0.25),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Center(
-        child: Text(
-          '$id'.padLeft(2, '0'),
-          style: TextStyle(
-            fontWeight: FontWeight.w900,
-            color: color,
-            fontSize: 15,
-          ),
+    return Center(
+      child: Text(
+        '$id'.padLeft(2, '0'),
+        style: TextStyle(
+          fontWeight: FontWeight.w900,
+          color: color,
+          fontSize: 15,
         ),
       ),
     );

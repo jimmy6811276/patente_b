@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../data/app_state.dart';
+import '../data/chapter_media.dart';
 import '../l10n/strings.dart';
 import '../models/models.dart';
 import '../theme/app_colors.dart';
@@ -90,15 +91,41 @@ class _ChaptersScreenState extends State<ChaptersScreen> {
                       style: const TextStyle(color: AppColors.textMuted),
                     ),
                   )
-                : ListView.separated(
-                    padding: EdgeInsets.fromLTRB(20, 8, 20, AppLayout.bottomClearance(context)),
+                : CustomScrollView(
                     physics: const BouncingScrollPhysics(),
-                    itemCount: chapters.length + 1,
-                    separatorBuilder: (context, index) => const SizedBox(height: 10),
-                    itemBuilder: (context, i) {
-                      if (i == chapters.length) {
-                        return Padding(
-                          padding: const EdgeInsets.only(top: 10, bottom: 8),
+                    slivers: [
+                      SliverPadding(
+                        padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+                        sliver: SliverGrid(
+                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            mainAxisSpacing: 12,
+                            crossAxisSpacing: 12,
+                            childAspectRatio: 0.9,
+                          ),
+                          delegate: SliverChildBuilderDelegate(
+                            (context, i) {
+                              final ch = chapters[i];
+                              final color = _palette[ch.id % _palette.length];
+                              return _ChapterMediaCard(
+                                chapter: ch,
+                                color: color,
+                                l: l,
+                                imageAsset: ChapterMedia.assetPathFor(ch.id),
+                              );
+                            },
+                            childCount: chapters.length,
+                          ),
+                        ),
+                      ),
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: EdgeInsets.fromLTRB(
+                            20,
+                            16,
+                            20,
+                            AppLayout.bottomClearance(context),
+                          ),
                           child: Center(
                             child: Text(
                               l.totalChapters(state.chapters.length),
@@ -108,12 +135,9 @@ class _ChaptersScreenState extends State<ChaptersScreen> {
                               ),
                             ),
                           ),
-                        );
-                      }
-                      final ch = chapters[i];
-                      final color = _palette[ch.id % _palette.length];
-                      return _ChapterTile(chapter: ch, color: color, l: l);
-                    },
+                        ),
+                      ),
+                    ],
                   ),
           ),
         ],
@@ -122,76 +146,172 @@ class _ChaptersScreenState extends State<ChaptersScreen> {
   }
 }
 
-class _ChapterTile extends StatelessWidget {
-  const _ChapterTile({
+class _ChapterMediaCard extends StatelessWidget {
+  const _ChapterMediaCard({
     required this.chapter,
     required this.color,
     required this.l,
+    this.imageAsset,
   });
+
   final Chapter chapter;
   final Color color;
   final L10n l;
+  final String? imageAsset;
 
   @override
   Widget build(BuildContext context) {
-    return PremiumCard(
-      padding: const EdgeInsets.all(14),
-      onTap: () => Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (_) => QuizScreen(
-            chapterId: chapter.id,
-            title: l.chapterName(chapter),
+    final radius = BorderRadius.circular(AppLayout.cardRadius);
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: radius,
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => QuizScreen(
+              chapterId: chapter.id,
+              title: l.chapterName(chapter),
+            ),
           ),
         ),
-      ),
-      child: Row(
-        children: [
-          ChapterBadge(id: chapter.id, color: color),
-          const SizedBox(width: 12),
-          Expanded(
+        child: Ink(
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: radius,
+            border: Border.all(color: AppColors.stroke),
+            boxShadow: [
+              BoxShadow(
+                color: color.withValues(alpha: 0.14),
+                blurRadius: 16,
+                offset: const Offset(0, 7),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: radius,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text(
-                  l.chapterName(chapter),
-                  style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
+                Expanded(
+                  flex: 55,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              color.withValues(alpha: 0.18),
+                              AppColors.canvasDeep,
+                            ],
+                          ),
+                        ),
+                      ),
+                      if (imageAsset != null)
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(18, 14, 18, 10),
+                          child: Image.asset(
+                            imageAsset!,
+                            fit: BoxFit.contain,
+                            errorBuilder: (context, error, stackTrace) => Center(
+                              child: ChapterBadge(id: chapter.id, color: color, size: 48),
+                            ),
+                          ),
+                        )
+                      else
+                        Center(
+                          child: ChapterBadge(id: chapter.id, color: color, size: 48),
+                        ),
+                      Positioned(
+                        left: 10,
+                        top: 10,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: color.withValues(alpha: 0.92),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Text(
+                            '${chapter.id}'.padLeft(2, '0'),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w900,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        right: 10,
+                        top: 10,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.92),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Text(
+                            '${(chapter.progress * 100).round()}%',
+                            style: TextStyle(
+                              color: color,
+                              fontWeight: FontWeight.w900,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 3),
-                Text(
-                  '${l.questionsCount(chapter.totalQuestions)} · ${l.difficulty(chapter.difficulty)}'
-                  '${chapter.hasData ? ' · ${(chapter.accuracy * 100).round()}%' : ''}',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: color.withValues(alpha: 0.95),
-                    fontWeight: FontWeight.w600,
+                Expanded(
+                  flex: 45,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l.chapterName(chapter),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w800,
+                            fontSize: 13.5,
+                            height: 1.2,
+                            color: AppColors.ink,
+                          ),
+                        ),
+                        const Spacer(),
+                        Text(
+                          '${l.questionsCount(chapter.totalQuestions)} · ${l.difficulty(chapter.difficulty)}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: color.withValues(alpha: 0.95),
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(6),
+                          child: LinearProgressIndicator(
+                            value: chapter.progress,
+                            minHeight: 5,
+                            backgroundColor: AppColors.canvasDeep,
+                            color: chapter.progress > 0.7 ? AppColors.neon : color,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(width: 8),
-          SizedBox(
-            width: 58,
-            child: Column(
-              children: [
-                Text(
-                  '${(chapter.progress * 100).round()}%',
-                  style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 14),
-                ),
-                const SizedBox(height: 7),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(6),
-                  child: LinearProgressIndicator(
-                    value: chapter.progress,
-                    minHeight: 6,
-                    backgroundColor: AppColors.navyElevated,
-                    color: chapter.progress > 0.7 ? AppColors.neon : color,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

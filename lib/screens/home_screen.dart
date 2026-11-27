@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../data/app_state.dart';
+import '../data/chapter_media.dart';
 import '../l10n/app_lang.dart';
 import '../l10n/strings.dart';
 import '../theme/app_colors.dart';
@@ -394,10 +395,10 @@ class HomeScreen extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: AppLayout.pagePad),
             sliver: SliverGrid(
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-                mainAxisSpacing: 10,
-                crossAxisSpacing: 10,
-                childAspectRatio: 0.88,
+                crossAxisCount: 2,
+                mainAxisSpacing: 12,
+                crossAxisSpacing: 12,
+                childAspectRatio: 0.82,
               ),
               delegate: SliverChildListDelegate([
                 DsGridTile(
@@ -405,6 +406,7 @@ class HomeScreen extends StatelessWidget {
                   title: l.quizTitle,
                   subtitle: l.questionsCount(state.totalQuestions),
                   color: AppColors.blue,
+                  imageAsset: PracticeMedia.quiz,
                   onTap: () => _push(context, QuizScreen(title: l.quizTitle)),
                 ),
                 DsGridTile(
@@ -412,6 +414,7 @@ class HomeScreen extends StatelessWidget {
                   title: l.hubChapters,
                   subtitle: l.chaptersShort,
                   color: AppColors.blueSoft,
+                  imageAsset: PracticeMedia.chapters,
                   onTap: () => _push(context, const ChaptersScreen()),
                 ),
                 DsGridTile(
@@ -419,6 +422,7 @@ class HomeScreen extends StatelessWidget {
                   title: l.hubSigns,
                   subtitle: l.signsSubtitle,
                   color: AppColors.amber,
+                  imageAsset: PracticeMedia.signs,
                   onTap: () => _push(context, const SignGamesScreen()),
                 ),
                 DsGridTile(
@@ -426,6 +430,7 @@ class HomeScreen extends StatelessWidget {
                   title: l.hubHard,
                   subtitle: l.hardSubtitle,
                   color: AppColors.coral,
+                  imageAsset: PracticeMedia.hard,
                   onTap: () => _push(
                     context,
                     QuizScreen(title: l.hardQuizTitle, hardMode: true),
@@ -436,6 +441,7 @@ class HomeScreen extends StatelessWidget {
                   title: l.hubVocab,
                   subtitle: l.vocabSub,
                   color: const Color(0xFF0891B2),
+                  imageAsset: PracticeMedia.vocab,
                   onTap: () => _push(context, const VocabularyScreen()),
                 ),
                 DsGridTile(
@@ -443,6 +449,7 @@ class HomeScreen extends StatelessWidget {
                   title: l.fastTrackSectionRow,
                   subtitle: l.fastTrackSubtitle,
                   color: AppColors.emerald,
+                  imageAsset: PracticeMedia.fastTrack,
                   onTap: () => _push(
                     context,
                     state.fastTrackUnlocked

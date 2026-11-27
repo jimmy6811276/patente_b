@@ -136,6 +136,7 @@ class DsGridTile extends StatelessWidget {
     required this.subtitle,
     required this.color,
     required this.onTap,
+    this.imageAsset,
   });
 
   final IconData icon;
@@ -144,8 +145,12 @@ class DsGridTile extends StatelessWidget {
   final Color color;
   final VoidCallback onTap;
 
+  /// Optional full-bleed cover (`assets/tiles/...` or a sign PNG).
+  final String? imageAsset;
+
   @override
   Widget build(BuildContext context) {
+    final radius = BorderRadius.circular(AppLayout.cardRadius);
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -153,59 +158,140 @@ class DsGridTile extends StatelessWidget {
           HapticFeedback.selectionClick();
           onTap();
         },
-        borderRadius: BorderRadius.circular(AppLayout.cardRadius),
+        borderRadius: radius,
         child: Ink(
           decoration: BoxDecoration(
             color: AppColors.surface,
-            borderRadius: BorderRadius.circular(AppLayout.cardRadius),
+            borderRadius: radius,
             border: Border.all(color: AppColors.stroke),
-            boxShadow: const [
-              BoxShadow(color: Color(0x0F0B1220), blurRadius: 12, offset: Offset(0, 5)),
+            boxShadow: [
+              BoxShadow(
+                color: color.withValues(alpha: 0.16),
+                blurRadius: 18,
+                offset: const Offset(0, 8),
+              ),
+              const BoxShadow(
+                color: Color(0x0A0B1220),
+                blurRadius: 10,
+                offset: Offset(0, 3),
+              ),
             ],
           ),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(12, 14, 12, 12),
+          child: ClipRRect(
+            borderRadius: radius,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: color.withValues(alpha: 0.14),
-                    borderRadius: BorderRadius.circular(14),
+                Expanded(
+                  flex: 58,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      if (imageAsset != null)
+                        Image.asset(
+                          imageAsset!,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) =>
+                              _TileGradientFallback(color: color),
+                        )
+                      else
+                        _TileGradientFallback(color: color),
+                      DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Colors.black.withValues(alpha: 0.02),
+                              Colors.black.withValues(alpha: 0.28),
+                            ],
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        left: 10,
+                        top: 10,
+                        child: Container(
+                          width: 34,
+                          height: 34,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.92),
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: color.withValues(alpha: 0.28),
+                                blurRadius: 10,
+                                offset: const Offset(0, 3),
+                              ),
+                            ],
+                          ),
+                          alignment: Alignment.center,
+                          child: Icon(icon, color: color, size: 18),
+                        ),
+                      ),
+                    ],
                   ),
-                  alignment: Alignment.center,
-                  child: Icon(icon, color: color, size: 22),
                 ),
-                const Spacer(),
-                Text(
-                  title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w800,
-                    fontSize: 13,
-                    height: 1.15,
-                    letterSpacing: 0,
-                    color: AppColors.ink,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  subtitle,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 11,
-                    height: 1.2,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textMuted,
+                Expanded(
+                  flex: 42,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w800,
+                            fontSize: 14,
+                            height: 1.15,
+                            letterSpacing: -0.2,
+                            color: AppColors.ink,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          subtitle,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 11.5,
+                            height: 1.25,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textMuted,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _TileGradientFallback extends StatelessWidget {
+  const _TileGradientFallback({required this.color});
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            color.withValues(alpha: 0.55),
+            color.withValues(alpha: 0.22),
+            AppColors.canvasDeep,
+          ],
         ),
       ),
     );
