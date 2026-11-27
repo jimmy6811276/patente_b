@@ -178,6 +178,65 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           const SizedBox(height: 16),
           PremiumCard(
+            borderColor: AppColors.neon.withValues(alpha: 0.28),
+            child: Row(
+              children: [
+                Container(
+                  width: 38,
+                  height: 38,
+                  decoration: BoxDecoration(
+                    color: AppColors.neon.withValues(alpha: 0.14),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppColors.neon.withValues(alpha: 0.3)),
+                  ),
+                  child: Icon(
+                    state.fastTrackUnlocked ? Icons.lock_open_rounded : Icons.lock_rounded,
+                    color: AppColors.neonSoft,
+                    size: 19,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Fast Track',
+                        style: TextStyle(fontWeight: FontWeight.w800),
+                      ),
+                      Text(
+                        state.fastTrackUnlocked
+                            ? 'Sbloccato su questo dispositivo'
+                            : 'Protetto da credenziali',
+                        style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
+                      ),
+                    ],
+                  ),
+                ),
+                if (state.fastTrackUnlocked)
+                  TextButton(
+                    onPressed: () async {
+                      await context.read<AppState>().lockFastTrack();
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Fast Track bloccato di nuovo'),
+                        ),
+                      );
+                    },
+                    child: const Text(
+                      'Blocca',
+                      style: TextStyle(
+                        color: AppColors.neonSoft,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          PremiumCard(
             onTap: _confirmReset,
             borderColor: AppColors.red.withValues(alpha: 0.25),
             child: Row(

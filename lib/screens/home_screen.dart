@@ -1,3 +1,5 @@
+import 'dart:ui' show ImageFilter;
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -6,6 +8,7 @@ import '../theme/app_colors.dart';
 import '../widgets/premium_scaffold.dart';
 import '../widgets/readiness_ring.dart';
 import 'exam_screen.dart';
+import 'fast_track_lock_screen.dart';
 import 'fast_track_screen.dart';
 import 'mistakes_screen.dart';
 import 'quiz_screen.dart';
@@ -215,7 +218,13 @@ class HomeScreen extends StatelessWidget {
                   icon: Icons.bolt_rounded,
                   gradient: AppColors.neonGradient,
                   glow: AppColors.neonGlow,
-                  onTap: () => _push(context, const FastTrackScreen()),
+                  locked: !state.fastTrackUnlocked,
+                  onTap: () => _push(
+                    context,
+                    state.fastTrackUnlocked
+                        ? const FastTrackScreen()
+                        : const FastTrackLockScreen(),
+                  ),
                 ),
                 _ActionCard(
                   title: 'Quiz',
@@ -374,6 +383,7 @@ class _ActionCard extends StatelessWidget {
     required this.gradient,
     required this.glow,
     required this.onTap,
+    this.locked = false,
   });
 
   final String title;
@@ -382,6 +392,9 @@ class _ActionCard extends StatelessWidget {
   final Gradient gradient;
   final Color glow;
   final VoidCallback onTap;
+
+  /// Veils the card and shows a lock chip — used for credential-gated sections.
+  final bool locked;
 
   @override
   Widget build(BuildContext context) {
@@ -421,14 +434,20 @@ class _ActionCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
-                        width: 42,
-                        height: 42,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.22),
-                          borderRadius: BorderRadius.circular(14),
+                      ImageFiltered(
+                        imageFilter: ImageFilter.blur(
+                          sigmaX: locked ? 2.2 : 0,
+                          sigmaY: locked ? 2.2 : 0,
                         ),
-                        child: Icon(icon, color: Colors.white, size: 24),
+                        child: Container(
+                          width: 42,
+                          height: 42,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.22),
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: Icon(icon, color: Colors.white, size: 24),
+                        ),
                       ),
                       const Spacer(),
                       Text(
@@ -452,6 +471,35 @@ class _ActionCard extends StatelessWidget {
                     ],
                   ),
                 ),
+                if (locked)
+                  Positioned(
+                    top: 12,
+                    right: 12,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.42),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: Colors.white.withValues(alpha: 0.32)),
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.lock_rounded, size: 11, color: Colors.white),
+                          SizedBox(width: 3),
+                          Text(
+                            'Privato',
+                            style: TextStyle(
+                              fontSize: 9,
+                              fontWeight: FontWeight.w800,
+                              color: Colors.white,
+                              letterSpacing: 0.2,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
               ],
             ),
           ),

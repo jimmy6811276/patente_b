@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:patente_b/data/fast_track_access.dart';
 import 'package:patente_b/models/models.dart';
 
 void main() {
@@ -55,5 +56,48 @@ void main() {
     );
     expect(q.explanationIt, contains('VERO'));
     expect(q.hintIt, isNotEmpty);
+  });
+
+  group('Fast Track gate', () {
+    test('accepts the correct credential pair', () {
+      expect(
+        FastTrackAccess.verify(username: 'JAMSHAID', password: 'ARIF'),
+        isTrue,
+      );
+    });
+
+    test('username is case-insensitive and trimmed', () {
+      expect(
+        FastTrackAccess.verify(username: '  Jamshaid  ', password: 'ARIF'),
+        isTrue,
+      );
+    });
+
+    test('password stays case-sensitive', () {
+      expect(
+        FastTrackAccess.verify(username: 'JAMSHAID', password: 'arif'),
+        isFalse,
+      );
+    });
+
+    test('rejects wrong username, wrong password, blanks and truncations', () {
+      const bad = <List<String>>[
+        ['JAMSHAID', 'wrong'],
+        ['admin', 'ARIF'],
+        ['', 'ARIF'],
+        ['JAMSHAID', ''],
+        ['', ''],
+        ['JAMSHAID', 'ARI'], // truncated
+        ['JAMSHAID', 'ARIF '], // trailing space is not trimmed
+        ['JAMSHAID', 'ARIFA'],
+      ];
+      for (final pair in bad) {
+        expect(
+          FastTrackAccess.verify(username: pair[0], password: pair[1]),
+          isFalse,
+          reason: 'should reject ${pair[0]} / ${pair[1]}',
+        );
+      }
+    });
   });
 }

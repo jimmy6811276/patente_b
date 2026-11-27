@@ -471,6 +471,32 @@ class LocalStore {
     );
   }
 
+  /// Key deliberately does NOT start with `fasttrack_`, so it is never picked
+  /// up by [getFastTrackState] and is not cleared by [resetProgress].
+  static const _unlockKey = 'access_fasttrack_unlocked';
+
+  Future<bool> isFastTrackUnlocked() async {
+    final rows = await db.query(
+      'meta',
+      where: 'key = ?',
+      whereArgs: [_unlockKey],
+      limit: 1,
+    );
+    return rows.isNotEmpty && rows.first['value'] == '1';
+  }
+
+  Future<void> setFastTrackUnlocked(bool unlocked) async {
+    if (!unlocked) {
+      await db.delete('meta', where: 'key = ?', whereArgs: [_unlockKey]);
+      return;
+    }
+    await db.insert(
+      'meta',
+      {'key': _unlockKey, 'value': '1'},
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
   Future<void> resetProgress() async {
     await db.transaction((txn) async {
       await txn.delete('attempts');

@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../models/models.dart';
+import 'fast_track_access.dart';
 import 'local_store.dart';
 
 /// Single source of truth for the offline app.
@@ -21,6 +22,7 @@ class AppState extends ChangeNotifier {
   List<MistakeItem> _mistakes = const [];
   AppStats _stats = const AppStats();
   Map<String, bool> _fastTrack = const <String, bool>{};
+  bool _fastTrackUnlocked = false;
   bool _offlineReady = false;
 
   bool get loading => _loading;
@@ -30,6 +32,7 @@ class AppState extends ChangeNotifier {
   List<MistakeItem> get mistakes => _mistakes;
   AppStats get stats => _stats;
   Map<String, bool> get fastTrackDone => _fastTrack;
+  bool get fastTrackUnlocked => _fastTrackUnlocked;
   bool get offlineReady => _offlineReady;
   LocalStore get store => _store;
 
@@ -56,6 +59,27 @@ class AppState extends ChangeNotifier {
     _mistakes = await _store.getMistakes();
     _stats = await _store.getStats();
     _fastTrack = await _store.getFastTrackState();
+    _fastTrackUnlocked = await _store.isFastTrackUnlocked();
+    notifyListeners();
+  }
+
+  /// Returns false when the username/password pair does not match.
+  Future<bool> unlockFastTrack({
+    required String username,
+    required String password,
+  }) async {
+    if (!FastTrackAccess.verify(username: username, password: password)) {
+      return false;
+    }
+    await _store.setFastTrackUnlocked(true);
+    _fastTrackUnlocked = true;
+    notifyListeners();
+    return true;
+  }
+
+  Future<void> lockFastTrack() async {
+    await _store.setFastTrackUnlocked(false);
+    _fastTrackUnlocked = false;
     notifyListeners();
   }
 
