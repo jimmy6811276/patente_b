@@ -6,6 +6,7 @@ import '../l10n/strings.dart';
 import '../models/models.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_layout.dart';
+import '../widgets/design_system.dart';
 import '../widgets/premium_scaffold.dart';
 import '../widgets/sign_placeholder.dart';
 import 'quiz_screen.dart';
@@ -48,47 +49,10 @@ class _ChaptersScreenState extends State<ChaptersScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(8, 8, 22, 0),
-            child: Row(
-              children: [
-                if (Navigator.of(context).canPop())
-                  IconButton(
-                    onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.arrow_back_ios_new_rounded),
-                  )
-                else
-                  const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        l.chaptersTitle,
-                        style: const TextStyle(
-                          fontSize: 30,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: -0.8,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        l.chaptersSubtitle(state.chapters.length, state.totalQuestions),
-                        style: const TextStyle(color: AppColors.textSecondary),
-                      ),
-                    ],
-                  ),
-                ),
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.06),
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: AppColors.stroke),
-                  ),
-                  child: const Icon(Icons.search_rounded, color: AppColors.textSecondary),
-                ),
-              ],
+            padding: const EdgeInsets.fromLTRB(16, 8, 20, 0),
+            child: DsScreenHeader(
+              title: l.chaptersTitle,
+              subtitle: l.chaptersSubtitle(state.chapters.length, state.totalQuestions),
             ),
           ),
           Padding(

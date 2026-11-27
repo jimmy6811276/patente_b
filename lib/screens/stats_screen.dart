@@ -6,6 +6,7 @@ import '../data/app_state.dart';
 import '../l10n/strings.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_layout.dart';
+import '../widgets/design_system.dart';
 import '../widgets/premium_scaffold.dart';
 
 class StatsScreen extends StatefulWidget {
@@ -27,37 +28,13 @@ class _StatsScreenState extends State<StatsScreen> {
     final scores = stats.weekAccuracy;
     final hasData = stats.totalAnswers > 0;
 
-    final canPop = Navigator.of(context).canPop();
-
     return PremiumScaffold(
       safeBottom: false,
       child: ListView(
-        padding: EdgeInsets.fromLTRB(20, 12, 20, AppLayout.bottomClearance(context)),
+        padding: EdgeInsets.fromLTRB(20, 8, 20, AppLayout.bottomClearance(context)),
         physics: const BouncingScrollPhysics(),
         children: [
-          if (canPop)
-            Align(
-              alignment: Alignment.centerLeft,
-              child: IconButton(
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-                onPressed: () => Navigator.pop(context),
-                icon: const Icon(Icons.arrow_back_ios_new_rounded),
-              ),
-            ),
-          Text(
-            l.statsTitle,
-            style: const TextStyle(
-              fontSize: 30,
-              fontWeight: FontWeight.w900,
-              letterSpacing: -0.8,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            l.statsSubtitle,
-            style: const TextStyle(color: AppColors.textSecondary),
-          ),
+          DsScreenHeader(title: l.statsTitle, subtitle: l.statsSubtitle),
           const SizedBox(height: 16),
           Row(
             children: [
@@ -188,12 +165,20 @@ class _StatsScreenState extends State<StatsScreen> {
                               showTitles: true,
                               reservedSize: 22,
                               getTitlesWidget: (v, _) {
-                                const days = ['L', 'M', 'M', 'G', 'V', 'S', 'D'];
                                 final i = v.toInt();
-                                if (i < 0 || i >= days.length) return const SizedBox.shrink();
+                                if (i < 0 || i >= 7) return const SizedBox.shrink();
+                                final day = DateTime.now().subtract(Duration(days: 6 - i));
+                                final labels = l.isEn
+                                    ? const ['M', 'T', 'W', 'T', 'F', 'S', 'S']
+                                    : const ['L', 'M', 'M', 'G', 'V', 'S', 'D'];
+                                // DateTime.weekday: Mon=1 … Sun=7
                                 return Text(
-                                  days[i],
-                                  style: const TextStyle(fontSize: 11, color: AppColors.textMuted, fontWeight: FontWeight.w600),
+                                  labels[day.weekday - 1],
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    color: AppColors.textMuted,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 );
                               },
                             ),

@@ -1,15 +1,17 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../data/app_state.dart';
 import '../l10n/strings.dart';
 import '../models/models.dart';
 import '../theme/app_colors.dart';
+import '../utils/app_haptics.dart';
+import '../widgets/bilingual_statement.dart';
+import '../widgets/exam_answer_buttons.dart';
 import '../widgets/premium_scaffold.dart';
+import '../widgets/question_image.dart';
 import '../widgets/readiness_ring.dart';
-import '../widgets/sign_art.dart';
 
 class ExamScreen extends StatefulWidget {
   const ExamScreen({super.key});
@@ -67,13 +69,94 @@ class _ExamScreenState extends State<ExamScreen> {
       .where((e) => e.value == _qs[e.key].correctIsTrue)
       .length;
 
-  int get _wrongCount => _answers.entries
-      .where((e) => e.value != _qs[e.key].correctIsTrue)
-      .length;
-
   void _pick(bool value) {
-    HapticFeedback.selectionClick();
+    AppHaptics.selection(context);
     setState(() => _answers[_index] = value);
+  }
+
+  int get _answeredCount => _answers.length;
+  int get _flaggedCount => _marked.length;
+  int get _remainingCount => _qs.length - _answeredCount;
+
+  void _openQuestionMap() {
+    final l = L10n.of(context);
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: AppColors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) {
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l.examNavTitle,
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
+              ),
+              const SizedBox(height: 14),
+              GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: _qs.length,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 6,
+                  mainAxisSpacing: 8,
+                  crossAxisSpacing: 8,
+                ),
+                itemBuilder: (_, i) {
+                  final answered = _answers.containsKey(i);
+                  final flagged = _marked.contains(i);
+                  final current = i == _index;
+                  Color bg = AppColors.canvasDeep;
+                  Color fg = AppColors.inkSoft;
+                  Color border = AppColors.stroke;
+                  if (current) {
+                    bg = AppColors.blue.withValues(alpha: 0.16);
+                    border = AppColors.blue;
+                    fg = AppColors.blue;
+                  } else if (flagged) {
+                    bg = AppColors.amber.withValues(alpha: 0.16);
+                    border = AppColors.amber;
+                    fg = AppColors.amber;
+                  } else if (answered) {
+                    bg = AppColors.emerald.withValues(alpha: 0.14);
+                    border = AppColors.emerald;
+                    fg = AppColors.emerald;
+                  }
+                  return Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () {
+                        Navigator.pop(ctx);
+                        setState(() => _index = i);
+                      },
+                      borderRadius: BorderRadius.circular(12),
+                      child: Ink(
+                        decoration: BoxDecoration(
+                          color: bg,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: border, width: current ? 2 : 1),
+                        ),
+                        child: Center(
+                          child: Text(
+                            '${i + 1}',
+                            style: TextStyle(fontWeight: FontWeight.w800, color: fg),
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   Future<void> _submit() async {
@@ -174,38 +257,54 @@ class _ExamScreenState extends State<ExamScreen> {
                   children: [
                     Expanded(
                       child: _ScoreChip(
-                        label: l.scoreCorrect,
-                        value: '$_correctCount',
-                        color: AppColors.neon,
+                        label: l.examAnswered,
+                        value: '$_answeredCount/${_qs.length}',
+                        color: AppColors.emerald,
                       ),
                     ),
                     const SizedBox(width: 10),
                     Expanded(
                       child: _ScoreChip(
-                        label: l.scoreErrors,
-                        value: '$_wrongCount',
-                        color: AppColors.red,
+                        label: l.examFlagged,
+                        value: '$_flaggedCount',
+                        color: AppColors.amber,
                       ),
                     ),
                     const SizedBox(width: 10),
                     Expanded(
                       child: _ScoreChip(
-                        label: l.scoreQuestion,
-                        value: '${_index + 1}/${_qs.length}',
-                        color: AppColors.electric,
+                        label: l.examRemaining,
+                        value: '$_remainingCount',
+                        color: AppColors.blue,
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 10),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(6),
-                  child: LinearProgressIndicator(
-                    value: (_index + 1) / _qs.length,
-                    minHeight: 5,
-                    backgroundColor: AppColors.navyElevated,
-                    color: AppColors.pink,
-                  ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(6),
+                        child: LinearProgressIndicator(
+                          value: _answeredCount / _qs.length,
+                          minHeight: 5,
+                          backgroundColor: AppColors.navyElevated,
+                          color: AppColors.emerald,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    IconButton(
+                      tooltip: l.examNavTitle,
+                      onPressed: _openQuestionMap,
+                      icon: const Icon(Icons.grid_view_rounded),
+                    ),
+                    TranslationModeChip(
+                      mode: context.watch<AppState>().translationMode,
+                      onChanged: (m) => context.read<AppState>().setTranslationMode(m),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -215,50 +314,38 @@ class _ExamScreenState extends State<ExamScreen> {
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
               physics: const BouncingScrollPhysics(),
               children: [
-                SignArt(
+                QuestionImage(
+                  image: q.image,
                   chapterId: q.chapterId,
-                  label: q.chapterNameIt,
+                  chapterLabel: q.chapterName(l.isEn),
                   height: 160,
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  l.questionText(q),
+                  '${l.scoreQuestion} ${_index + 1}/${_qs.length}',
                   style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w800,
-                    height: 1.35,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textMuted,
                   ),
                 ),
                 const SizedBox(height: 8),
-                Text(
-                  l.questionTextSecondary(q),
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontStyle: FontStyle.italic,
-                    color: AppColors.textSecondary,
+                BilingualStatement(
+                  question: q,
+                  mode: context.watch<AppState>().translationMode,
+                  primaryStyle: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    height: 1.35,
+                    color: AppColors.ink,
                   ),
                 ),
                 const SizedBox(height: 18),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _Choice(
-                        label: l.answerLabel(true),
-                        selected: selected == true,
-                        color: AppColors.neon,
-                        onTap: () => _pick(true),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _Choice(
-                        label: l.answerLabel(false),
-                        selected: selected == false,
-                        color: AppColors.red,
-                        onTap: () => _pick(false),
-                      ),
-                    ),
-                  ],
+                ExamAnswerButtons(
+                  selected: selected,
+                  enabled: true,
+                  onTrue: () => _pick(true),
+                  onFalse: () => _pick(false),
                 ),
                 const SizedBox(height: 8),
                 TextButton.icon(
@@ -478,56 +565,6 @@ class _ScoreChip extends StatelessWidget {
             style: const TextStyle(fontSize: 10, color: AppColors.textMuted, fontWeight: FontWeight.w600),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _Choice extends StatelessWidget {
-  const _Choice({
-    required this.label,
-    required this.selected,
-    required this.color,
-    required this.onTap,
-  });
-
-  final String label;
-  final bool selected;
-  final Color color;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 180),
-      height: 56,
-      decoration: BoxDecoration(
-        color: selected ? color : Colors.white.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: selected ? color : AppColors.strokeStrong,
-          width: 1.6,
-        ),
-        boxShadow: selected
-            ? [BoxShadow(color: color.withValues(alpha: 0.35), blurRadius: 16, offset: const Offset(0, 6))]
-            : null,
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(16),
-          child: Center(
-            child: Text(
-              label,
-              style: TextStyle(
-                fontWeight: FontWeight.w900,
-                fontSize: 17,
-                color: selected ? Colors.white : AppColors.textSecondary,
-              ),
-            ),
-          ),
-        ),
       ),
     );
   }

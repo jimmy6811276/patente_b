@@ -51,6 +51,7 @@ class QuizQuestion {
     this.image,
     this.tags = const [],
     this.chapterNameIt = '',
+    this.chapterNameEn = '',
   });
 
   final String id;
@@ -61,6 +62,10 @@ class QuizQuestion {
   final String? image;
   final List<String> tags;
   final String chapterNameIt;
+  final String chapterNameEn;
+
+  String chapterName(bool english) =>
+      english && chapterNameEn.isNotEmpty ? chapterNameEn : chapterNameIt;
 
   Difficulty get difficulty {
     if (tags.contains('num')) return Difficulty.hard;
@@ -126,12 +131,14 @@ class FastTrackTask {
 
 class WeakTopic {
   const WeakTopic({
+    required this.chapterId,
     required this.nameIt,
     required this.nameEn,
     required this.accuracy,
     required this.seen,
   });
 
+  final int chapterId;
   final String nameIt;
   final String nameEn;
   final double accuracy;

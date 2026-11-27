@@ -1,14 +1,17 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../data/app_state.dart';
 import '../l10n/strings.dart';
 import '../models/models.dart';
+import '../models/translation_mode.dart';
 import '../theme/app_colors.dart';
+import '../utils/app_haptics.dart';
+import '../widgets/bilingual_statement.dart';
+import '../widgets/exam_answer_buttons.dart';
 import '../widgets/premium_scaffold.dart';
-import '../widgets/sign_art.dart';
+import '../widgets/question_image.dart';
 
 class QuizScreen extends StatefulWidget {
   const QuizScreen({
@@ -71,25 +74,32 @@ class _QuizScreenState extends State<QuizScreen> {
       builder: (context, snap) {
         if (snap.connectionState != ConnectionState.done) {
           return PremiumScaffold(
-            child: Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const SizedBox(
-                    width: 34,
-                    height: 34,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 3,
-                      color: AppColors.neon,
-                    ),
+            child: Column(
+              children: [
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: IconButton(
+                    tooltip: l.back,
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.arrow_back_ios_new_rounded),
                   ),
-                  const SizedBox(height: 16),
-                  Text(
-                    l.loadingLocalDb,
-                    style: TextStyle(color: AppColors.textMuted.withValues(alpha: 0.9)),
+                ),
+                const Spacer(),
+                const SizedBox(
+                  width: 34,
+                  height: 34,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 3,
+                    color: AppColors.neon,
                   ),
-                ],
-              ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  l.loadingLocalDb,
+                  style: TextStyle(color: AppColors.textMuted.withValues(alpha: 0.9)),
+                ),
+                const Spacer(),
+              ],
             ),
           );
         }
@@ -99,8 +109,16 @@ class _QuizScreenState extends State<QuizScreen> {
             child: Padding(
               padding: const EdgeInsets.all(24),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: IconButton(
+                      tooltip: l.back,
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(Icons.arrow_back_ios_new_rounded),
+                    ),
+                  ),
+                  const Spacer(),
                   const Icon(Icons.inbox_rounded, size: 56, color: AppColors.textMuted),
                   const SizedBox(height: 14),
                   Text(
@@ -121,6 +139,7 @@ class _QuizScreenState extends State<QuizScreen> {
                       onPressed: () => Navigator.pop(context),
                     ),
                   ),
+                  const Spacer(),
                 ],
               ),
             ),
@@ -162,11 +181,11 @@ class _QuizSessionState extends State<_QuizSession> {
   int _correct = 0;
   int _wrong = 0;
   bool? _answeredTrue;
-  bool _showEn = true;
   bool _showHint = false;
   late bool _bookmarked;
   int _seconds = 30;
   Timer? _timer;
+  late TranslationMode _translationMode;
 
   List<QuizQuestion> get _questions => widget.questions;
   QuizQuestion get _q => _questions[_index];
@@ -176,9 +195,11 @@ class _QuizSessionState extends State<_QuizSession> {
     super.initState();
     _bookmarked = false;
     _seconds = widget.secondsPerQuestion;
+    _translationMode = context.read<AppState>().translationMode;
     _syncBookmark();
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (!mounted) return;
+      if (_answeredTrue != null) return;
       if (_seconds <= 0) {
         if (_answeredTrue == null) {
           _answer(_q.correctIsTrue, fromTimeout: true);
@@ -209,7 +230,7 @@ class _QuizSessionState extends State<_QuizSession> {
 
   Future<void> _answer(bool value, {bool fromTimeout = false}) async {
     if (_answeredTrue != null) return;
-    if (!fromTimeout) HapticFeedback.lightImpact();
+    if (!fromTimeout) AppHaptics.light(context);
     final ok = value == _q.correctIsTrue;
     setState(() {
       _answeredTrue = value;
@@ -382,32 +403,25 @@ class _QuizSessionState extends State<_QuizSession> {
               padding: const EdgeInsets.fromLTRB(20, 10, 20, 16),
               physics: const BouncingScrollPhysics(),
               children: [
-                SignArt(
+                QuestionImage(
+                  image: _q.image,
                   chapterId: _q.chapterId,
-                  label: _q.chapterNameIt.isEmpty ? l.defaultSignLabel : _q.chapterNameIt,
+                  chapterLabel: _q.chapterName(l.isEn).isEmpty
+                      ? l.defaultSignLabel
+                      : _q.chapterName(l.isEn),
                 ),
                 const SizedBox(height: 20),
-                Text(
-                  l.questionText(_q),
-                  style: const TextStyle(
+                BilingualStatement(
+                  question: _q,
+                  mode: _translationMode,
+                  primaryStyle: const TextStyle(
                     fontSize: 21,
                     fontWeight: FontWeight.w800,
                     height: 1.35,
-                    letterSpacing: -0.2,
+                    letterSpacing: 0,
+                    color: AppColors.ink,
                   ),
                 ),
-                if (_showEn) ...[
-                  const SizedBox(height: 10),
-                  Text(
-                    l.questionTextSecondary(_q),
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontStyle: FontStyle.italic,
-                      color: AppColors.textSecondary.withValues(alpha: 0.95),
-                      height: 1.4,
-                    ),
-                  ),
-                ],
                 const SizedBox(height: 14),
                 Wrap(
                   spacing: 8,
@@ -415,7 +429,9 @@ class _QuizSessionState extends State<_QuizSession> {
                   children: [
                     if (_q.tags.contains('sign')) l.tagSigns,
                     if (_q.tags.contains('num')) l.tagNumbers,
-                    l.chapterShort(_q.chapterId),
+                    _q.chapterName(l.isEn).isEmpty
+                        ? l.chapterShort(_q.chapterId)
+                        : _q.chapterName(l.isEn),
                   ]
                       .map(
                         (k) => Container(
@@ -449,11 +465,12 @@ class _QuizSessionState extends State<_QuizSession> {
                       onTap: () => setState(() => _showHint = !_showHint),
                     ),
                     const SizedBox(width: 8),
-                    _Tool(
-                      icon: Icons.translate_rounded,
-                      label: l.english,
-                      active: _showEn,
-                      onTap: () => setState(() => _showEn = !_showEn),
+                    TranslationModeChip(
+                      mode: _translationMode,
+                      onChanged: (m) {
+                        setState(() => _translationMode = m);
+                        context.read<AppState>().setTranslationMode(m);
+                      },
                     ),
                     const Spacer(),
                     IconButton(
@@ -518,16 +535,28 @@ class _QuizSessionState extends State<_QuizSession> {
                             l.correctAnswer(_q.correctIsTrue),
                             style: const TextStyle(fontWeight: FontWeight.w700, height: 1.35),
                           ),
-                          const SizedBox(height: 4),
+                          const SizedBox(height: 8),
                           Text(
-                            l.questionTextSecondary(_q),
+                            l.isEn ? _q.explanationEn : _q.explanationIt,
                             style: const TextStyle(
                               fontSize: 13,
-                              fontStyle: FontStyle.italic,
+                              fontWeight: FontWeight.w600,
                               color: AppColors.textSecondary,
                               height: 1.4,
                             ),
                           ),
+                          if (_translationMode != TranslationMode.off) ...[
+                            const SizedBox(height: 6),
+                            Text(
+                              l.questionTextSecondary(_q),
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontStyle: FontStyle.italic,
+                                color: AppColors.textSecondary,
+                                height: 1.4,
+                              ),
+                            ),
+                          ],
                         ],
                       ),
                     ),
@@ -544,73 +573,12 @@ class _QuizSessionState extends State<_QuizSession> {
                     icon: Icons.arrow_forward_rounded,
                     onPressed: _next,
                   )
-                : Row(
-                    children: [
-                      Expanded(
-                        child: _BigAnswer(
-                          label: l.answerLabel(true),
-                          color: AppColors.neon,
-                          glow: AppColors.neonGlow,
-                          onTap: () => _answer(true),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _BigAnswer(
-                          label: l.answerLabel(false),
-                          color: AppColors.red,
-                          glow: AppColors.redGlow,
-                          onTap: () => _answer(false),
-                        ),
-                      ),
-                    ],
+                : ExamAnswerButtons(
+                    onTrue: () => _answer(true),
+                    onFalse: () => _answer(false),
                   ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _BigAnswer extends StatelessWidget {
-  const _BigAnswer({
-    required this.label,
-    required this.color,
-    required this.glow,
-    required this.onTap,
-  });
-
-  final String label;
-  final Color color;
-  final Color glow;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 60,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: [BoxShadow(color: glow, blurRadius: 20, offset: const Offset(0, 8))],
-      ),
-      child: Material(
-        color: color,
-        borderRadius: BorderRadius.circular(18),
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(18),
-          child: Center(
-            child: Text(
-              label,
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w900,
-                color: Colors.white,
-                letterSpacing: 0.3,
-              ),
-            ),
-          ),
-        ),
       ),
     );
   }

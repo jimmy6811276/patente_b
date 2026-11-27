@@ -202,7 +202,7 @@ class LocalStore {
   }) async {
     final rows = await db.rawQuery(
       '''
-      SELECT q.*, c.name_it FROM questions q
+      SELECT q.*, c.name_it, c.name_en FROM questions q
       JOIN chapters c ON c.id = q.chapter_id
       ${chapterId != null ? 'WHERE q.chapter_id = ?' : ''}
       ORDER BY RANDOM() LIMIT ?
@@ -217,7 +217,7 @@ class LocalStore {
 
   Future<QuizQuestion?> questionById(String id) async {
     final rows = await db.rawQuery(
-      'SELECT q.*, c.name_it FROM questions q JOIN chapters c ON c.id = q.chapter_id WHERE q.id = ? LIMIT 1',
+      'SELECT q.*, c.name_it, c.name_en FROM questions q JOIN chapters c ON c.id = q.chapter_id WHERE q.id = ? LIMIT 1',
       [id],
     );
     return rows.isEmpty ? null : _mapQuestion(rows.first);
@@ -225,7 +225,7 @@ class LocalStore {
 
   Future<List<QuizQuestion>> bookmarkQuestions() async {
     final rows = await db.rawQuery('''
-      SELECT q.*, c.name_it FROM questions q
+      SELECT q.*, c.name_it, c.name_en FROM questions q
       JOIN chapters c ON c.id = q.chapter_id
       JOIN bookmarks b ON b.question_id = q.id
       ORDER BY b.created_at DESC
@@ -246,6 +246,7 @@ class LocalStore {
             .where((t) => t.isNotEmpty)
             .toList(),
         chapterNameIt: (r['name_it'] as String?) ?? '',
+        chapterNameEn: (r['name_en'] as String?) ?? '',
       );
 
   Future<void> recordAnswer({
@@ -326,7 +327,7 @@ class LocalStore {
 
   Future<List<MistakeItem>> getMistakes({int limit = 60}) async {
     final rows = await db.rawQuery('''
-      SELECT q.*, c.name_it,
+      SELECT q.*, c.name_it, c.name_en,
              SUM(CASE WHEN a.correct = 0 THEN 1 ELSE 0 END) AS wrong_count,
              MAX(CASE WHEN a.correct = 0 THEN a.created_at ELSE 0 END) AS last_wrong
       FROM attempts a
@@ -595,6 +596,8 @@ class LocalStore {
 
   static const _licenseKey = 'selected_license';
   static const _readableFontKey = 'readable_font';
+  static const _hapticsKey = 'haptics_enabled';
+  static const _translationModeKey = 'translation_mode';
 
   Future<String?> getSelectedLicenseCode() async {
     final rows = await db.query(
@@ -632,6 +635,44 @@ class LocalStore {
     );
   }
 
+  Future<bool> isHapticsEnabled() async {
+    final rows = await db.query(
+      'meta',
+      where: 'key = ?',
+      whereArgs: [_hapticsKey],
+      limit: 1,
+    );
+    if (rows.isEmpty) return true;
+    return rows.first['value'] == '1';
+  }
+
+  Future<void> setHapticsEnabled(bool enabled) async {
+    await db.insert(
+      'meta',
+      {'key': _hapticsKey, 'value': enabled ? '1' : '0'},
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<String> getTranslationMode() async {
+    final rows = await db.query(
+      'meta',
+      where: 'key = ?',
+      whereArgs: [_translationModeKey],
+      limit: 1,
+    );
+    if (rows.isEmpty) return 'sentence';
+    return (rows.first['value'] as String?) ?? 'sentence';
+  }
+
+  Future<void> setTranslationMode(String mode) async {
+    await db.insert(
+      'meta',
+      {'key': _translationModeKey, 'value': mode},
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
   static String dailyChallengeKeyFor(DateTime day) {
     final y = day.year.toString().padLeft(4, '0');
     final m = day.month.toString().padLeft(2, '0');
@@ -663,7 +704,7 @@ class LocalStore {
   Future<List<QuizQuestion>> hardQuestions({int limit = 20}) async {
     final hard = await db.rawQuery(
       '''
-      SELECT q.*, c.name_it FROM questions q
+      SELECT q.*, c.name_it, c.name_en FROM questions q
       JOIN chapters c ON c.id = q.chapter_id
       WHERE q.tags LIKE '%num%' OR q.tags LIKE '%hard%'
       ORDER BY RANDOM() LIMIT ?
@@ -683,7 +724,7 @@ class LocalStore {
       final placeholders = List.filled(ids.length, '?').join(',');
       final fromWeak = await db.rawQuery(
         '''
-        SELECT q.*, c.name_it FROM questions q
+        SELECT q.*, c.name_it, c.name_en FROM questions q
         JOIN chapters c ON c.id = q.chapter_id
         WHERE q.chapter_id IN ($placeholders)
         ORDER BY RANDOM() LIMIT ?

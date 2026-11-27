@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import '../l10n/app_lang.dart';
 import '../models/license_category.dart';
 import '../models/models.dart';
+import '../models/translation_mode.dart';
 import 'fast_track_access.dart';
 import 'local_store.dart';
 
@@ -30,6 +31,8 @@ class AppState extends ChangeNotifier {
   bool _langChosen = false;
   LicenseCategory _selectedLicense = LicenseCategory.b;
   bool _readableFont = false;
+  bool _hapticsEnabled = true;
+  TranslationMode _translationMode = TranslationMode.sentence;
   bool _dailyChallengeDone = false;
   List<ExamRecord> _examHistory = const [];
   int _ftMaxSlide = 0;
@@ -49,6 +52,8 @@ class AppState extends ChangeNotifier {
   bool get langChosen => _langChosen;
   LicenseCategory get selectedLicense => _selectedLicense;
   bool get readableFont => _readableFont;
+  bool get hapticsEnabled => _hapticsEnabled;
+  TranslationMode get translationMode => _translationMode;
   bool get dailyChallengeDone => _dailyChallengeDone;
   List<ExamRecord> get examHistory => _examHistory;
   int get ftMaxSlide => _ftMaxSlide;
@@ -85,6 +90,9 @@ class AppState extends ChangeNotifier {
     _selectedLicense =
         LicenseCategory.fromCode(await _store.getSelectedLicenseCode());
     _readableFont = await _store.isReadableFont();
+    _hapticsEnabled = await _store.isHapticsEnabled();
+    _translationMode =
+        TranslationModeX.fromStorage(await _store.getTranslationMode());
     _dailyChallengeDone = await _store.isDailyChallengeDone();
     _examHistory = await _store.getExamHistory();
     _ftMaxSlide = await _store.getFtMaxSlide();
@@ -127,6 +135,18 @@ class AppState extends ChangeNotifier {
     _readableFont = enabled;
     notifyListeners();
     await _store.setReadableFont(enabled);
+  }
+
+  Future<void> setHapticsEnabled(bool enabled) async {
+    _hapticsEnabled = enabled;
+    notifyListeners();
+    await _store.setHapticsEnabled(enabled);
+  }
+
+  Future<void> setTranslationMode(TranslationMode mode) async {
+    _translationMode = mode;
+    notifyListeners();
+    await _store.setTranslationMode(mode.storageValue);
   }
 
   Future<void> completeDailyChallenge() async {
@@ -226,6 +246,7 @@ class AppState extends ChangeNotifier {
         .take(5)
         .map(
           (c) => WeakTopic(
+            chapterId: c.id,
             nameIt: c.nameIt,
             nameEn: c.nameEn,
             accuracy: c.accuracy,

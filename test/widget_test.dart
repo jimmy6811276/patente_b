@@ -8,6 +8,7 @@ import 'package:patente_b/l10n/app_lang.dart';
 import 'package:patente_b/l10n/strings.dart';
 import 'package:patente_b/models/license_category.dart';
 import 'package:patente_b/models/models.dart';
+import 'package:patente_b/widgets/question_image.dart';
 
 void main() {
   test('bundled seed contains all chapters, questions and vocabulary', () {
@@ -28,6 +29,22 @@ void main() {
       expect((map['it'] as String).isNotEmpty, isTrue);
       expect((map['en'] as String).isNotEmpty, isTrue);
       expect(map['a'], anyOf(0, 1));
+    }
+  });
+
+  test('question image PNGs are bundled for every seed img filename', () {
+    final seed = jsonDecode(File('assets/data/seed.json').readAsStringSync())
+        as Map<String, dynamic>;
+    final questions = seed['questions'] as List;
+    final names = <String>{};
+    for (final q in questions) {
+      final img = (q as Map<String, dynamic>)['img'];
+      if (img is String && img.trim().isNotEmpty) names.add(img.trim());
+    }
+    expect(names.length, greaterThan(300));
+    for (final name in names) {
+      expect(QuestionImage.assetPathFor(name), 'assets/images/$name');
+      expect(File('assets/images/$name').existsSync(), isTrue, reason: name);
     }
   });
 

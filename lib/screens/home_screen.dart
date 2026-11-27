@@ -23,7 +23,10 @@ import 'sign_games_screen.dart';
 import 'vocabulary_screen.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({super.key, this.onOpenProfile});
+
+  /// Switches the shell to the Profile/Settings tab (keeps bottom nav).
+  final VoidCallback? onOpenProfile;
 
   @override
   Widget build(BuildContext context) {
@@ -33,9 +36,12 @@ class HomeScreen extends StatelessWidget {
     final weak = state.weakTopics;
     final bottomPad = AppLayout.bottomClearance(context);
 
+    final continueChapterId = weak.isNotEmpty ? weak.first.chapterId : null;
     final continueTitle = weak.isNotEmpty
         ? '${l.reviewTopic} ${l.topicName(weak.first)}'
-        : l.startFirstQuiz;
+        : state.mistakes.isNotEmpty
+            ? l.mistakesToReview
+            : l.startFirstQuiz;
 
     return PremiumScaffold(
       safeBottom: false,
@@ -45,7 +51,12 @@ class HomeScreen extends StatelessWidget {
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(AppLayout.pagePad, 8, AppLayout.pagePad, 0),
-              child: _Header(lang: state.lang, streak: stats.streak, offline: state.offlineReady),
+              child: _Header(
+                lang: state.lang,
+                streak: stats.streak,
+                offline: state.offlineReady,
+                onOpenProfile: onOpenProfile,
+              ),
             ),
           ),
           SliverToBoxAdapter(
@@ -163,7 +174,23 @@ class HomeScreen extends StatelessWidget {
                       width: double.infinity,
                       height: AppLayout.touchMin,
                       child: FilledButton.icon(
-                        onPressed: () => _push(context, QuizScreen(title: l.quizTitle)),
+                        onPressed: () {
+                          if (continueChapterId != null) {
+                            _push(
+                              context,
+                              QuizScreen(
+                                title: continueTitle,
+                                chapterId: continueChapterId,
+                              ),
+                            );
+                            return;
+                          }
+                          if (state.mistakes.isNotEmpty) {
+                            _push(context, const MistakesScreen());
+                            return;
+                          }
+                          _push(context, QuizScreen(title: l.quizTitle));
+                        },
                         style: FilledButton.styleFrom(
                           backgroundColor: AppColors.emerald,
                           foregroundColor: Colors.white,
@@ -283,7 +310,23 @@ class HomeScreen extends StatelessWidget {
                     title: l.continueWhereLeft,
                     subtitle: continueTitle,
                     color: AppColors.emerald,
-                    onTap: () => _push(context, QuizScreen(title: l.quizTitle)),
+                    onTap: () {
+                      if (continueChapterId != null) {
+                        _push(
+                          context,
+                          QuizScreen(
+                            title: continueTitle,
+                            chapterId: continueChapterId,
+                          ),
+                        );
+                        return;
+                      }
+                      if (state.mistakes.isNotEmpty) {
+                        _push(context, const MistakesScreen());
+                        return;
+                      }
+                      _push(context, QuizScreen(title: l.quizTitle));
+                    },
                   ),
                   const SizedBox(height: 8),
                   DsListRow(
@@ -325,7 +368,14 @@ class HomeScreen extends StatelessWidget {
                           title: l.topicName(w),
                           subtitle: '${(w.accuracy * 100).round()}%',
                           color: AppColors.amber,
-                          onTap: () => _push(context, const ChaptersScreen()),
+                          onTap: () => _push(
+                            context,
+                            QuizScreen(
+                              title: l.topicName(w),
+                              chapterId: w.chapterId,
+                              weakMode: true,
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -435,11 +485,13 @@ class _Header extends StatelessWidget {
     required this.lang,
     required this.streak,
     required this.offline,
+    this.onOpenProfile,
   });
 
   final AppLang lang;
   final int streak;
   final bool offline;
+  final VoidCallback? onOpenProfile;
 
   @override
   Widget build(BuildContext context) {
@@ -504,7 +556,7 @@ class _Header extends StatelessWidget {
         ),
         const SizedBox(width: 6),
         _HeaderIcon(
-          tooltip: offline ? l.offlineBadge : 'Online',
+          tooltip: offline ? l.offlineBadge : l.onlineBadge,
           child: Icon(
             offline ? Icons.cloud_off_rounded : Icons.cloud_done_rounded,
             size: 18,
@@ -530,9 +582,16 @@ class _Header extends StatelessWidget {
         const SizedBox(width: 6),
         _HeaderIcon(
           tooltip: l.navProfile,
-          onTap: () => Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => const SettingsScreen()),
-          ),
+          onTap: () {
+            HapticFeedback.selectionClick();
+            if (onOpenProfile != null) {
+              onOpenProfile!();
+              return;
+            }
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const SettingsScreen()),
+            );
+          },
           child: const Icon(Icons.person_rounded, size: 18, color: AppColors.inkSoft),
         ),
       ],

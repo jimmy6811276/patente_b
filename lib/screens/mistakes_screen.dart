@@ -66,25 +66,24 @@ class MistakesScreen extends StatelessWidget {
                       ],
                     ),
                   ),
-                  SizedBox(
-                    width: 110,
-                    child: NeonButton(
-                      label: l.retry,
-                      height: 44,
-                      gradient: AppColors.orangeGradient,
-                      glow: AppColors.orangeGlow,
-                      onPressed: mistakes.isEmpty
-                          ? () {}
-                          : () => Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (_) => QuizScreen(
-                                    title: l.mistakesReview,
-                                    mistakeMode: true,
-                                  ),
-                                ),
-                              ),
+                  if (mistakes.isNotEmpty)
+                    SizedBox(
+                      width: 110,
+                      child: NeonButton(
+                        label: l.retry,
+                        height: 44,
+                        gradient: AppColors.orangeGradient,
+                        glow: AppColors.orangeGlow,
+                        onPressed: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => QuizScreen(
+                              title: l.mistakesReview,
+                              mistakeMode: true,
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
                 ],
               ),
             ),

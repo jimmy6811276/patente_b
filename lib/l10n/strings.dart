@@ -93,6 +93,7 @@ class L10n {
   String get homeSubtitle =>
       p('Il tuo coach per l\'esame', 'Your exam coach');
   String get offlineBadge => p('Offline', 'Offline');
+  String get onlineBadge => p('Online', 'Online');
   String get nextActionLabel =>
       p('Prossimo passo', 'Next step');
   String get reviewTopic => p('Rivedi', 'Review');
@@ -252,8 +253,8 @@ class L10n {
       p('Corretta: ${isTrue ? trueLabel : falseLabel}', 'Correct: ${isTrue ? trueLabel : falseLabel}');
   String get noMistakes => p('Nessun errore salvato', 'No mistakes saved');
   String get noMistakesHint => p(
-      'Le risposte sbagliate verranno raccolte qui automaticamente e ripassate con la spaced repetition.',
-      'Wrong answers are collected here automatically and revisited with spaced repetition.');
+      'Le risposte sbagliate verranno raccolte qui automaticamente per il ripasso.',
+      'Wrong answers are collected here automatically for focused review.');
 
   // ── Settings ───────────────────────────────────────────────────────────────
   String get settingsTitle => p('Impostazioni', 'Settings');
@@ -263,17 +264,34 @@ class L10n {
   String get italian => p('Italiano', 'Italiano');
   String get englishLang => p('Inglese', 'English');
   String get translationEnglish =>
-      p('Traduzione seconda lingua', 'Second-language translation');
+      p('Traduzione durante lo studio', 'Study translation');
   String get translationSubtitle => p(
-      'Mostra l\'altra lingua sotto ogni domanda',
-      'Show the other language under each question');
+      'Off = solo esame · Frase = traduzione intera · Parola = parola per parola',
+      'Off = exam-only · Sentence = full translation · Word = word by word');
+  String get translationOff => p('Solo IT/EN', 'Off (exam)');
+  String get translationSentence => p('Per frase', 'By sentence');
+  String get translationWord => p('Parola per parola', 'Word by word');
+  String get translationOffShort => p('Off', 'Off');
+  String get translationSentenceShort => p('Frase', 'Sentence');
+  String get translationWordShort => p('Parole', 'Words');
+  String get wordModeHint => p(
+      'Ogni parola italiana ha la traduzione sotto. Ideale per studiare.',
+      'Each Italian word has its translation underneath. Ideal for study.');
   String get haptics => p('Feedback aptico', 'Haptic feedback');
   String get hapticsSubtitle => p('Vibrazione su risposte', 'Vibrate on answers');
-  String get offlineMode => p('Modalità offline', 'Offline mode');
+  String get offlineMode => p('Sempre offline', 'Always offline');
   String get offlineSubtitle => p(
-      'Contenuti sempre disponibili senza rete', 'Content always available without a network');
+      'Database e immagini inclusi — nessuna rete richiesta',
+      'Database and images bundled — no network required');
   String get audio => p('Audio pronuncia', 'Pronunciation audio');
-  String get audioSubtitle => p('Lettura parole chiave', 'Read key words aloud');
+  String get audioSubtitle => p(
+      'In arrivo nella prossima versione',
+      'Coming in a future update');
+  String get examNavTitle => p('Mappa domande', 'Question map');
+  String get examAnswered => p('Risposte', 'Answered');
+  String get examFlagged => p('Segnate', 'Flagged');
+  String get examRemaining => p('Rimanenti', 'Left');
+  String get jumpToQuestion => p('Vai alla domanda', 'Go to question');
   String get localDatabase => p('Database locale', 'Local database');
   String get lblChapters => p('Capitoli', 'Chapters');
   String get lblQuestions => p('Domande', 'Questions');

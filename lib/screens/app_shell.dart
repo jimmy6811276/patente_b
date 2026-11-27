@@ -1,13 +1,13 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../data/app_state.dart';
 import '../l10n/strings.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_layout.dart';
+import '../utils/app_haptics.dart';
 import 'chapters_screen.dart';
 import 'exam_screen.dart';
 import 'home_screen.dart';
@@ -47,11 +47,11 @@ class _AppShellState extends State<AppShell> {
     final l = L10n.of(context);
     final reviewBadge = state.mistakes.length;
 
-    final pages = const <Widget>[
-      HomeScreen(),
-      ChaptersScreen(),
-      StatsScreen(),
-      SettingsScreen(),
+    final pages = <Widget>[
+      HomeScreen(onOpenProfile: () => setState(() => _index = 4)),
+      const ChaptersScreen(),
+      const StatsScreen(),
+      SettingsScreen(onBackToHome: () => setState(() => _index = 0)),
     ];
 
     int stackIndexFor(int navIndex) => switch (navIndex) {
@@ -80,7 +80,7 @@ class _AppShellState extends State<AppShell> {
           l.navProfile,
         ],
         onTap: (i) {
-          HapticFeedback.selectionClick();
+          AppHaptics.selection(context);
           if (i == 2) {
             Navigator.of(context).push(
               MaterialPageRoute(
@@ -92,7 +92,7 @@ class _AppShellState extends State<AppShell> {
           setState(() => _index = i);
         },
         onCenterLongPress: () {
-          HapticFeedback.mediumImpact();
+          AppHaptics.medium(context);
           Navigator.of(context).push(
             MaterialPageRoute(builder: (_) => const ExamScreen()),
           );
@@ -208,8 +208,8 @@ class _CenterQuizButton extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                width: 48,
-                height: 48,
+                width: 44,
+                height: 44,
                 decoration: BoxDecoration(
                   gradient: AppColors.neonGradient,
                   shape: BoxShape.circle,
@@ -221,18 +221,20 @@ class _CenterQuizButton extends StatelessWidget {
                     ),
                   ],
                 ),
-                child: const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 28),
+                child: const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 26),
               ),
               const SizedBox(height: 2),
-              Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.emerald,
-                  letterSpacing: 0,
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  style: const TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.emerald,
+                    letterSpacing: 0,
+                  ),
                 ),
               ),
             ],
@@ -303,16 +305,18 @@ class _NavItem extends StatelessWidget {
                       ),
                   ],
                 ),
-                const SizedBox(height: 3),
-                Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
-                    color: selected ? AppColors.emerald : AppColors.textMuted,
-                    letterSpacing: 0,
+                const SizedBox(height: 2),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
+                      color: selected ? AppColors.emerald : AppColors.textMuted,
+                      letterSpacing: 0,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 2),

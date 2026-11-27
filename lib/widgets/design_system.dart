@@ -270,6 +270,93 @@ class DsQuickPill extends StatelessWidget {
   }
 }
 
+/// Back control — 44dp target; only renders when the route can pop (or [force]).
+class DsBackButton extends StatelessWidget {
+  const DsBackButton({super.key, this.onPressed, this.force = false});
+
+  final VoidCallback? onPressed;
+  final bool force;
+
+  @override
+  Widget build(BuildContext context) {
+    final canPop = force || Navigator.of(context).canPop();
+    if (!canPop) return const SizedBox.shrink();
+    return SizedBox(
+      width: AppLayout.touchMin,
+      height: AppLayout.touchMin,
+      child: IconButton(
+        tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+        padding: EdgeInsets.zero,
+        onPressed: onPressed ?? () => Navigator.of(context).maybePop(),
+        icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
+      ),
+    );
+  }
+}
+
+/// Title row used by Settings / Stats / Chapters when opened as a pushed route.
+class DsScreenHeader extends StatelessWidget {
+  const DsScreenHeader({
+    super.key,
+    required this.title,
+    this.subtitle,
+    this.showBack,
+    this.onBack,
+  });
+
+  final String title;
+  final String? subtitle;
+  final bool? showBack;
+  final VoidCallback? onBack;
+
+  @override
+  Widget build(BuildContext context) {
+    final back = showBack ?? (onBack != null || Navigator.of(context).canPop());
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        if (back) ...[
+          DsBackButton(force: true, onPressed: onBack),
+          const SizedBox(width: 4),
+        ],
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0,
+                  height: 1.15,
+                  color: AppColors.ink,
+                ),
+              ),
+              if (subtitle != null) ...[
+                const SizedBox(height: 4),
+                Text(
+                  subtitle!,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.textSecondary,
+                    letterSpacing: 0,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class DsListRow extends StatelessWidget {
   const DsListRow({
     super.key,

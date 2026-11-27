@@ -4,24 +4,24 @@ import 'package:provider/provider.dart';
 import '../data/app_state.dart';
 import '../l10n/app_lang.dart';
 import '../l10n/strings.dart';
+import '../models/translation_mode.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_layout.dart';
+import '../widgets/design_system.dart';
 import '../widgets/premium_scaffold.dart';
 import 'quiz_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
-  const SettingsScreen({super.key});
+  const SettingsScreen({super.key, this.onBackToHome});
+
+  /// When Settings is the Profile tab, back switches to Home.
+  final VoidCallback? onBackToHome;
 
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  bool _en = true;
-  bool _haptics = true;
-  bool _offline = true;
-  bool _audio = false;
-
   Future<void> _confirmReset() async {
     final l = L10n.read(context);
     final confirmed = await showDialog<bool>(
@@ -64,15 +64,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return PremiumScaffold(
       safeBottom: false,
       child: ListView(
-        padding: EdgeInsets.fromLTRB(20, 12, 20, AppLayout.bottomClearance(context)),
+        padding: EdgeInsets.fromLTRB(20, 8, 20, AppLayout.bottomClearance(context)),
         children: [
-          Text(
-            l.settingsTitle,
-            style: const TextStyle(
-              fontSize: 30,
-              fontWeight: FontWeight.w900,
-              letterSpacing: -0.8,
-            ),
+          DsScreenHeader(
+            title: l.settingsTitle,
+            showBack: true,
+            onBack: () {
+              if (Navigator.of(context).canPop()) {
+                Navigator.of(context).pop();
+                return;
+              }
+              widget.onBackToHome?.call();
+            },
           ),
           const SizedBox(height: 20),
           _LanguageCard(
@@ -85,7 +88,37 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const SizedBox(height: 16),
           PremiumCard(
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Text(
+                  l.translationEnglish,
+                  style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  l.translationSubtitle,
+                  style: const TextStyle(fontSize: 12, color: AppColors.textMuted, height: 1.35),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    for (final mode in TranslationMode.values) ...[
+                      if (mode != TranslationMode.values.first) const SizedBox(width: 8),
+                      Expanded(
+                        child: _ModeChip(
+                          label: switch (mode) {
+                            TranslationMode.off => l.translationOff,
+                            TranslationMode.sentence => l.translationSentence,
+                            TranslationMode.word => l.translationWord,
+                          },
+                          selected: state.translationMode == mode,
+                          onTap: () => context.read<AppState>().setTranslationMode(mode),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+                const Divider(color: AppColors.stroke, height: 28),
                 _Toggle(
                   title: l.readableFont,
                   subtitle: l.readableFontSub,
@@ -94,31 +127,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
                 const Divider(color: AppColors.stroke, height: 28),
                 _Toggle(
-                  title: l.translationEnglish,
-                  subtitle: l.translationSubtitle,
-                  value: _en,
-                  onChanged: (v) => setState(() => _en = v),
-                ),
-                const Divider(color: AppColors.stroke, height: 28),
-                _Toggle(
                   title: l.haptics,
                   subtitle: l.hapticsSubtitle,
-                  value: _haptics,
-                  onChanged: (v) => setState(() => _haptics = v),
+                  value: state.hapticsEnabled,
+                  onChanged: (v) => context.read<AppState>().setHapticsEnabled(v),
                 ),
                 const Divider(color: AppColors.stroke, height: 28),
                 _Toggle(
                   title: l.offlineMode,
                   subtitle: l.offlineSubtitle,
-                  value: _offline,
-                  onChanged: (v) => setState(() => _offline = v),
+                  value: true,
+                  onChanged: null,
                 ),
                 const Divider(color: AppColors.stroke, height: 28),
                 _Toggle(
                   title: l.audio,
                   subtitle: l.audioSubtitle,
-                  value: _audio,
-                  onChanged: (v) => setState(() => _audio = v),
+                  value: false,
+                  onChanged: null,
                 ),
               ],
             ),
@@ -170,29 +196,29 @@ class _SettingsScreenState extends State<SettingsScreen> {
           PremiumCard(
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute(
-                builder: (_) => const QuizScreen(
-                  title: 'Segnalibri',
+                builder: (_) => QuizScreen(
+                  title: l.bookmarks,
                   bookmarkMode: true,
                 ),
               ),
             ),
-            child: const Row(
+            child: Row(
               children: [
-                Icon(Icons.bookmark_rounded, color: AppColors.gold),
-                SizedBox(width: 12),
+                const Icon(Icons.bookmark_rounded, color: AppColors.gold),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Segnalibri', style: TextStyle(fontWeight: FontWeight.w800)),
+                      Text(l.bookmarks, style: const TextStyle(fontWeight: FontWeight.w800)),
                       Text(
-                        'Domande salvate durante i quiz',
-                        style: TextStyle(fontSize: 12, color: AppColors.textMuted),
+                        l.bookmarksSubtitle,
+                        style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
                       ),
                     ],
                   ),
                 ),
-                Icon(Icons.chevron_right_rounded, color: AppColors.textMuted),
+                const Icon(Icons.chevron_right_rounded, color: AppColors.textMuted),
               ],
             ),
           ),
@@ -449,6 +475,52 @@ class _InfoRow extends StatelessWidget {
   }
 }
 
+class _ModeChip extends StatelessWidget {
+  const _ModeChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Ink(
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 6),
+          decoration: BoxDecoration(
+            color: selected ? AppColors.emerald.withValues(alpha: 0.14) : AppColors.canvasDeep,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: selected ? AppColors.emerald : AppColors.stroke,
+              width: selected ? 1.6 : 1,
+            ),
+          ),
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
+              height: 1.2,
+              color: selected ? AppColors.emerald : AppColors.textMuted,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _Toggle extends StatelessWidget {
   const _Toggle({
     required this.title,
@@ -460,7 +532,7 @@ class _Toggle extends StatelessWidget {
   final String title;
   final String subtitle;
   final bool value;
-  final ValueChanged<bool> onChanged;
+  final ValueChanged<bool>? onChanged;
 
   @override
   Widget build(BuildContext context) {
