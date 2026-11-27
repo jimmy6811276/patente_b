@@ -1,5 +1,3 @@
-import 'dart:ui' show ImageFilter;
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -8,7 +6,6 @@ import '../data/app_state.dart';
 import '../l10n/app_lang.dart';
 import '../l10n/strings.dart';
 import '../theme/app_colors.dart';
-import '../widgets/grid_icons.dart';
 import '../widgets/license_chip.dart';
 import '../widgets/premium_scaffold.dart';
 import '../widgets/readiness_ring.dart';
@@ -41,7 +38,7 @@ class HomeScreen extends StatelessWidget {
         slivers: [
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(22, 10, 22, 0),
+              padding: const EdgeInsets.fromLTRB(22, 8, 22, 0),
               child: Row(
                 children: [
                   Expanded(
@@ -50,43 +47,38 @@ class HomeScreen extends StatelessWidget {
                       children: [
                         Row(
                           children: [
-                            _FlagRibbon(),
-                            const SizedBox(width: 10),
-                            Text(
-                              'PATENTE ${state.selectedLicense.code}',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: 1.6,
-                                color: AppColors.textSecondary.withValues(alpha: 0.9),
+                            Container(
+                              width: 10,
+                              height: 10,
+                              decoration: const BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: AppColors.emerald,
                               ),
                             ),
                             const SizedBox(width: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                              decoration: BoxDecoration(
-                                color: AppColors.neon.withValues(alpha: 0.12),
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(
-                                  color: AppColors.neon.withValues(alpha: 0.3),
-                                ),
+                            Text(
+                              'PATENTE ${state.selectedLicense.code}',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 1.2,
+                                color: AppColors.textMuted,
                               ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(Icons.offline_bolt_rounded,
-                                      size: 11, color: AppColors.neonSoft),
-                                  const SizedBox(width: 3),
-                                  Text(
-                                    l.offlineBadge,
-                                    style: const TextStyle(
-                                      fontSize: 9,
-                                      fontWeight: FontWeight.w900,
-                                      color: AppColors.neonSoft,
-                                      letterSpacing: 0.5,
-                                    ),
-                                  ),
-                                ],
+                            ),
+                            const Spacer(),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: AppColors.emeraldDim,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                l.offlineBadge,
+                                style: const TextStyle(
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.w900,
+                                  color: AppColors.emerald,
+                                ),
                               ),
                             ),
                           ],
@@ -95,10 +87,11 @@ class HomeScreen extends StatelessWidget {
                         Text(
                           l.greeting(state.userName),
                           style: const TextStyle(
-                            fontSize: 30,
+                            fontSize: 28,
                             fontWeight: FontWeight.w900,
-                            letterSpacing: -1,
+                            letterSpacing: -0.8,
                             height: 1.05,
+                            color: AppColors.ink,
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -106,13 +99,14 @@ class HomeScreen extends StatelessWidget {
                           l.homeSubtitle,
                           style: const TextStyle(
                             color: AppColors.textSecondary,
-                            fontSize: 13,
+                            fontSize: 14,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
                       ],
                     ),
                   ),
+                  const SizedBox(width: 10),
                   _LangButton(lang: state.lang),
                 ],
               ),
@@ -124,10 +118,9 @@ class HomeScreen extends StatelessWidget {
               child: Text(
                 l.chooseLicense,
                 style: const TextStyle(
-                  fontSize: 13,
+                  fontSize: 12,
                   fontWeight: FontWeight.w800,
                   color: AppColors.textMuted,
-                  letterSpacing: 0.3,
                 ),
               ),
             ),
@@ -147,65 +140,17 @@ class HomeScreen extends StatelessWidget {
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(22, 18, 22, 0),
-              child: Row(
-                children: [
-                  ReadinessRing(
-                    progress: stats.readiness,
-                    label: l.readinessLabel(stats),
-                    size: 118,
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      children: [
-                        _MiniMetric(
-                          emoji: '🔥',
-                          value: '${stats.streak}',
-                          label: l.streakLabel,
-                          accent: AppColors.orange,
-                        ),
-                        const SizedBox(height: 10),
-                        _MiniMetric(
-                          emoji: '⭐',
-                          value: stats.totalAnswers == 0
-                              ? '—'
-                              : '${(stats.accuracy * 100).round()}%',
-                          label: l.accuracyLabel,
-                          accent: AppColors.gold,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(22, 16, 22, 0),
               child: PremiumCard(
-                padding: const EdgeInsets.all(14),
-                borderColor: AppColors.electric.withValues(alpha: 0.25),
-                onTap: () => _push(context, const QuizScreen()),
+                padding: const EdgeInsets.all(16),
+                borderColor: AppColors.emerald.withValues(alpha: 0.2),
                 child: Row(
                   children: [
-                    Container(
-                      width: 44,
-                      height: 44,
-                      decoration: BoxDecoration(
-                        gradient: AppColors.electricGradient,
-                        borderRadius: BorderRadius.circular(14),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: AppColors.electricGlow,
-                            blurRadius: 14,
-                            offset: Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: const Icon(Icons.auto_awesome, color: Colors.white, size: 22),
+                    ReadinessRing(
+                      progress: stats.readiness,
+                      label: l.readinessLabel(stats),
+                      size: 108,
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 14),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -215,127 +160,105 @@ class HomeScreen extends StatelessWidget {
                             style: const TextStyle(
                               fontSize: 11,
                               color: AppColors.textMuted,
-                              fontWeight: FontWeight.w600,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
-                          const SizedBox(height: 2),
+                          const SizedBox(height: 4),
                           Text(
-                            '$nextAction · ~${l.daysShort(stats.estDaysLeft)}',
+                            nextAction,
                             style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w700,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w900,
+                              height: 1.2,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          Row(
+                            children: [
+                              _MiniStat('🔥', '${stats.streak}'),
+                              const SizedBox(width: 8),
+                              _MiniStat(
+                                '⭐',
+                                stats.totalAnswers == 0
+                                    ? '—'
+                                    : '${(stats.accuracy * 100).round()}%',
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          SizedBox(
+                            width: double.infinity,
+                            child: NeonButton(
+                              label: l.quizTitle,
+                              height: 44,
+                              icon: Icons.play_arrow_rounded,
+                              onPressed: () => _push(context, QuizScreen(title: l.quizTitle)),
                             ),
                           ),
                         ],
                       ),
                     ),
-                    const Icon(Icons.arrow_forward_ios_rounded,
-                        size: 14, color: AppColors.textMuted),
                   ],
                 ),
               ),
             ),
           ),
+          // Learning path
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(22, 20, 22, 8),
+              padding: const EdgeInsets.fromLTRB(22, 22, 22, 8),
               child: Text(
                 l.studyModes,
                 style: const TextStyle(
-                  fontSize: 13,
+                  fontSize: 12,
                   fontWeight: FontWeight.w800,
                   color: AppColors.textMuted,
-                  letterSpacing: 0.3,
                 ),
               ),
             ),
           ),
           SliverPadding(
-            padding: const EdgeInsets.fromLTRB(18, 0, 18, 28),
-            sliver: SliverGrid(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-                mainAxisSpacing: 12,
-                crossAxisSpacing: 12,
-                childAspectRatio: 0.88,
-              ),
-              delegate: SliverChildListDelegate([
-                _HubTile(
+            padding: const EdgeInsets.fromLTRB(22, 0, 22, 120),
+            sliver: SliverList.list(
+              children: [
+                _PathNode(
+                  step: 1,
                   title: l.quizTitle,
                   subtitle: l.questionsCount(state.totalQuestions),
-                  kind: HubIconKind.quiz,
-                  gradient: AppColors.electricGradient,
-                  glow: AppColors.electricGlow,
-                  delay: 0,
+                  color: AppColors.blue,
+                  icon: Icons.quiz_rounded,
                   onTap: () => _push(context, QuizScreen(title: l.quizTitle)),
                 ),
-                _HubTile(
-                  title: l.simulationTitle,
-                  subtitle: l.officialExam,
-                  kind: HubIconKind.exam,
-                  gradient: AppColors.pinkGradient,
-                  glow: AppColors.pinkGlow,
-                  delay: 40,
-                  onTap: () => _push(context, const ExamScreen()),
-                ),
-                _HubTile(
+                _PathNode(
+                  step: 2,
                   title: l.hubChapters,
                   subtitle: l.chaptersShort,
-                  kind: HubIconKind.chapters,
-                  gradient: const LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [Color(0xFF5B8CFF), Color(0xFF2A4FC8)],
-                  ),
-                  glow: AppColors.electricGlow,
-                  delay: 80,
+                  color: AppColors.blueSoft,
+                  icon: Icons.menu_book_rounded,
                   onTap: () => _push(context, const ChaptersScreen()),
                 ),
-                _HubTile(
-                  title: l.myMistakes,
-                  subtitle: l.toReview(state.mistakes.length),
-                  kind: HubIconKind.mistakes,
-                  gradient: AppColors.orangeGradient,
-                  glow: AppColors.orangeGlow,
-                  delay: 120,
-                  onTap: () => _push(context, const MistakesScreen()),
-                ),
-                _HubTile(
+                _PathNode(
+                  step: 3,
                   title: l.hubSigns,
                   subtitle: l.signsSubtitle,
-                  kind: HubIconKind.signs,
-                  gradient: const LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [Color(0xFFFFC14D), Color(0xFFE07A00)],
-                  ),
-                  glow: AppColors.orangeGlow,
-                  delay: 160,
+                  color: AppColors.amber,
+                  icon: Icons.signpost_rounded,
                   onTap: () => _push(context, const SignGamesScreen()),
                 ),
-                _HubTile(
+                _PathNode(
+                  step: 4,
                   title: l.hubHard,
                   subtitle: l.hardSubtitle,
-                  kind: HubIconKind.hard,
-                  gradient: const LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [Color(0xFFFF6B73), Color(0xFFC9182B)],
-                  ),
-                  glow: AppColors.redGlow,
-                  delay: 200,
-                  onTap: () => _push(
-                    context,
-                    QuizScreen(title: l.hardQuizTitle, hardMode: true),
-                  ),
+                  color: AppColors.coral,
+                  icon: Icons.local_fire_department_rounded,
+                  onTap: () => _push(context, QuizScreen(title: l.hardQuizTitle, hardMode: true)),
                 ),
-                _HubTile(
+                _PathNode(
+                  step: 5,
                   title: l.hubDaily,
                   subtitle: state.dailyChallengeDone ? l.dailyDone : l.dailyAvailable,
-                  kind: HubIconKind.daily,
-                  gradient: AppColors.neonGradient,
-                  glow: AppColors.neonGlow,
-                  delay: 240,
+                  color: AppColors.emerald,
+                  icon: Icons.today_rounded,
                   dimmed: state.dailyChallengeDone,
                   onTap: () {
                     if (state.dailyChallengeDone) {
@@ -354,13 +277,28 @@ class HomeScreen extends StatelessWidget {
                     );
                   },
                 ),
-                _HubTile(
+                _PathNode(
+                  step: 6,
+                  title: l.simulationTitle,
+                  subtitle: l.officialExam,
+                  color: AppColors.pink,
+                  icon: Icons.flag_rounded,
+                  onTap: () => _push(context, const ExamScreen()),
+                ),
+                _PathNode(
+                  step: 7,
+                  title: l.myMistakes,
+                  subtitle: l.toReview(state.mistakes.length),
+                  color: AppColors.amber,
+                  icon: Icons.error_outline_rounded,
+                  onTap: () => _push(context, const MistakesScreen()),
+                ),
+                _PathNode(
+                  step: 8,
                   title: l.fastTrackSectionRow,
-                  subtitle: l.fastTrackSubtitle,
-                  kind: HubIconKind.fastTrack,
-                  gradient: AppColors.neonGradient,
-                  glow: AppColors.neonGlow,
-                  delay: 280,
+                  subtitle: l.isEn ? 'Tricks & rules · website parity' : 'Tricks e regole · come sul sito',
+                  color: AppColors.emerald,
+                  icon: Icons.bolt_rounded,
                   locked: !state.fastTrackUnlocked,
                   lockedLabel: l.privateBadge,
                   onTap: () => _push(
@@ -370,29 +308,21 @@ class HomeScreen extends StatelessWidget {
                         : const FastTrackLockScreen(),
                   ),
                 ),
-                _HubTile(
+                _PathNode(
+                  step: 9,
                   title: l.hubBookmarks,
                   subtitle: l.hubBookmarksSub,
-                  kind: HubIconKind.bookmarks,
-                  gradient: const LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [Color(0xFFFFD60A), Color(0xFFE0A800)],
-                  ),
-                  glow: const Color(0x66FFD60A),
-                  delay: 320,
+                  color: AppColors.blue,
+                  icon: Icons.bookmark_rounded,
+                  last: true,
                   onTap: () => _push(
                     context,
-                    QuizScreen(
-                      title: l.hubBookmarks,
-                      bookmarkMode: true,
-                    ),
+                    QuizScreen(title: l.hubBookmarks, bookmarkMode: true),
                   ),
                 ),
-              ]),
+              ],
             ),
           ),
-          const SliverToBoxAdapter(child: SizedBox(height: 104)),
         ],
       ),
     );
@@ -407,32 +337,13 @@ class HomeScreen extends StatelessWidget {
           opacity: animation,
           child: SlideTransition(
             position: Tween<Offset>(
-              begin: const Offset(0, 0.04),
+              begin: const Offset(0, 0.03),
               end: Offset.zero,
             ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOutCubic)),
             child: child,
           ),
         ),
-        transitionDuration: const Duration(milliseconds: 320),
-      ),
-    );
-  }
-}
-
-class _FlagRibbon extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 22,
-      height: 14,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(3),
-        boxShadow: const [
-          BoxShadow(color: Color(0x44000000), blurRadius: 4, offset: Offset(0, 1)),
-        ],
-        gradient: const LinearGradient(
-          colors: [AppColors.flagGreen, AppColors.flagWhite, AppColors.flagRed],
-        ),
+        transitionDuration: const Duration(milliseconds: 280),
       ),
     );
   }
@@ -458,21 +369,19 @@ class _LangButton extends StatelessWidget {
           height: 48,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
-            color: AppColors.electric.withValues(alpha: 0.14),
-            border: Border.all(color: AppColors.electric.withValues(alpha: 0.35)),
+            color: AppColors.blueDim,
+            border: Border.all(color: AppColors.blue.withValues(alpha: 0.25)),
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.translate_rounded, color: AppColors.electricSoft, size: 17),
-              const SizedBox(height: 1),
+              const Icon(Icons.translate_rounded, color: AppColors.blue, size: 17),
               Text(
                 lang.code.toUpperCase(),
                 style: const TextStyle(
                   fontSize: 10,
                   fontWeight: FontWeight.w900,
-                  color: AppColors.electricSoft,
-                  letterSpacing: 0.4,
+                  color: AppColors.blue,
                 ),
               ),
             ],
@@ -483,236 +392,195 @@ class _LangButton extends StatelessWidget {
   }
 }
 
-class _MiniMetric extends StatelessWidget {
-  const _MiniMetric({
-    required this.emoji,
-    required this.value,
-    required this.label,
-    required this.accent,
-  });
-
+class _MiniStat extends StatelessWidget {
+  const _MiniStat(this.emoji, this.value);
   final String emoji;
   final String value;
-  final String label;
-  final Color accent;
 
   @override
   Widget build(BuildContext context) {
-    return PremiumCard(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-      borderColor: accent.withValues(alpha: 0.22),
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: AppColors.canvasDeep,
+        borderRadius: BorderRadius.circular(12),
+      ),
       child: Row(
         children: [
-          Text(emoji, style: const TextStyle(fontSize: 20)),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  value,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: -0.4,
-                  ),
-                ),
-                Text(
-                  label,
-                  style: const TextStyle(
-                    fontSize: 10,
-                    color: AppColors.textMuted,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
+          Text(emoji, style: const TextStyle(fontSize: 13)),
+          const SizedBox(width: 4),
+          Text(value, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13)),
         ],
       ),
     );
   }
 }
 
-class _HubTile extends StatefulWidget {
-  const _HubTile({
+class _PathNode extends StatelessWidget {
+  const _PathNode({
+    required this.step,
     required this.title,
     required this.subtitle,
-    required this.kind,
-    required this.gradient,
-    required this.glow,
+    required this.color,
+    required this.icon,
     required this.onTap,
-    this.delay = 0,
     this.locked = false,
     this.lockedLabel = 'Privato',
     this.dimmed = false,
+    this.last = false,
   });
 
+  final int step;
   final String title;
   final String subtitle;
-  final HubIconKind kind;
-  final Gradient gradient;
-  final Color glow;
+  final Color color;
+  final IconData icon;
   final VoidCallback onTap;
-  final int delay;
   final bool locked;
   final String lockedLabel;
   final bool dimmed;
-
-  @override
-  State<_HubTile> createState() => _HubTileState();
-}
-
-class _HubTileState extends State<_HubTile> with SingleTickerProviderStateMixin {
-  late final AnimationController _ctrl;
-  late final Animation<double> _fade;
-  late final Animation<Offset> _slide;
-
-  @override
-  void initState() {
-    super.initState();
-    _ctrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 420),
-    );
-    _fade = CurvedAnimation(parent: _ctrl, curve: Curves.easeOut);
-    _slide = Tween<Offset>(
-      begin: const Offset(0, 0.12),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOutCubic));
-    Future<void>.delayed(Duration(milliseconds: widget.delay), () {
-      if (mounted) _ctrl.forward();
-    });
-  }
-
-  @override
-  void dispose() {
-    _ctrl.dispose();
-    super.dispose();
-  }
+  final bool last;
 
   @override
   Widget build(BuildContext context) {
-    return FadeTransition(
-      opacity: _fade,
-      child: SlideTransition(
-        position: _slide,
-        child: Opacity(
-          opacity: widget.dimmed ? 0.72 : 1,
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(22),
-              boxShadow: [
-                BoxShadow(color: widget.glow, blurRadius: 18, offset: const Offset(0, 8)),
-              ],
-            ),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: widget.onTap,
-                borderRadius: BorderRadius.circular(22),
-                child: Ink(
-                  decoration: BoxDecoration(
-                    gradient: widget.gradient,
-                    borderRadius: BorderRadius.circular(22),
+    return Opacity(
+      opacity: dimmed ? 0.7 : 1,
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SizedBox(
+              width: 36,
+              child: Column(
+                children: [
+                  Container(
+                    width: 28,
+                    height: 28,
+                    decoration: BoxDecoration(
+                      color: color,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: color.withValues(alpha: 0.35),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      '$step',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w900,
+                        fontSize: 12,
+                      ),
+                    ),
                   ),
-                  child: Stack(
-                    children: [
-                      Positioned(
-                        right: -14,
-                        top: -14,
-                        child: Container(
-                          width: 56,
-                          height: 56,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white.withValues(alpha: 0.12),
+                  if (!last)
+                    Expanded(
+                      child: Container(
+                        width: 3,
+                        margin: const EdgeInsets.symmetric(vertical: 4),
+                        decoration: BoxDecoration(
+                          color: color.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.only(bottom: last ? 0 : 12),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: onTap,
+                    borderRadius: BorderRadius.circular(20),
+                    child: Ink(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: AppColors.surface,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: AppColors.stroke),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Color(0x100B1220),
+                            blurRadius: 14,
+                            offset: Offset(0, 6),
                           ),
-                        ),
+                        ],
                       ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            ImageFiltered(
-                              imageFilter: ImageFilter.blur(
-                                sigmaX: widget.locked ? 2.0 : 0,
-                                sigmaY: widget.locked ? 2.0 : 0,
-                              ),
-                              child: Container(
-                                width: 38,
-                                height: 38,
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withValues(alpha: 0.2),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Center(
-                                  child: HubGridIcon(kind: widget.kind, size: 22),
-                                ),
-                              ),
-                            ),
-                            const Spacer(),
-                            Text(
-                              widget.title,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w900,
-                                color: Colors.white,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              widget.subtitle,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: Colors.white.withValues(alpha: 0.88),
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      if (widget.locked)
-                        Positioned(
-                          top: 8,
-                          right: 8,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 44,
+                            height: 44,
                             decoration: BoxDecoration(
-                              color: Colors.black.withValues(alpha: 0.42),
+                              color: color.withValues(alpha: 0.12),
                               borderRadius: BorderRadius.circular(14),
-                              border: Border.all(
-                                color: Colors.white.withValues(alpha: 0.32),
-                              ),
                             ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
+                            child: Icon(icon, color: color),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Icon(Icons.lock_rounded, size: 9, color: Colors.white),
-                                const SizedBox(width: 2),
                                 Text(
-                                  widget.lockedLabel,
+                                  title,
                                   style: const TextStyle(
-                                    fontSize: 8,
-                                    fontWeight: FontWeight.w800,
-                                    color: Colors.white,
+                                    fontWeight: FontWeight.w900,
+                                    fontSize: 15,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  subtitle,
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: AppColors.textMuted,
+                                    fontWeight: FontWeight.w600,
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                        ),
-                    ],
+                          if (locked)
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: AppColors.ink.withValues(alpha: 0.06),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.lock_rounded, size: 12, color: AppColors.textMuted),
+                                  const SizedBox(width: 3),
+                                  Text(
+                                    lockedLabel,
+                                    style: const TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w800,
+                                      color: AppColors.textMuted,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          else
+                            Icon(Icons.chevron_right_rounded, color: color),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
+          ],
         ),
       ),
     );

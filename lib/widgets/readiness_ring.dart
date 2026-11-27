@@ -67,10 +67,10 @@ class _ReadinessRingState extends State<ReadinessRing>
                 children: [
                   Text(
                     '${(p * 100).round()}%',
-                    style: const TextStyle(
-                      fontSize: 52,
+                    style: TextStyle(
+                      fontSize: widget.size > 160 ? 44 : 28,
                       fontWeight: FontWeight.w900,
-                      color: Colors.white,
+                      color: AppColors.ink,
                       letterSpacing: -2,
                       height: 1,
                     ),
@@ -81,9 +81,9 @@ class _ReadinessRingState extends State<ReadinessRing>
                     child: Text(
                       widget.label,
                       textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: AppColors.textSecondary.withValues(alpha: 0.95),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: AppColors.textSecondary,
                         fontWeight: FontWeight.w600,
                         height: 1.25,
                       ),
@@ -116,14 +116,14 @@ class _RingPainter extends CustomPainter {
       Paint()
         ..shader = RadialGradient(
           colors: [
-            const Color(0xFF1A2A48),
-            AppColors.navyMid.withValues(alpha: 0.4),
+            Colors.white,
+            AppColors.canvasDeep,
           ],
         ).createShader(Rect.fromCircle(center: center, radius: radius)),
     );
 
     final track = Paint()
-      ..color = const Color(0x22FFFFFF)
+      ..color = const Color(0x1A0B1220)
       ..style = PaintingStyle.stroke
       ..strokeWidth = stroke
       ..strokeCap = StrokeCap.round;
@@ -234,7 +234,7 @@ class _TimerPainter extends CustomPainter {
       c,
       r,
       Paint()
-        ..color = const Color(0x22FFFFFF)
+        ..color = const Color(0x1A0B1220)
         ..style = PaintingStyle.stroke
         ..strokeWidth = 8,
     );

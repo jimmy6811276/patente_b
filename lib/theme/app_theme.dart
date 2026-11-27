@@ -4,10 +4,8 @@ import 'app_colors.dart';
 
 abstract final class AppTheme {
   static ThemeData dark({bool readable = false}) {
-    final base = ThemeData.dark(useMaterial3: true);
-    // Platform-native typeface (SF Pro on iOS, Roboto on Android).
-    // No font downloads: the app must work with zero network access.
-    // Readable mode widens letter-spacing and line height for dyslexia support.
+    // Kept name for compatibility — this is now the advanced light study theme.
+    final base = ThemeData.light(useMaterial3: true);
     final textTheme = base.textTheme.apply(
       bodyColor: AppColors.textPrimary,
       displayColor: AppColors.textPrimary,
@@ -24,15 +22,15 @@ abstract final class AppTheme {
     }
 
     return base.copyWith(
-      scaffoldBackgroundColor: AppColors.navyDeep,
-      colorScheme: const ColorScheme.dark(
-        primary: AppColors.electric,
-        secondary: AppColors.neon,
-        surface: AppColors.navyCard,
-        error: AppColors.red,
+      scaffoldBackgroundColor: AppColors.canvas,
+      colorScheme: const ColorScheme.light(
+        primary: AppColors.emerald,
+        secondary: AppColors.blue,
+        surface: AppColors.surface,
+        error: AppColors.coral,
         onPrimary: Colors.white,
         onSecondary: Colors.white,
-        onSurface: AppColors.textPrimary,
+        onSurface: AppColors.ink,
         onError: Colors.white,
       ),
       textTheme: textTheme.copyWith(
@@ -40,6 +38,7 @@ abstract final class AppTheme {
           textTheme.displayLarge?.copyWith(
             fontWeight: FontWeight.w900,
             letterSpacing: -1.4,
+            color: AppColors.ink,
           ),
           extraSpace: 0.2,
         ),
@@ -47,15 +46,24 @@ abstract final class AppTheme {
           textTheme.headlineMedium?.copyWith(
             fontWeight: FontWeight.w800,
             letterSpacing: -0.6,
+            color: AppColors.ink,
           ),
         ),
         titleLarge: readableStyle(
-          textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+          textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w700,
+            color: AppColors.ink,
+          ),
         ),
         titleMedium: readableStyle(
-          textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+          textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w700,
+            color: AppColors.ink,
+          ),
         ),
-        bodyLarge: readableStyle(textTheme.bodyLarge?.copyWith(height: 1.45)),
+        bodyLarge: readableStyle(
+          textTheme.bodyLarge?.copyWith(height: 1.45, color: AppColors.ink),
+        ),
         bodyMedium: readableStyle(
           textTheme.bodyMedium?.copyWith(
             color: AppColors.textSecondary,
@@ -66,6 +74,7 @@ abstract final class AppTheme {
           textTheme.labelLarge?.copyWith(
             fontWeight: FontWeight.w700,
             letterSpacing: 0.2,
+            color: AppColors.ink,
           ),
         ),
       ),
@@ -73,14 +82,14 @@ abstract final class AppTheme {
         backgroundColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
-        systemOverlayStyle: SystemUiOverlayStyle.light,
+        systemOverlayStyle: SystemUiOverlayStyle.dark,
         titleTextStyle: readableStyle(
           textTheme.titleLarge?.copyWith(
-            color: AppColors.textPrimary,
+            color: AppColors.ink,
             fontWeight: FontWeight.w700,
           ),
         ),
-        iconTheme: const IconThemeData(color: AppColors.textPrimary),
+        iconTheme: const IconThemeData(color: AppColors.ink),
       ),
       dividerColor: AppColors.stroke,
       splashFactory: InkSparkle.splashFactory,

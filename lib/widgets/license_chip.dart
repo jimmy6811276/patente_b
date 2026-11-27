@@ -66,25 +66,31 @@ class LicenseChip extends StatelessWidget {
         width: 72,
         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 6),
         decoration: BoxDecoration(
-          gradient: selected ? AppColors.electricGradient : null,
-          color: selected ? null : Colors.white.withValues(alpha: 0.05),
+          gradient: selected ? AppColors.neonGradient : null,
+          color: selected ? null : AppColors.surface,
           borderRadius: BorderRadius.circular(18),
           border: Border.all(
             color: selected
                 ? Colors.transparent
                 : category.isPlayable
-                    ? AppColors.neon.withValues(alpha: 0.35)
+                    ? AppColors.emerald.withValues(alpha: 0.35)
                     : AppColors.stroke,
           ),
           boxShadow: selected
               ? const [
                   BoxShadow(
-                    color: AppColors.electricGlow,
+                    color: AppColors.neonGlow,
                     blurRadius: 14,
                     offset: Offset(0, 4),
                   ),
                 ]
-              : null,
+              : const [
+                  BoxShadow(
+                    color: Color(0x100B1220),
+                    blurRadius: 10,
+                    offset: Offset(0, 4),
+                  ),
+                ],
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -94,7 +100,7 @@ class LicenseChip extends StatelessWidget {
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w900,
-                color: selected ? Colors.white : AppColors.textPrimary,
+                color: selected ? Colors.white : AppColors.ink,
                 letterSpacing: 0.4,
               ),
             ),
@@ -107,7 +113,7 @@ class LicenseChip extends StatelessWidget {
                 fontSize: 9,
                 fontWeight: FontWeight.w700,
                 color: selected
-                    ? Colors.white.withValues(alpha: 0.85)
+                    ? Colors.white.withValues(alpha: 0.9)
                     : AppColors.textMuted,
               ),
             ),
@@ -120,7 +126,7 @@ class LicenseChip extends StatelessWidget {
                   shape: BoxShape.circle,
                   color: selected
                       ? Colors.white.withValues(alpha: 0.55)
-                      : AppColors.orange.withValues(alpha: 0.7),
+                      : AppColors.amber.withValues(alpha: 0.8),
                 ),
               ),
             ],

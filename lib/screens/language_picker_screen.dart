@@ -20,7 +20,7 @@ class LanguagePickerScreen extends StatelessWidget {
     final state = context.watch<AppState>();
 
     return Scaffold(
-      backgroundColor: AppColors.navyDeep,
+      backgroundColor: AppColors.canvas,
       body: Stack(
         fit: StackFit.expand,
         children: [
@@ -28,12 +28,12 @@ class LanguagePickerScreen extends StatelessWidget {
           Positioned(
             top: -90,
             right: -70,
-            child: _Orb(size: 280, color: AppColors.electric.withValues(alpha: 0.22)),
+            child: _Orb(size: 280, color: AppColors.blue.withValues(alpha: 0.14)),
           ),
           Positioned(
             bottom: -60,
             left: -90,
-            child: _Orb(size: 300, color: AppColors.neon.withValues(alpha: 0.12)),
+            child: _Orb(size: 300, color: AppColors.emerald.withValues(alpha: 0.12)),
           ),
           SafeArea(
             child: Padding(
@@ -148,14 +148,17 @@ class _LangOption extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         decoration: BoxDecoration(
-          color: selected
-              ? AppColors.neon.withValues(alpha: 0.13)
-              : Colors.white.withValues(alpha: 0.05),
+          color: selected ? AppColors.emeraldDim : AppColors.surface,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: selected ? AppColors.neon : AppColors.stroke,
+            color: selected ? AppColors.emerald : AppColors.stroke,
             width: selected ? 1.6 : 1,
           ),
+          boxShadow: selected
+              ? null
+              : const [
+                  BoxShadow(color: Color(0x100B1220), blurRadius: 14, offset: Offset(0, 6)),
+                ],
         ),
         child: Row(
           children: [
@@ -183,9 +186,9 @@ class _LangOption extends StatelessWidget {
               height: 24,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: selected ? AppColors.neon : Colors.transparent,
+                color: selected ? AppColors.emerald : Colors.transparent,
                 border: Border.all(
-                  color: selected ? AppColors.neon : AppColors.textMuted,
+                  color: selected ? AppColors.emerald : AppColors.textMuted,
                   width: 2,
                 ),
               ),

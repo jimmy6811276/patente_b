@@ -10,9 +10,9 @@ void main() {
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.light,
-      systemNavigationBarColor: Color(0xFF040910),
-      systemNavigationBarIconBrightness: Brightness.light,
+      statusBarIconBrightness: Brightness.dark,
+      systemNavigationBarColor: Color(0xFFF3F6FB),
+      systemNavigationBarIconBrightness: Brightness.dark,
     ),
   );
   runApp(const PatenteBApp());
