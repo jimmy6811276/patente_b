@@ -182,6 +182,24 @@ class _FastTrackRulesQuizScreenState extends State<FastTrackRulesQuizScreen> {
                     ),
                   ),
                   const SizedBox(height: 12),
+                  if (_item.imageAsset != null) ...[
+                    Container(
+                      height: 120,
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(color: AppColors.stroke),
+                      ),
+                      padding: const EdgeInsets.all(14),
+                      child: Image.asset(
+                        _item.imageAsset!,
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                  ],
                   Text(
                     _item.prompt,
                     style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900, height: 1.2),

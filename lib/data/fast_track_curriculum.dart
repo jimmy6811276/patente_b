@@ -59,6 +59,7 @@ class FtQuizItem {
     required this.subtitle,
     required this.correctLabel,
     required this.options,
+    this.imageAsset,
   });
 
   final String id;
@@ -66,6 +67,7 @@ class FtQuizItem {
   final String subtitle;
   final String correctLabel;
   final List<String> options;
+  final String? imageAsset;
 }
 
 /// Guided Zero-Italian Fast Track: visual families → kill combos → letter stamps.
@@ -195,6 +197,7 @@ class FastTrackCurriculum {
       final label = '${m['label']}';
       final coach = FtPlaybook.triggers[phrase];
       final scopeNote = (m['scope'] as String?) ?? 'whole bank';
+      final img = (m['img'] as String?)?.trim();
       slides.add(
         FtSlide(
           id: 'trigger_$ti',
@@ -203,6 +206,7 @@ class FastTrackCurriculum {
           title: _t('SPOT → TAP', 'SPOT → TAP'),
           accent: '«$phrase»',
           badge: label,
+          imageAsset: (img != null && img.isNotEmpty) ? 'assets/images/$img' : null,
           body: coach != null
               ? '${coach.action}\n\n${coach.mnemonic}'
               : _t(
@@ -355,6 +359,7 @@ class FastTrackCurriculum {
       final logic = m['logic'] as Map<String, dynamic>? ?? {};
       final vero = ((m['veroWords'] as List?) ?? []).join(', ');
       final falso = ((m['falsoWords'] as List?) ?? []).join(', ');
+      final cardImg = (m['img'] as String?)?.trim();
       slides.add(
         FtSlide(
           id: 'sign_$sci',
@@ -363,6 +368,8 @@ class FastTrackCurriculum {
           title: '${m['topicIt']}',
           accent: '${m['majority']}',
           badge: 'CARD $sci',
+          imageAsset:
+              (cardImg != null && cardImg.isNotEmpty) ? 'assets/images/$cardImg' : null,
           body: (logic['test'] as String?) ?? '',
           hint: [
             if (vero.isNotEmpty) 'GREEN → VERO: $vero',
@@ -422,6 +429,7 @@ class FastTrackCurriculum {
           subtitle: fam.neverDoes,
           correctLabel: fam.fam == 'RED CIRCLE' ? 'YES' : 'NO',
           options: const ['YES', 'NO'],
+          imageAsset: fam.asset,
         ),
       );
     }
@@ -434,6 +442,7 @@ class FastTrackCurriculum {
           subtitle: combo.why,
           correctLabel: combo.tap,
           options: const ['VERO', 'FALSO'],
+          imageAsset: combo.asset,
         ),
       );
     }
@@ -443,6 +452,7 @@ class FastTrackCurriculum {
       final phrase = '${m['phrase']}';
       final label = '${m['label']}';
       final coach = FtPlaybook.triggers[phrase];
+      final img = (m['img'] as String?)?.trim();
       items.add(
         FtQuizItem(
           id: 'q_trig_$phrase',
@@ -453,6 +463,7 @@ class FastTrackCurriculum {
           subtitle: coach?.action ?? '${m['en']}',
           correctLabel: label,
           options: const ['VERO', 'FALSO'],
+          imageAsset: (img != null && img.isNotEmpty) ? 'assets/images/$img' : null,
         ),
       );
     }
