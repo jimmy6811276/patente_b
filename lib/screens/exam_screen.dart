@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../data/app_state.dart';
+import '../l10n/strings.dart';
 import '../models/models.dart';
 import '../theme/app_colors.dart';
 import '../widgets/premium_scaffold.dart';
@@ -79,11 +80,13 @@ class _ExamScreenState extends State<ExamScreen> {
     if (_submitted) return;
     _submitted = true;
     _timer?.cancel();
+    final l = L10n.read(context);
     final total = _qs.length;
     // Official rule: every question is scored. Unanswered questions count as errors.
     final correct = _correctCount;
     final wrong = total - correct;
     final passed = wrong <= 3;
+    final answeredCount = _answers.length;
     await context.read<AppState>().finishExam(
           total: total,
           correct: correct,
@@ -111,7 +114,7 @@ class _ExamScreenState extends State<ExamScreen> {
             ),
             const SizedBox(height: 14),
             Text(
-              passed ? 'Esame SUPERATO' : 'Esame NON SUPERATO',
+              passed ? l.passedTitle : l.failedTitle,
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.w900,
@@ -120,19 +123,18 @@ class _ExamScreenState extends State<ExamScreen> {
             ),
             const SizedBox(height: 10),
             Text(
-              '$correct corrette · $wrong errori (max 3)\n'
-              'Risposte: ${_answers.length}/$total',
+              l.examResult(correct, wrong, answeredCount, total),
               textAlign: TextAlign.center,
               style: const TextStyle(color: AppColors.textSecondary, height: 1.45),
             ),
             const SizedBox(height: 10),
-            const Text(
-              'Esito salvato nel database locale',
-              style: TextStyle(fontSize: 11, color: AppColors.textMuted),
+            Text(
+              l.resultSaved,
+              style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
             ),
             const SizedBox(height: 22),
             NeonButton(
-              label: 'Torna alla home',
+              label: l.backHome,
               onPressed: () {
                 Navigator.pop(ctx);
                 Navigator.pop(context);
@@ -152,6 +154,7 @@ class _ExamScreenState extends State<ExamScreen> {
 
     final q = _qs[_index];
     final selected = _answers[_index];
+    final l = L10n.of(context);
 
     return PremiumScaffold(
       child: Column(
@@ -163,6 +166,7 @@ class _ExamScreenState extends State<ExamScreen> {
                 TimerRing(
                   progress: _seconds / (20 * 60),
                   label: _clock,
+                  caption: l.timeRemaining,
                   size: 120,
                 ),
                 const SizedBox(height: 12),
@@ -170,7 +174,7 @@ class _ExamScreenState extends State<ExamScreen> {
                   children: [
                     Expanded(
                       child: _ScoreChip(
-                        label: 'Corrette',
+                        label: l.scoreCorrect,
                         value: '$_correctCount',
                         color: AppColors.neon,
                       ),
@@ -178,7 +182,7 @@ class _ExamScreenState extends State<ExamScreen> {
                     const SizedBox(width: 10),
                     Expanded(
                       child: _ScoreChip(
-                        label: 'Errori · max 3',
+                        label: l.scoreErrors,
                         value: '$_wrongCount',
                         color: AppColors.red,
                       ),
@@ -186,7 +190,7 @@ class _ExamScreenState extends State<ExamScreen> {
                     const SizedBox(width: 10),
                     Expanded(
                       child: _ScoreChip(
-                        label: 'Domanda',
+                        label: l.scoreQuestion,
                         value: '${_index + 1}/${_qs.length}',
                         color: AppColors.electric,
                       ),
@@ -218,7 +222,7 @@ class _ExamScreenState extends State<ExamScreen> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  q.textIt,
+                  l.questionText(q),
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w800,
@@ -227,7 +231,7 @@ class _ExamScreenState extends State<ExamScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  q.textEn,
+                  l.questionTextSecondary(q),
                   style: const TextStyle(
                     fontSize: 13,
                     fontStyle: FontStyle.italic,
@@ -239,7 +243,7 @@ class _ExamScreenState extends State<ExamScreen> {
                   children: [
                     Expanded(
                       child: _Choice(
-                        label: 'Vero',
+                        label: l.answerLabel(true),
                         selected: selected == true,
                         color: AppColors.neon,
                         onTap: () => _pick(true),
@@ -248,7 +252,7 @@ class _ExamScreenState extends State<ExamScreen> {
                     const SizedBox(width: 12),
                     Expanded(
                       child: _Choice(
-                        label: 'Falso',
+                        label: l.answerLabel(false),
                         selected: selected == false,
                         color: AppColors.red,
                         onTap: () => _pick(false),
@@ -273,8 +277,8 @@ class _ExamScreenState extends State<ExamScreen> {
                   ),
                   label: Text(
                     _marked.contains(_index)
-                        ? 'Segnata per revisione'
-                        : 'Segna per revisione',
+                        ? l.markedForReview
+                        : l.markForReview,
                     style: const TextStyle(
                       color: AppColors.orange,
                       fontWeight: FontWeight.w700,
@@ -290,14 +294,14 @@ class _ExamScreenState extends State<ExamScreen> {
               children: [
                 Expanded(
                   child: _NavBtn(
-                    label: 'Precedente',
+                    label: l.previous,
                     onTap: _index == 0 ? null : () => setState(() => _index--),
                   ),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: _NavBtn(
-                    label: 'Salta',
+                    label: l.skip,
                     onTap: () {
                       if (_index < _qs.length - 1) setState(() => _index++);
                     },
@@ -306,7 +310,7 @@ class _ExamScreenState extends State<ExamScreen> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: NeonButton(
-                    label: _index >= _qs.length - 1 ? 'Consegna' : 'Avanti',
+                    label: _index >= _qs.length - 1 ? l.submit : l.advance,
                     height: 48,
                     gradient: AppColors.pinkGradient,
                     glow: AppColors.pinkGlow,
@@ -335,6 +339,7 @@ class _Lobby extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
+    final l = L10n(state.lang);
     return PremiumScaffold(
       child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(22, 0, 22, 24),
@@ -359,9 +364,9 @@ class _Lobby extends StatelessWidget {
               child: const Icon(Icons.flag_rounded, color: Colors.white, size: 36),
             ),
             const SizedBox(height: 20),
-            const Text(
-              'Simulazione\nEsame',
-              style: TextStyle(
+            Text(
+              l.examLobbyTitle,
+              style: const TextStyle(
                 fontSize: 36,
                 fontWeight: FontWeight.w900,
                 letterSpacing: -1,
@@ -369,9 +374,9 @@ class _Lobby extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-            const Text(
-              'Formato ufficiale Ministero:\n30 domande · 20 minuti · massimo 3 errori',
-              style: TextStyle(
+            Text(
+              l.examLobbySubtitle,
+              style: const TextStyle(
                 color: AppColors.textSecondary,
                 height: 1.45,
                 fontSize: 15,
@@ -381,34 +386,34 @@ class _Lobby extends StatelessWidget {
             PremiumCard(
               child: Column(
                 children: [
-                  const _Rule(Icons.quiz_outlined, '30 domande Vero / Falso'),
+                  _Rule(Icons.quiz_outlined, l.rule30),
                   const SizedBox(height: 14),
-                  const _Rule(Icons.timer_outlined, 'Countdown circolare 20:00'),
+                  _Rule(Icons.timer_outlined, l.ruleCountdown),
                   const SizedBox(height: 14),
-                  const _Rule(Icons.error_outline, 'Soglia: ≤ 3 errori'),
+                  _Rule(Icons.error_outline, l.ruleThreshold),
                   const SizedBox(height: 14),
                   _Rule(
                     Icons.history_rounded,
                     state.stats.examAttempts == 0
-                        ? 'Nessuna simulazione ancora'
-                        : '${state.stats.examAttempts} tentativi · ${state.stats.examPasses} superati',
+                        ? l.noSimulationYet
+                        : l.attemptsAndPasses(state.stats.examAttempts, state.stats.examPasses),
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 24),
             NeonButton(
-              label: onStart == null ? 'Preparazione…' : 'Inizia simulazione',
+              label: onStart == null ? l.preparing : l.startSimulation,
               icon: Icons.play_arrow_rounded,
               gradient: AppColors.pinkGradient,
               glow: AppColors.pinkGlow,
               onPressed: onStart ?? () {},
             ),
             const SizedBox(height: 10),
-            const Center(
+            Center(
               child: Text(
-                'Domande selezionate dal database locale',
-                style: TextStyle(fontSize: 11, color: AppColors.textMuted),
+                l.questionsFromLocal,
+                style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
               ),
             ),
           ],

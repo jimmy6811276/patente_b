@@ -79,6 +79,10 @@ class QuizQuestion {
   String get hintIt => tags.contains('num')
       ? 'Attenzione ai numeri: spesso la risposta cambia di poco.'
       : 'Individua la parola chiave italiana e confrontala con la traduzione.';
+
+  String get hintEn => tags.contains('num')
+      ? 'Watch the numbers: the answer often changes by very little.'
+      : 'Find the key Italian word and compare it with the translation.';
 }
 
 class VocabularyItem {

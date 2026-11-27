@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../data/app_state.dart';
+import '../l10n/strings.dart';
 import '../models/models.dart';
 import '../theme/app_colors.dart';
 import '../widgets/premium_scaffold.dart';
@@ -12,14 +13,14 @@ import '../widgets/sign_art.dart';
 class QuizScreen extends StatefulWidget {
   const QuizScreen({
     super.key,
-    this.title = 'Quiz',
+    this.title,
     this.chapterId,
     this.questions,
     this.mistakeMode = false,
     this.bookmarkMode = false,
   });
 
-  final String title;
+  final String? title;
   final int? chapterId;
   final List<QuizQuestion>? questions;
   final bool mistakeMode;
@@ -48,6 +49,7 @@ class _QuizScreenState extends State<QuizScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = L10n.of(context);
     return FutureBuilder<List<QuizQuestion>>(
       future: _future,
       builder: (context, snap) {
@@ -67,7 +69,7 @@ class _QuizScreenState extends State<QuizScreen> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Caricamento dal database locale…',
+                    l.loadingLocalDb,
                     style: TextStyle(color: AppColors.textMuted.withValues(alpha: 0.9)),
                   ),
                 ],
@@ -86,16 +88,12 @@ class _QuizScreenState extends State<QuizScreen> {
                   const Icon(Icons.inbox_rounded, size: 56, color: AppColors.textMuted),
                   const SizedBox(height: 14),
                   Text(
-                    widget.bookmarkMode
-                        ? 'Nessun segnalibro'
-                        : 'Nessuna domanda disponibile',
+                    widget.bookmarkMode ? l.noBookmarks : l.noQuestionsAvailable,
                     style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    widget.bookmarkMode
-                        ? 'Tocca il segnalibro durante un quiz per salvare le domande qui.'
-                        : 'Fai prima qualche quiz per raccogliere errori da ripassare.',
+                    widget.bookmarkMode ? l.bookmarkHint : l.mistakeHint,
                     textAlign: TextAlign.center,
                     style: const TextStyle(color: AppColors.textSecondary),
                   ),
@@ -103,7 +101,7 @@ class _QuizScreenState extends State<QuizScreen> {
                   SizedBox(
                     width: 180,
                     child: NeonButton(
-                      label: 'Torna',
+                      label: l.back,
                       onPressed: () => Navigator.pop(context),
                     ),
                   ),
@@ -113,7 +111,7 @@ class _QuizScreenState extends State<QuizScreen> {
           );
         }
         return _QuizSession(
-          title: widget.title,
+          title: widget.title ?? l.quizTitle,
           questions: questions,
           mistakeMode: widget.mistakeMode,
         );
@@ -218,6 +216,7 @@ class _QuizSessionState extends State<_QuizSession> {
 
   void _finish() {
     _timer?.cancel();
+    final l = L10n.read(context);
     showModalBottomSheet(
       context: context,
       backgroundColor: AppColors.navyCard,
@@ -247,23 +246,23 @@ class _QuizSessionState extends State<_QuizSession> {
                 color: pct >= 80 ? AppColors.gold : AppColors.electricSoft,
               ),
               const SizedBox(height: 12),
-              const Text(
-                'Sessione completata',
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900),
+              Text(
+                l.sessionComplete,
+                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900),
               ),
               const SizedBox(height: 10),
               Text(
-                '$_correct corrette · $_wrong errori · $pct%',
+                l.correctWrongPct(_correct, _wrong, pct),
                 style: const TextStyle(color: AppColors.textSecondary),
               ),
               const SizedBox(height: 8),
-              const Text(
-                'Progressi salvati nel database locale',
-                style: TextStyle(fontSize: 11, color: AppColors.textMuted),
+              Text(
+                l.progressSaved,
+                style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
               ),
               const SizedBox(height: 24),
               NeonButton(
-                label: 'Chiudi',
+                label: l.close,
                 onPressed: () {
                   Navigator.pop(ctx);
                   Navigator.pop(context);
@@ -278,6 +277,7 @@ class _QuizSessionState extends State<_QuizSession> {
 
   @override
   Widget build(BuildContext context) {
+    final l = L10n.of(context);
     final answered = _answeredTrue != null;
     final wasCorrect = answered && (_answeredTrue == _q.correctIsTrue);
 
@@ -357,11 +357,11 @@ class _QuizSessionState extends State<_QuizSession> {
               children: [
                 SignArt(
                   chapterId: _q.chapterId,
-                  label: _q.chapterNameIt.isEmpty ? 'Segnale' : _q.chapterNameIt,
+                  label: _q.chapterNameIt.isEmpty ? l.defaultSignLabel : _q.chapterNameIt,
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  _q.textIt,
+                  l.questionText(_q),
                   style: const TextStyle(
                     fontSize: 21,
                     fontWeight: FontWeight.w800,
@@ -372,7 +372,7 @@ class _QuizSessionState extends State<_QuizSession> {
                 if (_showEn) ...[
                   const SizedBox(height: 10),
                   Text(
-                    _q.textEn,
+                    l.questionTextSecondary(_q),
                     style: TextStyle(
                       fontSize: 14,
                       fontStyle: FontStyle.italic,
@@ -386,9 +386,9 @@ class _QuizSessionState extends State<_QuizSession> {
                   spacing: 8,
                   runSpacing: 8,
                   children: [
-                    if (_q.tags.contains('sign')) 'segnaletica',
-                    if (_q.tags.contains('num')) 'numeri',
-                    'cap. ${_q.chapterId}',
+                    if (_q.tags.contains('sign')) l.tagSigns,
+                    if (_q.tags.contains('num')) l.tagNumbers,
+                    l.chapterShort(_q.chapterId),
                   ]
                       .map(
                         (k) => Container(
@@ -417,14 +417,14 @@ class _QuizSessionState extends State<_QuizSession> {
                   children: [
                     _Tool(
                       icon: Icons.lightbulb_outline_rounded,
-                      label: 'Suggerimento',
+                      label: l.hint,
                       active: _showHint,
                       onTap: () => setState(() => _showHint = !_showHint),
                     ),
                     const SizedBox(width: 8),
                     _Tool(
                       icon: Icons.translate_rounded,
-                      label: 'English',
+                      label: l.english,
                       active: _showEn,
                       onTap: () => setState(() => _showEn = !_showEn),
                     ),
@@ -456,7 +456,7 @@ class _QuizSessionState extends State<_QuizSession> {
                         const SizedBox(width: 10),
                         Expanded(
                           child: Text(
-                            _q.hintIt,
+                            l.isEn ? _q.hintEn : _q.hintIt,
                             style: const TextStyle(color: AppColors.gold, fontSize: 13, height: 1.35),
                           ),
                         ),
@@ -480,7 +480,7 @@ class _QuizSessionState extends State<_QuizSession> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            wasCorrect ? '✓ Corretto' : '✕ Errato',
+                            wasCorrect ? l.correct : l.incorrect,
                             style: TextStyle(
                               fontWeight: FontWeight.w900,
                               color: wasCorrect ? AppColors.neonSoft : AppColors.redSoft,
@@ -488,12 +488,12 @@ class _QuizSessionState extends State<_QuizSession> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            'Risposta corretta: ${_q.correctIsTrue ? 'VERO' : 'FALSO'}',
+                            l.correctAnswer(_q.correctIsTrue),
                             style: const TextStyle(fontWeight: FontWeight.w700, height: 1.35),
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            _q.textEn,
+                            l.questionTextSecondary(_q),
                             style: const TextStyle(
                               fontSize: 13,
                               fontStyle: FontStyle.italic,
@@ -513,7 +513,7 @@ class _QuizSessionState extends State<_QuizSession> {
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 18),
             child: answered
                 ? NeonButton(
-                    label: _index >= _questions.length - 1 ? 'Vedi risultato' : 'Prossima',
+                    label: _index >= _questions.length - 1 ? l.seeResult : l.next,
                     icon: Icons.arrow_forward_rounded,
                     onPressed: _next,
                   )
@@ -521,7 +521,7 @@ class _QuizSessionState extends State<_QuizSession> {
                     children: [
                       Expanded(
                         child: _BigAnswer(
-                          label: 'Vero',
+                          label: l.answerLabel(true),
                           color: AppColors.neon,
                           glow: AppColors.neonGlow,
                           onTap: () => _answer(true),
@@ -530,7 +530,7 @@ class _QuizSessionState extends State<_QuizSession> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: _BigAnswer(
-                          label: 'Falso',
+                          label: l.answerLabel(false),
                           color: AppColors.red,
                           glow: AppColors.redGlow,
                           onTap: () => _answer(false),

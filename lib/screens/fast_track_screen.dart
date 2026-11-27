@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../data/app_data.dart';
 import '../data/app_state.dart';
+import '../l10n/strings.dart';
 import '../models/models.dart';
 import '../theme/app_colors.dart';
 import '../widgets/premium_scaffold.dart';
@@ -40,6 +41,7 @@ class _FastTrackScreenState extends State<FastTrackScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = L10n.of(context);
     final vocab = context.watch<AppState>().vocabulary;
     final day1 = _tasks.where((t) => t.day == 1).toList();
     final day2 = _tasks.where((t) => t.day == 2).toList();
@@ -56,10 +58,10 @@ class _FastTrackScreenState extends State<FastTrackScreen> {
                   onPressed: () => Navigator.pop(context),
                   icon: const Icon(Icons.arrow_back_ios_new_rounded),
                 ),
-                const Expanded(
+                Expanded(
                   child: Text(
-                    'Fast Track',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+                    l.fastTrackScreenTitle,
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
                   ),
                 ),
                 Container(
@@ -126,19 +128,19 @@ class _FastTrackScreenState extends State<FastTrackScreen> {
                           ),
                         ),
                         const SizedBox(height: 16),
-                        const Text(
-                          'Piano Turbo',
-                          style: TextStyle(
+                        Text(
+                          l.turboPlan,
+                          style: const TextStyle(
                             fontSize: 26,
                             fontWeight: FontWeight.w900,
                             letterSpacing: -0.6,
                           ),
                         ),
                         const SizedBox(height: 6),
-                        const Text(
-                          'Zero italiano → pronto per l\'esame\nin 1–2 giorni intensivi',
+                        Text(
+                          l.turboPlanSubtitle,
                           textAlign: TextAlign.center,
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: AppColors.textSecondary,
                             height: 1.4,
                             fontWeight: FontWeight.w500,
@@ -156,7 +158,7 @@ class _FastTrackScreenState extends State<FastTrackScreen> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          '${(_progress * 100).round()}% completato',
+                          l.percentComplete((_progress * 100).round()),
                           style: const TextStyle(
                             fontSize: 12,
                             color: AppColors.textMuted,
@@ -168,37 +170,39 @@ class _FastTrackScreenState extends State<FastTrackScreen> {
                   ),
                 ),
                 const SizedBox(height: 14),
-                const _FeatureRow(),
+                _FeatureRow(l: l),
                 const SizedBox(height: 24),
                 _DayBlock(
-                  title: 'Giorno 1',
-                  subtitle: 'Fondamenta + segnali di pericolo',
+                  title: l.day1,
+                  subtitle: l.day1Sub,
                   accent: AppColors.neon,
                   tasks: day1,
                   onToggle: _toggle,
+                  l: l,
                 ),
                 const SizedBox(height: 20),
                 _DayBlock(
-                  title: 'Giorno 2',
-                  subtitle: 'Limiti, distanza, mini-esame',
+                  title: l.day2,
+                  subtitle: l.day2Sub,
                   accent: AppColors.electric,
                   tasks: day2,
                   onToggle: _toggle,
+                  l: l,
                 ),
                 const SizedBox(height: 24),
                 Row(
                   children: [
                     const Icon(Icons.translate_rounded, size: 18, color: AppColors.electricSoft),
                     const SizedBox(width: 8),
-                    const Text(
-                      'Vocabolario essenziale',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
+                    Text(
+                      l.vocabularyEssentials,
+                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
                     ),
                     const Spacer(),
                     TextButton(
                       onPressed: () => setState(() => _showAllVocab = !_showAllVocab),
                       child: Text(
-                        _showAllVocab ? 'Meno' : 'Tutti',
+                        _showAllVocab ? l.showLess : l.showAll,
                         style: const TextStyle(color: AppColors.electricSoft, fontWeight: FontWeight.w700),
                       ),
                     ),
@@ -227,11 +231,11 @@ class _FastTrackScreenState extends State<FastTrackScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  v.termIt,
+                                  l.vocabularyTerm(v),
                                   style: const TextStyle(fontWeight: FontWeight.w800),
                                 ),
                                 Text(
-                                  v.termEn,
+                                  l.vocabularyTermSecondary(v),
                                   style: const TextStyle(
                                     fontSize: 12,
                                     color: AppColors.textMuted,
@@ -242,7 +246,7 @@ class _FastTrackScreenState extends State<FastTrackScreen> {
                             ),
                           ),
                           Text(
-                            'Cap. ${v.chapterId}',
+                            l.chapterShortFT(v.chapterId),
                             style: const TextStyle(fontSize: 10, color: AppColors.textMuted),
                           ),
                         ],
@@ -252,12 +256,12 @@ class _FastTrackScreenState extends State<FastTrackScreen> {
                 ),
                 const SizedBox(height: 20),
                 NeonButton(
-                  label: _done == 0 ? 'Inizia il Piano' : 'Continua il Piano',
+                  label: _done == 0 ? l.startPlan : l.continuePlan,
                   icon: Icons.play_arrow_rounded,
                   onPressed: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (_) => const QuizScreen(title: 'Fast Track Quiz'),
+                        builder: (_) => QuizScreen(title: l.fastTrackQuiz),
                       ),
                     );
                   },
@@ -283,15 +287,16 @@ class _FastTrackScreenState extends State<FastTrackScreen> {
 }
 
 class _FeatureRow extends StatelessWidget {
-  const _FeatureRow();
+  const _FeatureRow({required this.l});
+  final L10n l;
 
   @override
   Widget build(BuildContext context) {
-    const items = [
-      (Icons.translate_rounded, 'EN + IT'),
-      (Icons.lightbulb_rounded, 'Tricks'),
-      (Icons.signpost_rounded, 'Segnali'),
-      (Icons.cloud_off_rounded, 'Offline'),
+    final items = [
+      (Icons.translate_rounded, l.p('IT + EN', 'EN + IT')),
+      (Icons.lightbulb_rounded, l.featureTricks),
+      (Icons.signpost_rounded, l.featureSigns),
+      (Icons.cloud_off_rounded, l.p('Offline', 'Offline')),
     ];
     return Row(
       children: items
@@ -336,6 +341,7 @@ class _DayBlock extends StatelessWidget {
     required this.accent,
     required this.tasks,
     required this.onToggle,
+    required this.l,
   });
 
   final String title;
@@ -343,6 +349,7 @@ class _DayBlock extends StatelessWidget {
   final Color accent;
   final List<FastTrackTask> tasks;
   final void Function(String id) onToggle;
+  final L10n l;
 
   @override
   Widget build(BuildContext context) {
@@ -428,7 +435,7 @@ class _DayBlock extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  t.titleIt,
+                                  l.fastTrackTitle(t),
                                   style: TextStyle(
                                     fontWeight: FontWeight.w700,
                                     decoration: t.done ? TextDecoration.lineThrough : null,
@@ -436,7 +443,7 @@ class _DayBlock extends StatelessWidget {
                                   ),
                                 ),
                                 Text(
-                                  t.titleEn,
+                                  l.fastTrackTitleSecondary(t),
                                   style: const TextStyle(
                                     fontSize: 12,
                                     color: AppColors.textMuted,

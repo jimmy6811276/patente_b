@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../data/app_state.dart';
+import '../l10n/strings.dart';
 import '../theme/app_colors.dart';
 import '../widgets/premium_scaffold.dart';
 import 'quiz_screen.dart';
@@ -12,6 +13,7 @@ class MistakesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
+    final l = L10n(state.lang);
     final mistakes = state.mistakes;
 
     return PremiumScaffold(
@@ -26,10 +28,10 @@ class MistakesScreen extends StatelessWidget {
                   onPressed: () => Navigator.pop(context),
                   icon: const Icon(Icons.arrow_back_ios_new_rounded),
                 ),
-                const Expanded(
+                Expanded(
                   child: Text(
-                    'I miei errori',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+                    l.mistakesTitle,
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
                   ),
                 ),
               ],
@@ -47,16 +49,16 @@ class MistakesScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '${mistakes.length} errori salvati',
+                          l.savedMistakes(mistakes.length),
                           style: const TextStyle(
                             fontWeight: FontWeight.w900,
                             fontSize: 18,
                           ),
                         ),
                         const SizedBox(height: 4),
-                        const Text(
-                          'Raggruppati per capitolo · spaced repetition',
-                          style: TextStyle(
+                        Text(
+                          l.groupedByChapter,
+                          style: const TextStyle(
                             fontSize: 12,
                             color: AppColors.textSecondary,
                           ),
@@ -67,7 +69,7 @@ class MistakesScreen extends StatelessWidget {
                   SizedBox(
                     width: 110,
                     child: NeonButton(
-                      label: 'Riprova',
+                      label: l.retry,
                       height: 44,
                       gradient: AppColors.orangeGradient,
                       glow: AppColors.orangeGlow,
@@ -75,8 +77,8 @@ class MistakesScreen extends StatelessWidget {
                           ? () {}
                           : () => Navigator.of(context).push(
                                 MaterialPageRoute(
-                                  builder: (_) => const QuizScreen(
-                                    title: 'Ripasso errori',
+                                  builder: (_) => QuizScreen(
+                                    title: l.mistakesReview,
                                     mistakeMode: true,
                                   ),
                                 ),
@@ -90,7 +92,7 @@ class MistakesScreen extends StatelessWidget {
           const SizedBox(height: 12),
           Expanded(
             child: mistakes.isEmpty
-                ? const _EmptyMistakes()
+                ? _EmptyMistakes(l: l)
                 : ListView.separated(
                     padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
                     itemCount: mistakes.length,
@@ -122,7 +124,7 @@ class MistakesScreen extends StatelessWidget {
                                     ),
                                   ),
                                   child: Text(
-                                    'Cap. ${q.chapterId}',
+                                    l.chapterBadge(q.chapterId),
                                     style: const TextStyle(
                                       fontSize: 11,
                                       fontWeight: FontWeight.w800,
@@ -134,7 +136,7 @@ class MistakesScreen extends StatelessWidget {
                                 const Icon(Icons.replay_rounded, size: 15, color: AppColors.textMuted),
                                 const SizedBox(width: 4),
                                 Text(
-                                  '${item.wrongCount}× errata',
+                                  l.wrongTimes(item.wrongCount),
                                   style: const TextStyle(
                                     fontSize: 11,
                                     color: AppColors.textMuted,
@@ -145,12 +147,12 @@ class MistakesScreen extends StatelessWidget {
                             ),
                             const SizedBox(height: 10),
                             Text(
-                              q.textIt,
+                              l.questionText(q),
                               style: const TextStyle(fontWeight: FontWeight.w700, height: 1.35),
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              q.textEn,
+                              l.questionTextSecondary(q),
                               style: const TextStyle(
                                 fontSize: 12,
                                 fontStyle: FontStyle.italic,
@@ -159,7 +161,7 @@ class MistakesScreen extends StatelessWidget {
                             ),
                             const SizedBox(height: 10),
                             Text(
-                              'Corretta: ${q.correctIsTrue ? 'VERO' : 'FALSO'}',
+                              l.correctIs(q.correctIsTrue),
                               style: const TextStyle(
                                 fontSize: 12,
                                 color: AppColors.neonSoft,
@@ -179,7 +181,8 @@ class MistakesScreen extends StatelessWidget {
 }
 
 class _EmptyMistakes extends StatelessWidget {
-  const _EmptyMistakes();
+  const _EmptyMistakes({required this.l});
+  final L10n l;
 
   @override
   Widget build(BuildContext context) {
@@ -200,15 +203,15 @@ class _EmptyMistakes extends StatelessWidget {
               child: const Icon(Icons.verified_rounded, color: AppColors.neon, size: 38),
             ),
             const SizedBox(height: 18),
-            const Text(
-              'Nessun errore salvato',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
+            Text(
+              l.noMistakes,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
             ),
             const SizedBox(height: 8),
-            const Text(
-              'Le risposte sbagliate verranno raccolte qui automaticamente e ripassate con la spaced repetition.',
+            Text(
+              l.noMistakesHint,
               textAlign: TextAlign.center,
-              style: TextStyle(color: AppColors.textSecondary, height: 1.45),
+              style: const TextStyle(color: AppColors.textSecondary, height: 1.45),
             ),
           ],
         ),

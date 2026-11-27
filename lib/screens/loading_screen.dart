@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../l10n/strings.dart';
 import '../theme/app_colors.dart';
 import '../widgets/premium_scaffold.dart';
 
@@ -7,6 +8,7 @@ class LoadingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = L10n.of(context);
     return PremiumScaffold(
       child: Column(
         children: [
@@ -64,9 +66,9 @@ class LoadingScreen extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-          const Text(
-            'Preparazione del database locale…',
-            style: TextStyle(color: AppColors.textMuted, fontSize: 12),
+          Text(
+            l.preparingDb,
+            style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
           ),
         ],
       ),
@@ -98,6 +100,7 @@ class DbErrorScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = L10n.of(context);
     return PremiumScaffold(
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -115,10 +118,10 @@ class DbErrorScreen extends StatelessWidget {
               child: const Icon(Icons.storage_rounded, color: AppColors.red, size: 34),
             ),
             const SizedBox(height: 20),
-            const Text(
-              'Database locale non disponibile',
+            Text(
+              l.dbUnavailable,
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
             ),
             const SizedBox(height: 10),
             Text(
@@ -138,7 +141,7 @@ class DbErrorScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(16),
                   ),
                 ),
-                child: const Text('Riprova', style: TextStyle(fontWeight: FontWeight.w800)),
+                child: Text(l.retryBtn, style: const TextStyle(fontWeight: FontWeight.w800)),
               ),
             ),
           ],

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../data/app_state.dart';
+import '../l10n/strings.dart';
 import '../theme/app_colors.dart';
 import '../widgets/premium_scaffold.dart';
 import 'fast_track_screen.dart';
@@ -43,11 +44,12 @@ class _FastTrackLockScreenState extends State<FastTrackLockScreen> {
 
   Future<void> _submit() async {
     if (_busy) return;
+    final l = L10n.read(context);
     final username = _userCtrl.text.trim();
     final password = _passCtrl.text;
 
     if (username.isEmpty || password.isEmpty) {
-      setState(() => _error = 'Inserisci nome utente e password.');
+      setState(() => _error = l.fillBothFields);
       return;
     }
 
@@ -79,7 +81,7 @@ class _FastTrackLockScreenState extends State<FastTrackLockScreen> {
     setState(() {
       _busy = false;
       _failures++;
-      _error = 'Credenziali non valide. Riprova.';
+      _error = l.invalidCredentials;
       _passCtrl.clear();
     });
     _passFocus.requestFocus();
@@ -87,6 +89,7 @@ class _FastTrackLockScreenState extends State<FastTrackLockScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = L10n.of(context);
     final locked = _failures >= 5;
 
     return PremiumScaffold(
@@ -100,10 +103,10 @@ class _FastTrackLockScreenState extends State<FastTrackLockScreen> {
                   onPressed: () => Navigator.pop(context),
                   icon: const Icon(Icons.arrow_back_ios_new_rounded),
                 ),
-                const Expanded(
+                Expanded(
                   child: Text(
-                    'Area riservata',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+                    l.reservedArea,
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
                   ),
                 ),
               ],
@@ -137,20 +140,20 @@ class _FastTrackLockScreenState extends State<FastTrackLockScreen> {
                   ),
                 ),
                 const SizedBox(height: 22),
-                const Text(
-                  'Fast Track',
+                Text(
+                  l.fastTrackScreenTitle,
                   textAlign: TextAlign.center,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.w900,
                     letterSpacing: -0.6,
                   ),
                 ),
                 const SizedBox(height: 8),
-                const Text(
-                  'Questa sezione è privata.\nInserisci le credenziali fornite dall\'amministratore.',
+                Text(
+                  l.privateSectionBody,
                   textAlign: TextAlign.center,
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: AppColors.textSecondary,
                     height: 1.45,
                     fontWeight: FontWeight.w500,
@@ -163,7 +166,7 @@ class _FastTrackLockScreenState extends State<FastTrackLockScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const _FieldLabel('Nome utente'),
+                      _FieldLabel(l.username),
                       _GateField(
                         controller: _userCtrl,
                         hint: 'username',
@@ -173,7 +176,7 @@ class _FastTrackLockScreenState extends State<FastTrackLockScreen> {
                         onSubmitted: (_) => _passFocus.requestFocus(),
                       ),
                       const SizedBox(height: 16),
-                      const _FieldLabel('Password'),
+                      _FieldLabel(l.password),
                       _GateField(
                         controller: _passCtrl,
                         hint: '••••••••',
@@ -215,7 +218,7 @@ class _FastTrackLockScreenState extends State<FastTrackLockScreen> {
                       if (locked) ...[
                         const SizedBox(height: 10),
                         Text(
-                          'Troppi tentativi. Attendi qualche secondo prima di riprovare.',
+                          l.tooManyAttempts,
                           style: TextStyle(
                             color: AppColors.orange.withValues(alpha: 0.9),
                             fontSize: 12,
@@ -224,7 +227,7 @@ class _FastTrackLockScreenState extends State<FastTrackLockScreen> {
                       ],
                       const SizedBox(height: 22),
                       NeonButton(
-                        label: _busy ? 'Verifica…' : 'Sblocca',
+                        label: _busy ? l.verifying : l.unlock,
                         icon: _busy ? Icons.hourglass_top_rounded : Icons.lock_open_rounded,
                         gradient: AppColors.neonGradient,
                         glow: AppColors.neonGlow,
@@ -241,7 +244,7 @@ class _FastTrackLockScreenState extends State<FastTrackLockScreen> {
                     const SizedBox(width: 6),
                     Flexible(
                       child: Text(
-                        'Accesso verificato sul dispositivo · nessun dato inviato',
+                        l.deviceVerified,
                         style: TextStyle(
                           fontSize: 11,
                           color: AppColors.textMuted.withValues(alpha: 0.9),

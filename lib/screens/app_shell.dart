@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../data/app_state.dart';
+import '../l10n/strings.dart';
 import '../theme/app_colors.dart';
 import 'chapters_screen.dart';
 import 'home_screen.dart';
+import 'language_picker_screen.dart';
 import 'loading_screen.dart';
 import 'settings_screen.dart';
 import 'stats_screen.dart';
@@ -40,6 +42,12 @@ class _AppShellState extends State<AppShell> {
         onRetry: () => context.read<AppState>().init(),
       );
     }
+    // First launch: pick a language before showing any content.
+    if (!state.langChosen) {
+      return const LanguagePickerScreen();
+    }
+
+    final l = L10n.of(context);
 
     return Scaffold(
       backgroundColor: AppColors.navyDeep,
@@ -71,25 +79,25 @@ class _AppShellState extends State<AppShell> {
                   children: [
                     _NavItem(
                       icon: Icons.home_rounded,
-                      label: 'Home',
+                      label: l.navHome,
                       selected: _index == 0,
                       onTap: () => setState(() => _index = 0),
                     ),
                     _NavItem(
                       icon: Icons.insights_rounded,
-                      label: 'Stats',
+                      label: l.navStats,
                       selected: _index == 1,
                       onTap: () => setState(() => _index = 1),
                     ),
                     _NavItem(
                       icon: Icons.menu_book_rounded,
-                      label: 'Capitoli',
+                      label: l.navChapters,
                       selected: _index == 2,
                       onTap: () => setState(() => _index = 2),
                     ),
                     _NavItem(
                       icon: Icons.settings_rounded,
-                      label: 'Settings',
+                      label: l.navSettings,
                       selected: _index == 3,
                       onTap: () => setState(() => _index = 3),
                     ),

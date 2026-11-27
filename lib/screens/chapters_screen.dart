@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../data/app_state.dart';
+import '../l10n/strings.dart';
 import '../models/models.dart';
 import '../theme/app_colors.dart';
 import '../widgets/premium_scaffold.dart';
@@ -30,6 +31,7 @@ class _ChaptersScreenState extends State<ChaptersScreen> {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
+    final l = L10n(state.lang);
     final chapters = state.chapters
         .where(
           (c) =>
@@ -52,9 +54,9 @@ class _ChaptersScreenState extends State<ChaptersScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Capitoli',
-                        style: TextStyle(
+                      Text(
+                        l.chaptersTitle,
+                        style: const TextStyle(
                           fontSize: 30,
                           fontWeight: FontWeight.w900,
                           letterSpacing: -0.8,
@@ -62,7 +64,7 @@ class _ChaptersScreenState extends State<ChaptersScreen> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '${state.chapters.length} capitoli · ${state.totalQuestions} domande offline',
+                        l.chaptersSubtitle(state.chapters.length, state.totalQuestions),
                         style: const TextStyle(color: AppColors.textSecondary),
                       ),
                     ],
@@ -87,7 +89,7 @@ class _ChaptersScreenState extends State<ChaptersScreen> {
               onChanged: (v) => setState(() => _query = v),
               style: const TextStyle(color: AppColors.textPrimary),
               decoration: InputDecoration(
-                hintText: 'Cerca capitolo…',
+                hintText: l.searchChapter,
                 hintStyle: const TextStyle(color: AppColors.textMuted),
                 filled: true,
                 fillColor: Colors.white.withValues(alpha: 0.05),
@@ -110,10 +112,10 @@ class _ChaptersScreenState extends State<ChaptersScreen> {
           ),
           Expanded(
             child: chapters.isEmpty
-                ? const Center(
+                ? Center(
                     child: Text(
-                      'Nessun capitolo trovato',
-                      style: TextStyle(color: AppColors.textMuted),
+                      l.noChaptersFound,
+                      style: const TextStyle(color: AppColors.textMuted),
                     ),
                   )
                 : ListView.separated(
@@ -127,7 +129,7 @@ class _ChaptersScreenState extends State<ChaptersScreen> {
                           padding: const EdgeInsets.only(top: 10, bottom: 8),
                           child: Center(
                             child: Text(
-                              'Totale: ${state.chapters.length} Capitoli',
+                              l.totalChapters(state.chapters.length),
                               style: const TextStyle(
                                 color: AppColors.textMuted,
                                 fontWeight: FontWeight.w700,
@@ -138,7 +140,7 @@ class _ChaptersScreenState extends State<ChaptersScreen> {
                       }
                       final ch = chapters[i];
                       final color = _palette[ch.id % _palette.length];
-                      return _ChapterTile(chapter: ch, color: color);
+                      return _ChapterTile(chapter: ch, color: color, l: l);
                     },
                   ),
           ),
@@ -149,15 +151,14 @@ class _ChaptersScreenState extends State<ChaptersScreen> {
 }
 
 class _ChapterTile extends StatelessWidget {
-  const _ChapterTile({required this.chapter, required this.color});
+  const _ChapterTile({
+    required this.chapter,
+    required this.color,
+    required this.l,
+  });
   final Chapter chapter;
   final Color color;
-
-  String get _diffLabel => switch (chapter.difficulty) {
-        Difficulty.easy => 'Facile',
-        Difficulty.medium => 'Medio',
-        Difficulty.hard => 'Difficile',
-      };
+  final L10n l;
 
   @override
   Widget build(BuildContext context) {
@@ -165,7 +166,10 @@ class _ChapterTile extends StatelessWidget {
       padding: const EdgeInsets.all(14),
       onTap: () => Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (_) => QuizScreen(chapterId: chapter.id, title: chapter.nameIt),
+          builder: (_) => QuizScreen(
+            chapterId: chapter.id,
+            title: l.chapterName(chapter),
+          ),
         ),
       ),
       child: Row(
@@ -177,12 +181,12 @@ class _ChapterTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  chapter.nameIt,
+                  l.chapterName(chapter),
                   style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
                 ),
                 const SizedBox(height: 3),
                 Text(
-                  '${chapter.totalQuestions} domande · $_diffLabel'
+                  '${l.questionsCount(chapter.totalQuestions)} · ${l.difficulty(chapter.difficulty)}'
                   '${chapter.hasData ? ' · ${(chapter.accuracy * 100).round()}%' : ''}',
                   style: TextStyle(
                     fontSize: 12,

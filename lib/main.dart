@@ -28,11 +28,15 @@ class PatenteBApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<AppState>(
       create: (_) => (state ?? AppState())..init(),
-      child: MaterialApp(
-        title: 'Patente B',
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.dark,
-        home: const AppShell(),
+      child: Consumer<AppState>(
+        builder: (context, appState, _) => MaterialApp(
+          title: 'Patente B',
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.dark,
+          locale: Locale(appState.lang.code),
+          supportedLocales: const [Locale('it'), Locale('en')],
+          home: const AppShell(),
+        ),
       ),
     );
   }

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../data/app_state.dart';
+import '../l10n/app_lang.dart';
+import '../l10n/strings.dart';
 import '../theme/app_colors.dart';
 import '../widgets/premium_scaffold.dart';
 import 'quiz_screen.dart';
@@ -20,25 +22,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _audio = false;
 
   Future<void> _confirmReset() async {
+    final l = L10n.read(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.navyCard,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
-        title: const Text('Azzerare i progressi?', style: TextStyle(fontWeight: FontWeight.w900)),
-        content: const Text(
-          'Verranno cancellati risposte, errori, segnalibri ed esiti degli esami. Le domande restano disponibili.',
-          style: TextStyle(color: AppColors.textSecondary),
+        title: Text(l.resetDialogTitle, style: const TextStyle(fontWeight: FontWeight.w900)),
+        content: Text(
+          l.resetDialogBody,
+          style: const TextStyle(color: AppColors.textSecondary),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Annulla', style: TextStyle(color: AppColors.textMuted)),
+            child: Text(l.cancel, style: const TextStyle(color: AppColors.textMuted)),
           ),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: AppColors.red),
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Azzera'),
+            child: Text(l.reset),
           ),
         ],
       ),
@@ -47,7 +50,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       await context.read<AppState>().resetProgress();
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Progressi azzerati nel database locale')),
+        SnackBar(content: Text(L10n.read(context).progressReset)),
       );
     }
   }
@@ -55,48 +58,57 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
+    final l = L10n(state.lang);
 
     return PremiumScaffold(
       safeBottom: false,
       child: ListView(
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 120),
         children: [
-          const Text(
-            'Impostazioni',
-            style: TextStyle(
+          Text(
+            l.settingsTitle,
+            style: const TextStyle(
               fontSize: 30,
               fontWeight: FontWeight.w900,
               letterSpacing: -0.8,
             ),
           ),
           const SizedBox(height: 20),
+          _LanguageCard(
+            lang: state.lang,
+            l: l,
+            onChanged: (v) {
+              context.read<AppState>().setLanguage(v);
+            },
+          ),
+          const SizedBox(height: 16),
           PremiumCard(
             child: Column(
               children: [
                 _Toggle(
-                  title: 'Traduzione inglese',
-                  subtitle: 'Mostra EN sotto le domande IT',
+                  title: l.translationEnglish,
+                  subtitle: l.translationSubtitle,
                   value: _en,
                   onChanged: (v) => setState(() => _en = v),
                 ),
                 const Divider(color: AppColors.stroke, height: 28),
                 _Toggle(
-                  title: 'Feedback aptico',
-                  subtitle: 'Vibrazione su risposte',
+                  title: l.haptics,
+                  subtitle: l.hapticsSubtitle,
                   value: _haptics,
                   onChanged: (v) => setState(() => _haptics = v),
                 ),
                 const Divider(color: AppColors.stroke, height: 28),
                 _Toggle(
-                  title: 'Modalità offline',
-                  subtitle: 'Contenuti sempre disponibili senza rete',
+                  title: l.offlineMode,
+                  subtitle: l.offlineSubtitle,
                   value: _offline,
                   onChanged: (v) => setState(() => _offline = v),
                 ),
                 const Divider(color: AppColors.stroke, height: 28),
                 _Toggle(
-                  title: 'Audio pronuncia',
-                  subtitle: 'Lettura parole italiane chiave',
+                  title: l.audio,
+                  subtitle: l.audioSubtitle,
                   value: _audio,
                   onChanged: (v) => setState(() => _audio = v),
                 ),
@@ -121,27 +133,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       child: const Icon(Icons.storage_rounded, color: Colors.white, size: 19),
                     ),
                     const SizedBox(width: 12),
-                    const Expanded(
+                    Expanded(
                       child: Text(
-                        'Database locale',
-                        style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16),
+                        l.localDatabase,
+                        style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16),
                       ),
                     ),
                     const Icon(Icons.check_circle_rounded, color: AppColors.neon, size: 20),
                   ],
                 ),
                 const SizedBox(height: 14),
-                _InfoRow(label: 'Capitoli', value: '${state.chapters.length}'),
-                _InfoRow(label: 'Domande', value: '${state.totalQuestions}'),
-                _InfoRow(label: 'Vocaboli', value: '${state.vocabulary.length}'),
+                _InfoRow(label: l.lblChapters, value: '${state.chapters.length}'),
+                _InfoRow(label: l.lblQuestions, value: '${state.totalQuestions}'),
+                _InfoRow(label: l.lblVocab, value: '${state.vocabulary.length}'),
                 _InfoRow(
-                  label: 'Risposte registrate',
+                  label: l.lblAnswers,
                   value: '${state.stats.totalAnswers}',
                 ),
                 const SizedBox(height: 8),
-                const Text(
-                  'Tutti i contenuti sono inclusi nell\'app. Nessuna API, nessun download di immagini, nessuna connessione richiesta.',
-                  style: TextStyle(fontSize: 12, color: AppColors.textSecondary, height: 1.4),
+                Text(
+                  l.allIncluded,
+                  style: const TextStyle(fontSize: 12, color: AppColors.textSecondary, height: 1.4),
                 ),
               ],
             ),
@@ -200,14 +212,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Fast Track',
-                        style: TextStyle(fontWeight: FontWeight.w800),
+                      Text(
+                        l.fastTrackSectionRow,
+                        style: const TextStyle(fontWeight: FontWeight.w800),
                       ),
                       Text(
                         state.fastTrackUnlocked
-                            ? 'Sbloccato su questo dispositivo'
-                            : 'Protetto da credenziali',
+                            ? l.fastTrackUnlockedLocal
+                            : l.fastTrackLockedCreds,
                         style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
                       ),
                     ],
@@ -219,14 +231,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       await context.read<AppState>().lockFastTrack();
                       if (!context.mounted) return;
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Fast Track bloccato di nuovo'),
+                        SnackBar(
+                          content: Text(L10n.read(context).fastTrackLockedToast),
                         ),
                       );
                     },
-                    child: const Text(
-                      'Blocca',
-                      style: TextStyle(
+                    child: Text(
+                      l.lock,
+                      style: const TextStyle(
                         color: AppColors.neonSoft,
                         fontWeight: FontWeight.w800,
                       ),
@@ -243,14 +255,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
               children: [
                 const Icon(Icons.restart_alt_rounded, color: AppColors.red),
                 const SizedBox(width: 12),
-                const Expanded(
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Azzera progressi', style: TextStyle(fontWeight: FontWeight.w800)),
+                      Text(l.resetProgress, style: const TextStyle(fontWeight: FontWeight.w800)),
                       Text(
-                        'Cancella risposte, errori ed esami',
-                        style: TextStyle(fontSize: 12, color: AppColors.textMuted),
+                        l.resetSubtitle,
+                        style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
                       ),
                     ],
                   ),
@@ -261,17 +273,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           const SizedBox(height: 16),
           PremiumCard(
-            child: const Column(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                const Text(
                   'Patente B',
                   style: TextStyle(fontWeight: FontWeight.w900, fontSize: 18),
                 ),
-                SizedBox(height: 6),
+                const SizedBox(height: 6),
                 Text(
-                  'Intelligent bilingual driving-theory platform\nBuild 10113198194 · Flutter iOS + Android',
-                  style: TextStyle(
+                  l.buildInfo('10113198194'),
+                  style: const TextStyle(
                     color: AppColors.textSecondary,
                     height: 1.4,
                     fontSize: 13,
@@ -281,6 +293,128 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _LanguageCard extends StatelessWidget {
+  const _LanguageCard({
+    required this.lang,
+    required this.l,
+    required this.onChanged,
+  });
+
+  final AppLang lang;
+  final L10n l;
+  final ValueChanged<AppLang> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return PremiumCard(
+      borderColor: AppColors.electric.withValues(alpha: 0.3),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  gradient: AppColors.electricGradient,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(Icons.translate_rounded, color: Colors.white, size: 19),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l.languageTitle,
+                      style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16),
+                    ),
+                    Text(
+                      l.languageSubtitle,
+                      style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              Expanded(
+                child: _LangChoice(
+                  label: l.italian,
+                  selected: lang == AppLang.it,
+                  onTap: () => onChanged(AppLang.it),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _LangChoice(
+                  label: l.englishLang,
+                  selected: lang == AppLang.en,
+                  onTap: () => onChanged(AppLang.en),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LangChoice extends StatelessWidget {
+  const _LangChoice({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(vertical: 13),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          gradient: selected ? AppColors.electricGradient : null,
+          color: selected ? null : Colors.white.withValues(alpha: 0.05),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: selected ? Colors.transparent : AppColors.stroke,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (selected) ...[
+              const Icon(Icons.check_rounded, size: 16, color: Colors.white),
+              const SizedBox(width: 6),
+            ],
+            Text(
+              label,
+              style: TextStyle(
+                fontWeight: FontWeight.w800,
+                fontSize: 14,
+                color: selected ? Colors.white : AppColors.textMuted,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

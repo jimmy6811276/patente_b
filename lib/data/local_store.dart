@@ -497,6 +497,42 @@ class LocalStore {
     );
   }
 
+  static const _langKey = 'app_language';
+  static const _langChosenKey = 'app_language_chosen';
+
+  Future<String?> getLanguageCode() async {
+    final rows = await db.query(
+      'meta',
+      where: 'key = ?',
+      whereArgs: [_langKey],
+      limit: 1,
+    );
+    return rows.isEmpty ? null : rows.first['value'] as String?;
+  }
+
+  Future<bool> hasChosenLanguage() async {
+    final rows = await db.query(
+      'meta',
+      where: 'key = ?',
+      whereArgs: [_langChosenKey],
+      limit: 1,
+    );
+    return rows.isNotEmpty && rows.first['value'] == '1';
+  }
+
+  Future<void> setLanguageCode(String code) async {
+    await db.insert(
+      'meta',
+      {'key': _langKey, 'value': code},
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+    await db.insert(
+      'meta',
+      {'key': _langChosenKey, 'value': '1'},
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
   Future<void> resetProgress() async {
     await db.transaction((txn) async {
       await txn.delete('attempts');

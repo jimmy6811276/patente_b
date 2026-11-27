@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../l10n/app_lang.dart';
 import '../models/models.dart';
 import 'fast_track_access.dart';
 import 'local_store.dart';
@@ -24,6 +25,8 @@ class AppState extends ChangeNotifier {
   Map<String, bool> _fastTrack = const <String, bool>{};
   bool _fastTrackUnlocked = false;
   bool _offlineReady = false;
+  AppLang _lang = AppLang.it;
+  bool _langChosen = false;
 
   bool get loading => _loading;
   String? get error => _error;
@@ -34,6 +37,8 @@ class AppState extends ChangeNotifier {
   Map<String, bool> get fastTrackDone => _fastTrack;
   bool get fastTrackUnlocked => _fastTrackUnlocked;
   bool get offlineReady => _offlineReady;
+  AppLang get lang => _lang;
+  bool get langChosen => _langChosen;
   LocalStore get store => _store;
 
   Future<void> init() async {
@@ -60,7 +65,18 @@ class AppState extends ChangeNotifier {
     _stats = await _store.getStats();
     _fastTrack = await _store.getFastTrackState();
     _fastTrackUnlocked = await _store.isFastTrackUnlocked();
+    _lang = AppLang.fromCode(await _store.getLanguageCode());
+    _langChosen = await _store.hasChosenLanguage();
     notifyListeners();
+  }
+
+  /// Chooses the interface language and remembers that the first-run
+  /// picker has been answered, so it never interrupts again.
+  Future<void> setLanguage(AppLang lang) async {
+    _lang = lang;
+    _langChosen = true;
+    notifyListeners();
+    await _store.setLanguageCode(lang.code);
   }
 
   /// Returns false when the username/password pair does not match.

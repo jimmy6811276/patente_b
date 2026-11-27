@@ -177,11 +177,13 @@ class TimerRing extends StatelessWidget {
     super.key,
     required this.progress,
     required this.label,
+    this.caption = 'rimanente',
     this.size = 120,
   });
 
   final double progress;
   final String label;
+  final String caption;
   final double size;
 
   @override
@@ -204,9 +206,9 @@ class TimerRing extends StatelessWidget {
                   fontFeatures: [FontFeature.tabularFigures()],
                 ),
               ),
-              const Text(
-                'rimanente',
-                style: TextStyle(
+              Text(
+                caption,
+                style: const TextStyle(
                   fontSize: 11,
                   color: AppColors.textMuted,
                   fontWeight: FontWeight.w600,

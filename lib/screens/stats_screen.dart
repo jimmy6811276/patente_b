@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../data/app_state.dart';
+import '../l10n/strings.dart';
 import '../theme/app_colors.dart';
 import '../widgets/premium_scaffold.dart';
 
@@ -19,6 +20,7 @@ class _StatsScreenState extends State<StatsScreen> {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
+    final l = L10n(state.lang);
     final stats = state.stats;
     final weak = state.weakTopics;
     final scores = stats.weekAccuracy;
@@ -30,27 +32,27 @@ class _StatsScreenState extends State<StatsScreen> {
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 120),
         physics: const BouncingScrollPhysics(),
         children: [
-          const Text(
-            'Statistiche',
-            style: TextStyle(
+          Text(
+            l.statsTitle,
+            style: const TextStyle(
               fontSize: 30,
               fontWeight: FontWeight.w900,
               letterSpacing: -0.8,
             ),
           ),
           const SizedBox(height: 4),
-          const Text(
-            'Learning intelligence · solo dati locali',
-            style: TextStyle(color: AppColors.textSecondary),
+          Text(
+            l.statsSubtitle,
+            style: const TextStyle(color: AppColors.textSecondary),
           ),
           const SizedBox(height: 16),
           Row(
             children: [
-              _TabChip(label: 'Generale', selected: _tab == 0, onTap: () => setState(() => _tab = 0)),
+              _TabChip(label: l.tabGeneral, selected: _tab == 0, onTap: () => setState(() => _tab = 0)),
               const SizedBox(width: 8),
-              _TabChip(label: 'Debolezze', selected: _tab == 1, onTap: () => setState(() => _tab = 1)),
+              _TabChip(label: l.tabWeak, selected: _tab == 1, onTap: () => setState(() => _tab = 1)),
               const SizedBox(width: 8),
-              _TabChip(label: 'Trend', selected: _tab == 2, onTap: () => setState(() => _tab = 2)),
+              _TabChip(label: l.tabTrend, selected: _tab == 2, onTap: () => setState(() => _tab = 2)),
             ],
           ),
           const SizedBox(height: 18),
@@ -63,9 +65,9 @@ class _StatsScreenState extends State<StatsScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Accuratezza',
-                        style: TextStyle(color: AppColors.textMuted, fontSize: 13, fontWeight: FontWeight.w600),
+                      Text(
+                        l.accuracyLabel,
+                        style: const TextStyle(color: AppColors.textMuted, fontSize: 13, fontWeight: FontWeight.w600),
                       ),
                       const SizedBox(height: 6),
                       Row(
@@ -84,7 +86,7 @@ class _StatsScreenState extends State<StatsScreen> {
                           Padding(
                             padding: const EdgeInsets.only(bottom: 6),
                             child: Text(
-                              '${stats.totalAnswers} risposte',
+                              l.answersCount(stats.totalAnswers),
                               style: const TextStyle(
                                 color: AppColors.textMuted,
                                 fontWeight: FontWeight.w700,
@@ -116,9 +118,9 @@ class _StatsScreenState extends State<StatsScreen> {
                           fontSize: 18,
                         ),
                       ),
-                      const Text(
-                        'ready',
-                        style: TextStyle(fontSize: 11, color: Colors.white70, fontWeight: FontWeight.w600),
+                      Text(
+                        l.ready,
+                        style: const TextStyle(fontSize: 11, color: Colors.white70, fontWeight: FontWeight.w600),
                       ),
                     ],
                   ),
@@ -134,13 +136,13 @@ class _StatsScreenState extends State<StatsScreen> {
                 children: [
                   Row(
                     children: [
-                      const Text(
-                        'Ultimi 7 giorni',
-                        style: TextStyle(fontWeight: FontWeight.w800),
+                      Text(
+                        l.last7Days,
+                        style: const TextStyle(fontWeight: FontWeight.w800),
                       ),
                       const Spacer(),
                       Text(
-                        '🔥 ${stats.streak} giorni',
+                        '🔥 ${l.streakDays(stats.streak)}',
                         style: const TextStyle(
                           fontSize: 12,
                           color: AppColors.orange,
@@ -219,11 +221,11 @@ class _StatsScreenState extends State<StatsScreen> {
                     ),
                   ),
                   if (!hasData)
-                    const Padding(
-                      padding: EdgeInsets.only(top: 8),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
                       child: Text(
-                        'Completa il primo quiz per vedere il tuo andamento.',
-                        style: TextStyle(fontSize: 12, color: AppColors.textMuted),
+                        l.completeFirstQuiz,
+                        style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
                       ),
                     ),
                 ],
@@ -231,9 +233,9 @@ class _StatsScreenState extends State<StatsScreen> {
             ),
           if (_tab == 0 || _tab == 1) ...[
             const SizedBox(height: 18),
-            const Text(
-              'Argomenti più difficili',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
+            Text(
+              l.hardestTopics,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
             ),
             const SizedBox(height: 10),
             if (weak.isEmpty)
@@ -242,10 +244,10 @@ class _StatsScreenState extends State<StatsScreen> {
                   children: [
                     const Icon(Icons.insights_rounded, color: AppColors.electricSoft),
                     const SizedBox(width: 12),
-                    const Expanded(
+                    Expanded(
                       child: Text(
-                        'Rispondi ad almeno 3 domande per capitolo per generare i punti deboli.',
-                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                        l.weakHint,
+                        style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
                       ),
                     ),
                   ],
@@ -264,7 +266,7 @@ class _StatsScreenState extends State<StatsScreen> {
                           children: [
                             Expanded(
                               child: Text(
-                                t.nameIt,
+                                l.topicName(t),
                                 style: const TextStyle(fontWeight: FontWeight.w800),
                               ),
                             ),
@@ -278,7 +280,7 @@ class _StatsScreenState extends State<StatsScreen> {
                           ],
                         ),
                         Text(
-                          '${t.nameEn} · ${t.seen} risposte',
+                          '${t.nameIt == l.topicName(t) ? t.nameEn : t.nameIt} · ${l.answersCount(t.seen)}',
                           style: const TextStyle(
                             fontSize: 12,
                             color: AppColors.textMuted,
@@ -320,14 +322,14 @@ class _StatsScreenState extends State<StatsScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Prossima revisione',
-                        style: TextStyle(fontWeight: FontWeight.w800),
+                      Text(
+                        l.nextReview,
+                        style: const TextStyle(fontWeight: FontWeight.w800),
                       ),
                       Text(
                         stats.totalAnswers == 0
-                            ? 'Inizia un quiz per attivare il ripasso'
-                            : 'Spaced repetition · ${stats.estDaysLeft} giorni stimati',
+                            ? l.startQuizForReview
+                            : l.spacedRepetition(stats.estDaysLeft),
                         style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
                       ),
                     ],
@@ -338,8 +340,7 @@ class _StatsScreenState extends State<StatsScreen> {
           ),
           const SizedBox(height: 12),
           Text(
-            'Probabilità di superamento stimata: ${(stats.readiness * 100).round()}% '
-            '(stima da accuratezza, copertura capitoli e simulazioni)',
+            l.passProbability((stats.readiness * 100).round()),
             style: const TextStyle(fontSize: 11, color: AppColors.textMuted, height: 1.4),
           ),
         ],

@@ -3,6 +3,8 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patente_b/data/fast_track_access.dart';
+import 'package:patente_b/l10n/app_lang.dart';
+import 'package:patente_b/l10n/strings.dart';
 import 'package:patente_b/models/models.dart';
 
 void main() {
@@ -98,6 +100,57 @@ void main() {
           reason: 'should reject ${pair[0]} / ${pair[1]}',
         );
       }
+    });
+  });
+
+  group('Localisation', () {
+    const it = L10n(AppLang.it);
+    const en = L10n(AppLang.en);
+
+    test('language codes round-trip and fall back to Italian', () {
+      expect(AppLang.fromCode('en'), AppLang.en);
+      expect(AppLang.fromCode('it'), AppLang.it);
+      expect(AppLang.fromCode(null), AppLang.it);
+      expect(AppLang.fromCode('fr'), AppLang.it);
+    });
+
+    test('every exposed label differs between the two languages', () {
+      expect(it.navSettings, 'Impostazioni');
+      expect(en.navSettings, 'Settings');
+      expect(it.quizTitle, 'Quiz');
+      expect(en.quizTitle, 'Quiz');
+      expect(it.trueLabel, 'VERO');
+      expect(en.trueLabel, 'TRUE');
+      expect(it.hint, isNot(en.hint));
+      expect(it.noMistakes, isNot(en.noMistakes));
+    });
+
+    test('parameterised strings interpolate exactly once', () {
+      expect(it.questionsCount(42), '42 domande');
+      expect(en.questionsCount(42), '42 questions');
+      expect(it.correctWrongPct(18, 2, 90), contains('18'));
+      expect(en.examResult(27, 3, 30, 30), contains('30/30'));
+      expect(it.percentComplete(55), '55% completato');
+      expect(en.spacedRepetition(3), contains('3 days'));
+    });
+
+    test('content helpers flip the primary language', () {
+      const chapter = Chapter(id: 7, nameIt: 'Segnali di pericolo', nameEn: 'Danger signs');
+      expect(it.chapterName(chapter), 'Segnali di pericolo');
+      expect(en.chapterName(chapter), 'Danger signs');
+      expect(it.secondaryChapterName(chapter), 'Danger signs');
+      expect(en.secondaryChapterName(chapter), 'Segnali di pericolo');
+
+      const q = QuizQuestion(
+        id: 'q1',
+        chapterId: 7,
+        textIt: 'Il segnale indica un dosso.',
+        textEn: 'The sign indicates a bump.',
+        correctIsTrue: true,
+      );
+      expect(it.questionText(q), q.textIt);
+      expect(en.questionText(q), q.textEn);
+      expect(en.questionTextSecondary(q), q.textIt);
     });
   });
 }

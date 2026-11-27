@@ -1,9 +1,12 @@
 import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../data/app_state.dart';
+import '../l10n/app_lang.dart';
+import '../l10n/strings.dart';
 import '../theme/app_colors.dart';
 import '../widgets/premium_scaffold.dart';
 import '../widgets/readiness_ring.dart';
@@ -19,11 +22,12 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
+    final l = L10n(context.watch<AppState>().lang);
     final stats = state.stats;
     final weak = state.weakTopics;
     final nextAction = weak.isNotEmpty
-        ? 'Rivedi ${weak.first.nameIt}'
-        : 'Inizia il primo quiz';
+        ? '${l.reviewTopic} ${l.topicName(weak.first)}'
+        : l.startFirstQuiz;
 
     return PremiumScaffold(
       safeBottom: false,
@@ -62,14 +66,14 @@ class HomeScreen extends StatelessWidget {
                                   color: AppColors.neon.withValues(alpha: 0.3),
                                 ),
                               ),
-                              child: const Row(
+                              child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(Icons.offline_bolt_rounded, size: 11, color: AppColors.neonSoft),
-                                  SizedBox(width: 3),
+                                  const Icon(Icons.offline_bolt_rounded, size: 11, color: AppColors.neonSoft),
+                                  const SizedBox(width: 3),
                                   Text(
-                                    'OFFLINE',
-                                    style: TextStyle(
+                                    l.offlineBadge,
+                                    style: const TextStyle(
                                       fontSize: 9,
                                       fontWeight: FontWeight.w900,
                                       color: AppColors.neonSoft,
@@ -83,7 +87,7 @@ class HomeScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 10),
                         Text(
-                          'Ciao ${state.userName}',
+                          l.greeting(state.userName),
                           style: const TextStyle(
                             fontSize: 32,
                             fontWeight: FontWeight.w900,
@@ -92,9 +96,9 @@ class HomeScreen extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 4),
-                        const Text(
-                          'Il tuo coach intelligente per l\'esame',
-                          style: TextStyle(
+                        Text(
+                          l.homeSubtitle,
+                          style: const TextStyle(
                             color: AppColors.textSecondary,
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
@@ -103,7 +107,7 @@ class HomeScreen extends StatelessWidget {
                       ],
                     ),
                   ),
-                  _GearButton(onTap: () {}),
+                  _LangButton(lang: state.lang),
                 ],
               ),
             ),
@@ -114,7 +118,7 @@ class HomeScreen extends StatelessWidget {
               child: Center(
                 child: ReadinessRing(
                   progress: stats.readiness,
-                  label: stats.readinessLabel,
+                  label: l.readinessLabel(stats),
                 ),
               ),
             ),
@@ -128,7 +132,7 @@ class HomeScreen extends StatelessWidget {
                     child: _MetricCard(
                       emoji: '🔥',
                       value: '${stats.streak}',
-                      label: 'giorni streak',
+                      label: l.streakLabel,
                       accent: AppColors.orange,
                     ),
                   ),
@@ -139,7 +143,7 @@ class HomeScreen extends StatelessWidget {
                       value: stats.totalAnswers == 0
                           ? '—'
                           : '${(stats.accuracy * 100).round()}%',
-                      label: 'accuratezza',
+                      label: l.accuracyLabel,
                       accent: AppColors.gold,
                     ),
                   ),
@@ -177,9 +181,9 @@ class HomeScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Prossima azione consigliata',
-                            style: TextStyle(
+                          Text(
+                            l.nextActionLabel,
+                            style: const TextStyle(
                               fontSize: 11,
                               color: AppColors.textMuted,
                               fontWeight: FontWeight.w600,
@@ -187,7 +191,7 @@ class HomeScreen extends StatelessWidget {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            '$nextAction · ~${stats.estDaysLeft} gg',
+                            '$nextAction · ~${l.daysShort(stats.estDaysLeft)}',
                             style: const TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w700,
@@ -213,12 +217,13 @@ class HomeScreen extends StatelessWidget {
               ),
               delegate: SliverChildListDelegate([
                 _ActionCard(
-                  title: 'Fast Track',
-                  subtitle: '1–2 giorni turbo',
+                  title: l.fastTrackSectionRow,
+                  subtitle: l.fastTrackSubtitle,
                   icon: Icons.bolt_rounded,
                   gradient: AppColors.neonGradient,
                   glow: AppColors.neonGlow,
                   locked: !state.fastTrackUnlocked,
+                  lockedLabel: l.privateBadge,
                   onTap: () => _push(
                     context,
                     state.fastTrackUnlocked
@@ -227,24 +232,24 @@ class HomeScreen extends StatelessWidget {
                   ),
                 ),
                 _ActionCard(
-                  title: 'Quiz',
-                  subtitle: '${state.totalQuestions} domande',
+                  title: l.quizTitle,
+                  subtitle: l.questionsCount(state.totalQuestions),
                   icon: Icons.play_arrow_rounded,
                   gradient: AppColors.electricGradient,
                   glow: AppColors.electricGlow,
                   onTap: () => _push(context, const QuizScreen()),
                 ),
                 _ActionCard(
-                  title: 'Simulazione',
-                  subtitle: 'Esame ufficiale',
+                  title: l.simulationTitle,
+                  subtitle: l.officialExam,
                   icon: Icons.flag_rounded,
                   gradient: AppColors.pinkGradient,
                   glow: AppColors.pinkGlow,
                   onTap: () => _push(context, const ExamScreen()),
                 ),
                 _ActionCard(
-                  title: 'I miei errori',
-                  subtitle: '${state.mistakes.length} da rivedere',
+                  title: l.myMistakes,
+                  subtitle: l.toReview(state.mistakes.length),
                   icon: Icons.error_outline_rounded,
                   gradient: AppColors.orangeGradient,
                   glow: AppColors.orangeGlow,
@@ -298,26 +303,45 @@ class _FlagRibbon extends StatelessWidget {
   }
 }
 
-class _GearButton extends StatelessWidget {
-  const _GearButton({required this.onTap});
-  final VoidCallback onTap;
+class _LangButton extends StatelessWidget {
+  const _LangButton({required this.lang});
+  final AppLang lang;
 
   @override
   Widget build(BuildContext context) {
+    final other = lang == AppLang.it ? AppLang.en : AppLang.it;
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: onTap,
+        onTap: () {
+          HapticFeedback.selectionClick();
+          context.read<AppState>().setLanguage(other);
+        },
         borderRadius: BorderRadius.circular(16),
         child: Ink(
           width: 48,
           height: 48,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
-            color: Colors.white.withValues(alpha: 0.06),
-            border: Border.all(color: AppColors.stroke),
+            color: AppColors.electric.withValues(alpha: 0.14),
+            border: Border.all(color: AppColors.electric.withValues(alpha: 0.35)),
           ),
-          child: const Icon(Icons.settings_rounded, color: AppColors.textSecondary, size: 22),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.translate_rounded, color: AppColors.electricSoft, size: 17),
+              const SizedBox(height: 1),
+              Text(
+                lang.code.toUpperCase(),
+                style: const TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w900,
+                  color: AppColors.electricSoft,
+                  letterSpacing: 0.4,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -384,6 +408,7 @@ class _ActionCard extends StatelessWidget {
     required this.glow,
     required this.onTap,
     this.locked = false,
+    this.lockedLabel = 'Privato',
   });
 
   final String title;
@@ -395,6 +420,7 @@ class _ActionCard extends StatelessWidget {
 
   /// Veils the card and shows a lock chip — used for credential-gated sections.
   final bool locked;
+  final String lockedLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -482,14 +508,14 @@ class _ActionCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(color: Colors.white.withValues(alpha: 0.32)),
                       ),
-                      child: const Row(
+                      child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.lock_rounded, size: 11, color: Colors.white),
-                          SizedBox(width: 3),
+                          const Icon(Icons.lock_rounded, size: 11, color: Colors.white),
+                          const SizedBox(width: 3),
                           Text(
-                            'Privato',
-                            style: TextStyle(
+                            lockedLabel,
+                            style: const TextStyle(
                               fontSize: 9,
                               fontWeight: FontWeight.w800,
                               color: Colors.white,
