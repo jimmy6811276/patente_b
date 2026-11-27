@@ -101,6 +101,9 @@ class L10n {
   String get startQuizCta => p('Inizia quiz', 'Start quiz');
   String get continueQuizCta => p('Continua', 'Continue');
   String get continueSection => p('Continua', 'Continue');
+  String get featuredModesSection => p('In evidenza', 'Featured');
+  String get studyPathsSection => p('Percorsi di studio', 'Study paths');
+  String get weakVisualSection => p('Capitoli deboli', 'Weak chapters');
   String get continueWhereLeft => p('Continua da dove eri', 'Continue where you left off');
   String get mistakesToReview => p('Errori da rivedere', 'Mistakes to review');
   String get weakChaptersSection => p('Capitoli deboli', 'Weak chapters');

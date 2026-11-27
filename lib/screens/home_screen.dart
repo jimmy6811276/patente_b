@@ -11,8 +11,6 @@ import '../theme/app_layout.dart';
 import '../widgets/design_system.dart';
 import '../widgets/license_chip.dart';
 import '../widgets/premium_scaffold.dart';
-import '../widgets/readiness_ring.dart';
-import 'chapters_screen.dart';
 import 'exam_screen.dart';
 import 'fast_track_lock_screen.dart';
 import 'fast_track_screen.dart';
@@ -23,10 +21,11 @@ import 'settings_screen.dart';
 import 'sign_games_screen.dart';
 import 'vocabulary_screen.dart';
 
+/// Home — one visual composition, no duplicate destinations.
+/// Quiz = center nav · Chapters = chapters tab · everything else appears once.
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key, this.onOpenProfile});
 
-  /// Switches the shell to the Profile/Settings tab (keeps bottom nav).
   final VoidCallback? onOpenProfile;
 
   @override
@@ -44,6 +43,21 @@ class HomeScreen extends StatelessWidget {
             ? l.mistakesToReview
             : l.startFirstQuiz;
 
+    void openContinue() {
+      if (continueChapterId != null) {
+        _push(
+          context,
+          QuizScreen(title: continueTitle, chapterId: continueChapterId),
+        );
+        return;
+      }
+      if (state.mistakes.isNotEmpty) {
+        _push(context, const MistakesScreen());
+        return;
+      }
+      _push(context, QuizScreen(title: l.quizTitle));
+    }
+
     return PremiumScaffold(
       safeBottom: false,
       child: CustomScrollView(
@@ -51,7 +65,7 @@ class HomeScreen extends StatelessWidget {
         slivers: [
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(AppLayout.pagePad, 8, AppLayout.pagePad, 0),
+              padding: const EdgeInsets.fromLTRB(AppLayout.pagePad, 4, AppLayout.pagePad, 0),
               child: _Header(
                 lang: state.lang,
                 streak: stats.streak,
@@ -60,24 +74,29 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
           ),
+
+          // Full-bleed visual hero — brand + one CTA
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(AppLayout.pagePad, 16, AppLayout.pagePad, 8),
-              child: Text(
-                l.greeting(state.userName),
-                style: const TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 0,
-                  height: 1.15,
-                  color: AppColors.ink,
-                ),
+              padding: const EdgeInsets.fromLTRB(AppLayout.pagePad, 12, AppLayout.pagePad, 0),
+              child: _HomeHero(
+                brand: l.appTitle,
+                headline: l.greeting(state.userName),
+                support: continueTitle,
+                cta: stats.totalAnswers == 0 ? l.startQuizCta : l.continueQuizCta,
+                readiness: stats.readiness,
+                accuracyLabel: stats.totalAnswers == 0
+                    ? '—'
+                    : '${(stats.accuracy * 100).round()}%',
+                streakLabel: '${stats.streak}',
+                onCta: openContinue,
               ),
             ),
           ),
+
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(AppLayout.pagePad, 0, AppLayout.pagePad, 8),
+              padding: const EdgeInsets.fromLTRB(AppLayout.pagePad, 16, AppLayout.pagePad, 6),
               child: DsSectionLabel(l.chooseLicense),
             ),
           ),
@@ -93,137 +112,37 @@ class HomeScreen extends StatelessWidget {
               },
             ),
           ),
-          // Hero readiness + single CTA
+
+          // Featured — unique modes NOT duplicated in bottom nav
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(AppLayout.pagePad, 16, AppLayout.pagePad, 0),
-              child: DsCard(
-                borderColor: AppColors.emerald.withValues(alpha: 0.22),
-                child: Column(
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        ReadinessRing(
-                          progress: stats.readiness,
-                          caption: stats.totalAnswers == 0 ? l.progressCaptionStart : l.progressCaption,
-                        ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                l.nextActionLabel,
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppColors.textMuted,
-                                  letterSpacing: 0,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                continueTitle,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w800,
-                                  height: 1.25,
-                                  letterSpacing: 0,
-                                  color: AppColors.ink,
-                                ),
-                              ),
-                              const SizedBox(height: 12),
-                              Row(
-                                children: [
-                                  DsStatBadge(
-                                    icon: Icons.local_fire_department_rounded,
-                                    value: l.streakValue(stats.streak),
-                                    label: l.statStreak,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  DsStatBadge(
-                                    icon: Icons.insights_rounded,
-                                    value: stats.totalAnswers == 0
-                                        ? '0%'
-                                        : '${(stats.accuracy * 100).round()}%',
-                                    label: l.statAccuracy,
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 8),
-                              Row(
-                                children: [
-                                  DsStatBadge(
-                                    icon: Icons.quiz_outlined,
-                                    value: '${state.totalQuestions}',
-                                    label: l.statQuestions,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  const Expanded(child: SizedBox()),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 14),
-                    SizedBox(
-                      width: double.infinity,
-                      height: AppLayout.touchMin,
-                      child: FilledButton.icon(
-                        onPressed: () {
-                          if (continueChapterId != null) {
-                            _push(
-                              context,
-                              QuizScreen(
-                                title: continueTitle,
-                                chapterId: continueChapterId,
-                              ),
-                            );
-                            return;
-                          }
-                          if (state.mistakes.isNotEmpty) {
-                            _push(context, const MistakesScreen());
-                            return;
-                          }
-                          _push(context, QuizScreen(title: l.quizTitle));
-                        },
-                        style: FilledButton.styleFrom(
-                          backgroundColor: AppColors.emerald,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                        ),
-                        icon: const Icon(Icons.play_arrow_rounded),
-                        label: Text(
-                          stats.totalAnswers == 0 ? l.startQuizCta : l.continueQuizCta,
-                          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              padding: const EdgeInsets.fromLTRB(AppLayout.pagePad, 20, AppLayout.pagePad, 8),
+              child: DsSectionLabel(l.featuredModesSection),
             ),
           ),
-          // Quick pills — no duplicate of main CTA
           SliverToBoxAdapter(
             child: SizedBox(
-              height: 56,
+              height: 210,
               child: ListView(
                 scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.fromLTRB(AppLayout.pagePad, 14, AppLayout.pagePad, 0),
+                physics: const BouncingScrollPhysics(),
+                padding: const EdgeInsets.symmetric(horizontal: AppLayout.pagePad),
                 children: [
-                  DsQuickPill(
-                    label: l.hubDaily,
-                    icon: Icons.today_rounded,
+                  DsFeatureRail(
+                    title: l.simulationTitle,
+                    subtitle: l.ftQLabel,
+                    color: AppColors.coral,
+                    imageAsset: PracticeMedia.exam,
+                    badge: '30 · 20′',
+                    onTap: () => _push(context, const ExamScreen()),
+                  ),
+                  const SizedBox(width: 12),
+                  DsFeatureRail(
+                    title: l.hubDaily,
+                    subtitle: state.dailyChallengeDone ? l.dailyAlreadyDone : l.hubDaily,
                     color: AppColors.emerald,
-                    done: state.dailyChallengeDone,
+                    imageAsset: PracticeMedia.daily,
+                    badge: state.dailyChallengeDone ? 'DONE' : 'TODAY',
                     onTap: () {
                       if (state.dailyChallengeDone) {
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -241,154 +160,46 @@ class HomeScreen extends StatelessWidget {
                       );
                     },
                   ),
-                  DsQuickPill(
-                    label: l.hubQuick,
-                    icon: Icons.bolt_rounded,
+                  const SizedBox(width: 12),
+                  DsFeatureRail(
+                    title: l.hubQuick,
+                    subtitle: l.quickQuizTitle,
                     color: AppColors.blue,
+                    imageAsset: PracticeMedia.quick,
+                    badge: '20s',
                     onTap: () => _push(
                       context,
-                      QuizScreen(title: l.quickQuizTitle, quickMode: true, secondsPerQuestion: 20),
-                    ),
-                  ),
-                  DsQuickPill(
-                    label: l.simulationTitle,
-                    icon: Icons.flag_rounded,
-                    color: AppColors.coral,
-                    onTap: () => _push(context, const ExamScreen()),
-                  ),
-                  DsQuickPill(
-                    label: l.hubSigns,
-                    icon: Icons.signpost_rounded,
-                    color: AppColors.amber,
-                    onTap: () => _push(context, const SignGamesScreen()),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          // Official exam info
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(AppLayout.pagePad, 16, AppLayout.pagePad, 0),
-              child: DsCard(
-                borderColor: AppColors.blue.withValues(alpha: 0.22),
-                padding: const EdgeInsets.all(14),
-                child: Row(
-                  children: [
-                    const Icon(Icons.info_outline_rounded, color: AppColors.blue),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        l.officialExamInfo,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          height: 1.35,
-                          color: AppColors.inkSoft,
-                          letterSpacing: 0,
-                        ),
+                      QuizScreen(
+                        title: l.quickQuizTitle,
+                        quickMode: true,
+                        secondsPerQuestion: 20,
                       ),
                     ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          // Continue / mistakes / bookmarks
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(AppLayout.pagePad, 20, AppLayout.pagePad, 8),
-              child: DsSectionLabel(l.continueSection),
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppLayout.pagePad),
-              child: Column(
-                children: [
-                  DsListRow(
-                    icon: Icons.play_circle_outline_rounded,
-                    title: l.continueWhereLeft,
-                    subtitle: continueTitle,
+                  ),
+                  const SizedBox(width: 12),
+                  DsFeatureRail(
+                    title: l.fastTrackSectionRow,
+                    subtitle: l.fastTrackSubtitle,
                     color: AppColors.emerald,
-                    onTap: () {
-                      if (continueChapterId != null) {
-                        _push(
-                          context,
-                          QuizScreen(
-                            title: continueTitle,
-                            chapterId: continueChapterId,
-                          ),
-                        );
-                        return;
-                      }
-                      if (state.mistakes.isNotEmpty) {
-                        _push(context, const MistakesScreen());
-                        return;
-                      }
-                      _push(context, QuizScreen(title: l.quizTitle));
-                    },
-                  ),
-                  const SizedBox(height: 8),
-                  DsListRow(
-                    icon: Icons.error_outline_rounded,
-                    title: l.mistakesToReview,
-                    subtitle: l.toReview(state.mistakes.length),
-                    color: AppColors.coral,
-                    onTap: () => _push(context, const MistakesScreen()),
-                  ),
-                  const SizedBox(height: 8),
-                  DsListRow(
-                    icon: Icons.bookmark_rounded,
-                    title: l.hubBookmarks,
-                    subtitle: l.hubBookmarksSub,
-                    color: AppColors.blue,
+                    imageAsset: PracticeMedia.fastTrack,
+                    badge: 'ADMIN',
                     onTap: () => _push(
                       context,
-                      QuizScreen(title: l.hubBookmarks, bookmarkMode: true),
+                      state.fastTrackUnlocked
+                          ? const FastTrackScreen()
+                          : const FastTrackLockScreen(),
                     ),
                   ),
                 ],
               ),
             ),
           ),
-          if (weak.isNotEmpty)
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(AppLayout.pagePad, 20, AppLayout.pagePad, 8),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    DsSectionLabel(l.weakChaptersSection),
-                    const SizedBox(height: 8),
-                    ...weak.take(3).map(
-                      (w) => Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
-                        child: DsListRow(
-                          icon: Icons.trending_down_rounded,
-                          title: l.topicName(w),
-                          subtitle: '${(w.accuracy * 100).round()}%',
-                          color: AppColors.amber,
-                          onTap: () => _push(
-                            context,
-                            QuizScreen(
-                              title: l.topicName(w),
-                              chapterId: w.chapterId,
-                              weakMode: true,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          // Practice grid — equal height tiles
+
+          // Study paths — unique only (no Quiz / Chapters — those live in nav)
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(AppLayout.pagePad, 12, AppLayout.pagePad, 8),
-              child: DsSectionLabel(l.practiceSection),
+              padding: const EdgeInsets.fromLTRB(AppLayout.pagePad, 18, AppLayout.pagePad, 8),
+              child: DsSectionLabel(l.studyPathsSection),
             ),
           ),
           SliverPadding(
@@ -398,25 +209,9 @@ class HomeScreen extends StatelessWidget {
                 crossAxisCount: 2,
                 mainAxisSpacing: 12,
                 crossAxisSpacing: 12,
-                childAspectRatio: 0.82,
+                childAspectRatio: 0.84,
               ),
               delegate: SliverChildListDelegate([
-                DsGridTile(
-                  icon: Icons.quiz_rounded,
-                  title: l.quizTitle,
-                  subtitle: l.questionsCount(state.totalQuestions),
-                  color: AppColors.blue,
-                  imageAsset: PracticeMedia.quiz,
-                  onTap: () => _push(context, QuizScreen(title: l.quizTitle)),
-                ),
-                DsGridTile(
-                  icon: Icons.menu_book_rounded,
-                  title: l.hubChapters,
-                  subtitle: l.chaptersShort,
-                  color: AppColors.blueSoft,
-                  imageAsset: PracticeMedia.chapters,
-                  onTap: () => _push(context, const ChaptersScreen()),
-                ),
                 DsGridTile(
                   icon: Icons.signpost_rounded,
                   title: l.hubSigns,
@@ -445,21 +240,66 @@ class HomeScreen extends StatelessWidget {
                   onTap: () => _push(context, const VocabularyScreen()),
                 ),
                 DsGridTile(
-                  icon: Icons.bolt_rounded,
-                  title: l.fastTrackSectionRow,
-                  subtitle: l.fastTrackSubtitle,
-                  color: AppColors.emerald,
-                  imageAsset: PracticeMedia.fastTrack,
+                  icon: Icons.error_outline_rounded,
+                  title: l.mistakesToReview,
+                  subtitle: l.toReview(state.mistakes.length),
+                  color: AppColors.coral,
+                  imageAsset: PracticeMedia.mistakes,
+                  onTap: () => _push(context, const MistakesScreen()),
+                ),
+                DsGridTile(
+                  icon: Icons.bookmark_rounded,
+                  title: l.hubBookmarks,
+                  subtitle: l.hubBookmarksSub,
+                  color: AppColors.blue,
+                  imageAsset: PracticeMedia.bookmarks,
                   onTap: () => _push(
                     context,
-                    state.fastTrackUnlocked
-                        ? const FastTrackScreen()
-                        : const FastTrackLockScreen(),
+                    QuizScreen(title: l.hubBookmarks, bookmarkMode: true),
                   ),
                 ),
               ]),
             ),
           ),
+
+          if (weak.isNotEmpty) ...[
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(AppLayout.pagePad, 18, AppLayout.pagePad, 8),
+                child: DsSectionLabel(l.weakVisualSection),
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: SizedBox(
+                height: 118,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  physics: const BouncingScrollPhysics(),
+                  padding: const EdgeInsets.symmetric(horizontal: AppLayout.pagePad),
+                  itemCount: weak.take(6).length,
+                  separatorBuilder: (context, index) => const SizedBox(width: 10),
+                  itemBuilder: (context, i) {
+                    final w = weak[i];
+                    final thumb = ChapterMedia.assetPathFor(w.chapterId);
+                    return _WeakChapterChip(
+                      title: l.topicName(w),
+                      accuracy: '${(w.accuracy * 100).round()}%',
+                      imageAsset: thumb,
+                      onTap: () => _push(
+                        context,
+                        QuizScreen(
+                          title: l.topicName(w),
+                          chapterId: w.chapterId,
+                          weakMode: true,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ],
+
           SliverToBoxAdapter(child: SizedBox(height: bottomPad)),
         ],
       ),
@@ -482,6 +322,265 @@ class HomeScreen extends StatelessWidget {
           ),
         ),
         transitionDuration: const Duration(milliseconds: 260),
+      ),
+    );
+  }
+}
+
+class _HomeHero extends StatelessWidget {
+  const _HomeHero({
+    required this.brand,
+    required this.headline,
+    required this.support,
+    required this.cta,
+    required this.readiness,
+    required this.accuracyLabel,
+    required this.streakLabel,
+    required this.onCta,
+  });
+
+  final String brand;
+  final String headline;
+  final String support;
+  final String cta;
+  final double readiness;
+  final String accuracyLabel;
+  final String streakLabel;
+  final VoidCallback onCta;
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(28),
+      child: SizedBox(
+        height: 292,
+        width: double.infinity,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            Image.asset(
+              PracticeMedia.hero,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) => const ColoredBox(
+                color: Color(0xFF16324F),
+              ),
+            ),
+            DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    const Color(0xFF0B1220).withValues(alpha: 0.22),
+                    const Color(0xFF0B1220).withValues(alpha: 0.78),
+                  ],
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    brand,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 28,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -0.6,
+                      height: 1.05,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    headline,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.92),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    support,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.78),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      height: 1.3,
+                    ),
+                  ),
+                  const Spacer(),
+                  Row(
+                    children: [
+                      _HeroMetric(label: 'READY', value: '${(readiness * 100).round()}%'),
+                      const SizedBox(width: 8),
+                      _HeroMetric(label: 'ACC', value: accuracyLabel),
+                      const SizedBox(width: 8),
+                      _HeroMetric(label: 'STREAK', value: streakLabel),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: FilledButton.icon(
+                      onPressed: onCta,
+                      style: FilledButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: AppColors.ink,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                      icon: const Icon(Icons.play_arrow_rounded),
+                      label: Text(
+                        cta,
+                        style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 15),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _HeroMetric extends StatelessWidget {
+  const _HeroMetric({required this.label, required this.value});
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.14),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.7),
+                fontSize: 9,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 0.6,
+              ),
+            ),
+            Text(
+              value,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 14,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _WeakChapterChip extends StatelessWidget {
+  const _WeakChapterChip({
+    required this.title,
+    required this.accuracy,
+    required this.onTap,
+    this.imageAsset,
+  });
+
+  final String title;
+  final String accuracy;
+  final VoidCallback onTap;
+  final String? imageAsset;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          HapticFeedback.selectionClick();
+          onTap();
+        },
+        borderRadius: BorderRadius.circular(18),
+        child: Ink(
+          width: 168,
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: AppColors.stroke),
+            boxShadow: const [
+              BoxShadow(color: Color(0x100B1220), blurRadius: 12, offset: Offset(0, 5)),
+            ],
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 54,
+                height: 54,
+                decoration: BoxDecoration(
+                  color: AppColors.amberDim,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                padding: const EdgeInsets.all(6),
+                child: imageAsset != null
+                    ? Image.asset(
+                        imageAsset!,
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) =>
+                            const Icon(Icons.trending_down_rounded, color: AppColors.amber),
+                      )
+                    : const Icon(Icons.trending_down_rounded, color: AppColors.amber),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 12.5,
+                        height: 1.2,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      accuracy,
+                      style: const TextStyle(
+                        color: AppColors.amber,
+                        fontWeight: FontWeight.w900,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -520,33 +619,7 @@ class _Header extends StatelessWidget {
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 18),
           ),
         ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                l.appTitle,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 0,
-                  color: AppColors.ink,
-                ),
-              ),
-              Text(
-                l.homeSubtitle,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.textMuted,
-                ),
-              ),
-            ],
-          ),
-        ),
+        const Spacer(),
         _HeaderIcon(
           tooltip: l.statStreak,
           child: Row(
@@ -554,10 +627,7 @@ class _Header extends StatelessWidget {
             children: [
               const Icon(Icons.local_fire_department_rounded, size: 16, color: AppColors.coral),
               const SizedBox(width: 2),
-              Text(
-                '$streak',
-                style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
-              ),
+              Text('$streak', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13)),
             ],
           ),
         ),
@@ -579,11 +649,7 @@ class _Header extends StatelessWidget {
           },
           child: Text(
             lang.code.toUpperCase(),
-            style: const TextStyle(
-              fontWeight: FontWeight.w800,
-              fontSize: 12,
-              color: AppColors.blue,
-            ),
+            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12, color: AppColors.blue),
           ),
         ),
         const SizedBox(width: 6),

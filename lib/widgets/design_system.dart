@@ -298,6 +298,134 @@ class _TileGradientFallback extends StatelessWidget {
   }
 }
 
+/// Wide horizontal feature card for Home rail (image-led, no duplicate icons).
+class DsFeatureRail extends StatelessWidget {
+  const DsFeatureRail({
+    super.key,
+    required this.title,
+    required this.subtitle,
+    required this.color,
+    required this.imageAsset,
+    required this.onTap,
+    this.badge,
+  });
+
+  final String title;
+  final String subtitle;
+  final Color color;
+  final String imageAsset;
+  final VoidCallback onTap;
+  final String? badge;
+
+  @override
+  Widget build(BuildContext context) {
+    final radius = BorderRadius.circular(24);
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          HapticFeedback.selectionClick();
+          onTap();
+        },
+        borderRadius: radius,
+        child: Ink(
+          width: 196,
+          decoration: BoxDecoration(
+            borderRadius: radius,
+            border: Border.all(color: AppColors.stroke),
+            boxShadow: [
+              BoxShadow(
+                color: color.withValues(alpha: 0.22),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: radius,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Image.asset(
+                  imageAsset,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) =>
+                      _TileGradientFallback(color: color),
+                ),
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.black.withValues(alpha: 0.05),
+                        Colors.black.withValues(alpha: 0.62),
+                      ],
+                    ),
+                  ),
+                ),
+                if (badge != null)
+                  Positioned(
+                    top: 12,
+                    left: 12,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: color.withValues(alpha: 0.95),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        badge!,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w900,
+                          fontSize: 10,
+                        ),
+                      ),
+                    ),
+                  ),
+                Positioned(
+                  left: 14,
+                  right: 14,
+                  bottom: 14,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w900,
+                          fontSize: 16,
+                          height: 1.15,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        subtitle,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.88),
+                          fontWeight: FontWeight.w600,
+                          fontSize: 11.5,
+                          height: 1.25,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class DsQuickPill extends StatelessWidget {
   const DsQuickPill({
     super.key,

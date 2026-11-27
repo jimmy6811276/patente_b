@@ -25,12 +25,17 @@ class PremiumScaffold extends StatelessWidget {
           Positioned(
             top: -90,
             right: -50,
-            child: _Orb(size: 240, color: AppColors.emerald.withValues(alpha: 0.12)),
+            child: _Orb(size: 240, color: AppColors.emerald.withValues(alpha: 0.14)),
           ),
           Positioned(
             top: 180,
             left: -80,
-            child: _Orb(size: 220, color: AppColors.blue.withValues(alpha: 0.10)),
+            child: _Orb(size: 220, color: AppColors.blue.withValues(alpha: 0.12)),
+          ),
+          Positioned(
+            bottom: 120,
+            right: -60,
+            child: _Orb(size: 200, color: AppColors.amber.withValues(alpha: 0.08)),
           ),
           SafeArea(
             top: safeTop,

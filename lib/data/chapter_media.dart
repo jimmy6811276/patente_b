@@ -23,12 +23,18 @@ abstract final class ChapterMedia {
   }
 }
 
-/// Cover art for Home practice grid tiles (`assets/tiles/*.jpg`).
+/// Cover art for Home media surfaces (`assets/tiles/*.jpg`).
 abstract final class PracticeMedia {
+  static const hero = 'assets/tiles/hero_home.jpg';
   static const quiz = 'assets/tiles/tile_quiz.jpg';
   static const chapters = 'assets/tiles/tile_chapters.jpg';
   static const signs = 'assets/tiles/tile_signs.jpg';
   static const hard = 'assets/tiles/tile_hard.jpg';
   static const vocab = 'assets/tiles/tile_vocab.jpg';
   static const fastTrack = 'assets/tiles/tile_fast_track.jpg';
+  static const exam = 'assets/tiles/tile_exam.jpg';
+  static const daily = 'assets/tiles/tile_daily.jpg';
+  static const mistakes = 'assets/tiles/tile_mistakes.jpg';
+  static const bookmarks = 'assets/tiles/tile_bookmarks.jpg';
+  static const quick = 'assets/tiles/tile_quick.jpg';
 }
