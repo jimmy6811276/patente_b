@@ -184,6 +184,10 @@ void main() {
       expect(it.comingSoonTitle, isNot(en.comingSoonTitle));
       expect(it.examHistory, isNot(en.examHistory));
       expect(it.readableFont, isNot(en.readableFont));
+      expect(it.hubVocab, isNot(en.hubVocab));
+      expect(it.hubWeak, isNot(en.hubWeak));
+      expect(it.hubMini, isNot(en.hubMini));
+      expect(it.practiceSection, isNot(en.practiceSection));
     });
   });
 }

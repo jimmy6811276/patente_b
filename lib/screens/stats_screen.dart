@@ -26,12 +26,24 @@ class _StatsScreenState extends State<StatsScreen> {
     final scores = stats.weekAccuracy;
     final hasData = stats.totalAnswers > 0;
 
+    final canPop = Navigator.of(context).canPop();
+
     return PremiumScaffold(
       safeBottom: false,
       child: ListView(
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 120),
         physics: const BouncingScrollPhysics(),
         children: [
+          if (canPop)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: IconButton(
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+                onPressed: () => Navigator.pop(context),
+                icon: const Icon(Icons.arrow_back_ios_new_rounded),
+              ),
+            ),
           Text(
             l.statsTitle,
             style: const TextStyle(

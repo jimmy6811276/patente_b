@@ -21,7 +21,9 @@ class QuizScreen extends StatefulWidget {
     this.hardMode = false,
     this.quickMode = false,
     this.dailyMode = false,
+    this.weakMode = false,
     this.secondsPerQuestion = 30,
+    this.limit,
   });
 
   final String? title;
@@ -32,7 +34,9 @@ class QuizScreen extends StatefulWidget {
   final bool hardMode;
   final bool quickMode;
   final bool dailyMode;
+  final bool weakMode;
   final int secondsPerQuestion;
+  final int? limit;
 
   @override
   State<QuizScreen> createState() => _QuizScreenState();
@@ -52,10 +56,11 @@ class _QuizScreenState extends State<QuizScreen> {
     final state = context.read<AppState>();
     if (widget.mistakeMode) return state.loadMistakeQuiz();
     if (widget.bookmarkMode) return state.loadBookmarks();
-    if (widget.hardMode) return state.loadHardQuiz(limit: 20);
-    if (widget.quickMode) return state.loadQuickQuiz(limit: 10);
-    if (widget.dailyMode) return state.loadDailyChallenge(limit: 10);
-    return state.loadQuiz(limit: 20, chapterId: widget.chapterId);
+    if (widget.hardMode) return state.loadHardQuiz(limit: widget.limit ?? 20);
+    if (widget.weakMode) return state.loadHardQuiz(limit: widget.limit ?? 20);
+    if (widget.quickMode) return state.loadQuickQuiz(limit: widget.limit ?? 10);
+    if (widget.dailyMode) return state.loadDailyChallenge(limit: widget.limit ?? 10);
+    return state.loadQuiz(limit: widget.limit ?? 20, chapterId: widget.chapterId);
   }
 
   @override

@@ -344,11 +344,21 @@ class L10n {
   // ── Advanced hub ───────────────────────────────────────────────────────────
   String get chooseLicense => p('Scegli la patente', 'Choose your licence');
   String get studyModes => p('Modalità di studio', 'Study modes');
+  String get practiceSection => p('Pratica', 'Practice');
+  String get examSection => p('Esame e ripasso', 'Exam & review');
+  String get studySection => p('Studio', 'Study');
+  String get toolsSection => p('Strumenti', 'Tools');
   String get hubChapters => p('Capitoli', 'Chapters');
   String get hubSigns => p('Segnali', 'Signs');
   String get hubHard => p('Difficili', 'Hard');
   String get hubDaily => p('Sfida', 'Daily');
   String get hubBookmarks => p('Segnalibri', 'Bookmarks');
+  String get hubQuick => p('Rapido', 'Quick');
+  String get hubTimed => p('A tempo', 'Timed');
+  String get hubWeak => p('Punti deboli', 'Weak spots');
+  String get hubVocab => p('Vocabolario', 'Vocabulary');
+  String get hubMini => p('Mini esame', 'Mini exam');
+  String get hubStats => p('Progressi', 'Progress');
   String get dailyAvailable => p('Disponibile', 'Available');
   String get dailyDone => p('Completata', 'Done');
   String get hardSubtitle => p('Domande toste', 'Tough questions');
@@ -356,6 +366,20 @@ class L10n {
   String get dailySubtitle => p('10 domande oggi', '10 questions today');
   String get hubBookmarksSub => p('Salvate offline', 'Saved offline');
   String get chaptersShort => p('Per argomento', 'By topic');
+  String get quickSub => p('10 domande veloci', '10 quick questions');
+  String get timedSub => p('15 sec a domanda', '15 sec per question');
+  String get weakSub => p('Ripasso intelligente', 'Smart review');
+  String get vocabSub => p('Parole chiave IT/EN', 'Key words IT/EN');
+  String get miniSub => p('15 domande', '15 questions');
+  String get statsSub => p('Andamento e storico', 'Trends & history');
+  String get vocabTitle => p('Vocabolario stradale', 'Road vocabulary');
+  String get vocabSubtitle =>
+      p('Tocca la carta per mostrare la traduzione', 'Tap the card to show the translation');
+  String get vocabTapHint => p('Tocca per girare', 'Tap to flip');
+  String get vocabShuffle => p('Casuale', 'Shuffle');
+  String get vocabEmpty => p('Nessun termine disponibile', 'No terms available');
+  String get doneLabel => p('Fine', 'Done');
+  String get allModes => p('Tutto il percorso', 'Full toolkit');
 
   String get comingSoonTitle => p('In preparazione', 'Coming soon');
   String comingSoonBody(String code) => p(
