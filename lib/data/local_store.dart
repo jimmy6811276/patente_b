@@ -16,7 +16,9 @@ class LocalStore {
 
   static const _dbName = 'patente_b.db';
   static const _seedAsset = 'assets/data/seed.json';
-  static const _schemaVersion = 1;
+  /// Bumped when question rows (images/text) must be re-imported from seed.
+  static const _schemaVersion = 2;
+  static const _seedContentVersion = '2';
 
   Database get db {
     final database = _db ?? _injected;
@@ -41,6 +43,11 @@ class LocalStore {
       onConfigure: (d) => d.execute('PRAGMA foreign_keys = ON'),
       onCreate: (d, version) async {
         await _createTables(d);
+      },
+      onUpgrade: (d, oldVersion, newVersion) async {
+        await _createTables(d);
+        // Force a content refresh so image filenames stay in sync with assets.
+        await d.delete('meta', where: 'key = ?', whereArgs: ['seed_version']);
       },
     );
     await _seedIfEmpty(_db!);
@@ -123,7 +130,8 @@ class LocalStore {
       whereArgs: ['seed_version'],
       limit: 1,
     );
-    if (seeded.isNotEmpty) return;
+    final current = seeded.isEmpty ? null : seeded.first['value'] as String?;
+    if (current == _seedContentVersion) return;
 
     final raw = await rootBundle.loadString(_seedAsset);
     final seed = jsonDecode(raw) as Map<String, dynamic>;
@@ -132,6 +140,10 @@ class LocalStore {
     final vocab = (seed['vocabulary'] as List).cast<Map<String, dynamic>>();
 
     await d.transaction((txn) async {
+      // Refresh catalogue rows; keep attempts / bookmarks / exams intact.
+      await txn.delete('vocabulary');
+      await txn.delete('questions');
+      await txn.delete('chapters');
       final batch = txn.batch();
       for (final c in chapters) {
         batch.insert('chapters', {
@@ -161,7 +173,7 @@ class LocalStore {
       await batch.commit(noResult: true);
       await txn.insert('meta', {
         'key': 'seed_version',
-        'value': '${seed['version'] ?? 1}',
+        'value': _seedContentVersion,
       }, conflictAlgorithm: ConflictAlgorithm.replace);
       await txn.insert('meta', {
         'key': 'seeded_at',

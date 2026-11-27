@@ -315,10 +315,11 @@ class _ExamScreenState extends State<ExamScreen> {
               physics: const BouncingScrollPhysics(),
               children: [
                 QuestionImage(
+                  key: ValueKey('exam-qi-${q.id}'),
                   image: q.image,
                   chapterId: q.chapterId,
                   chapterLabel: q.chapterName(l.isEn),
-                  height: 160,
+                  height: 168,
                 ),
                 const SizedBox(height: 16),
                 Text(
@@ -342,6 +343,7 @@ class _ExamScreenState extends State<ExamScreen> {
                 ),
                 const SizedBox(height: 18),
                 ExamAnswerButtons(
+                  examMode: true,
                   selected: selected,
                   enabled: true,
                   onTrue: () => _pick(true),

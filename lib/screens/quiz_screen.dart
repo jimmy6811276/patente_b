@@ -404,6 +404,7 @@ class _QuizSessionState extends State<_QuizSession> {
               physics: const BouncingScrollPhysics(),
               children: [
                 QuestionImage(
+                  key: ValueKey('qi-${_q.id}'),
                   image: _q.image,
                   chapterId: _q.chapterId,
                   chapterLabel: _q.chapterName(l.isEn).isEmpty
@@ -567,16 +568,26 @@ class _QuizSessionState extends State<_QuizSession> {
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 18),
-            child: answered
-                ? NeonButton(
+            child: Column(
+              children: [
+                ExamAnswerButtons(
+                  examMode: false,
+                  selected: _answeredTrue,
+                  result: answered ? _q.correctIsTrue : null,
+                  enabled: !answered,
+                  onTrue: () => _answer(true),
+                  onFalse: () => _answer(false),
+                ),
+                if (answered) ...[
+                  const SizedBox(height: 12),
+                  NeonButton(
                     label: _index >= _questions.length - 1 ? l.seeResult : l.next,
                     icon: Icons.arrow_forward_rounded,
                     onPressed: _next,
-                  )
-                : ExamAnswerButtons(
-                    onTrue: () => _answer(true),
-                    onFalse: () => _answer(false),
                   ),
+                ],
+              ],
+            ),
           ),
         ],
       ),

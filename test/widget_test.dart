@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patente_b/data/fast_track_access.dart';
 import 'package:patente_b/data/local_store.dart';
@@ -44,8 +45,19 @@ void main() {
     expect(names.length, greaterThan(300));
     for (final name in names) {
       expect(QuestionImage.assetPathFor(name), 'assets/images/$name');
-      expect(File('assets/images/$name').existsSync(), isTrue, reason: name);
+      final file = File('assets/images/$name');
+      expect(file.existsSync(), isTrue, reason: name);
+      expect(file.lengthSync(), greaterThan(100), reason: name);
+      final bytes = file.readAsBytesSync();
+      expect(bytes[0], 0x89, reason: '$name not PNG');
+      expect(bytes[1], 0x50, reason: '$name not PNG');
     }
+  });
+
+  testWidgets('sample sign asset loads from the Flutter asset bundle', (tester) async {
+    TestWidgetsFlutterBinding.ensureInitialized();
+    final data = await rootBundle.load('assets/images/40.png');
+    expect(data.lengthInBytes, greaterThan(500));
   });
 
   test('chapter progress and accuracy are derived safely', () {
