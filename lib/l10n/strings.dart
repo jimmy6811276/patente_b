@@ -89,7 +89,8 @@ class L10n {
   String daysShort(int d) => p('$d gg', '${d}d');
   String get streakLabel => p('giorni streak', 'day streak');
   String get accuracyLabel => p('accuratezza', 'accuracy');
-  String get fastTrackSubtitle => p('1–2 giorni turbo', '1–2 day sprint');
+  String get fastTrackSubtitle =>
+      p('Admin · pass in 1–4 giorni', 'Admin · pass in 1–4 days');
   String get quizTitle => p('Quiz', 'Quiz');
   String questionsCount(int n) => p('$n domande', '$n questions');
   String get simulationTitle => p('Simulazione', 'Mock exam');
@@ -285,10 +286,82 @@ class L10n {
 
   // ── Fast Track ─────────────────────────────────────────────────────────────
   String get fastTrackScreenTitle => p('Fast Track', 'Fast Track');
+  String get ftAdminOnly => p('SOLO ADMIN', 'ADMIN ONLY');
+  String get ftHeaderSub => p(
+      'Sprint privato · niente italiano richiesto',
+      'Private sprint · no Italian needed');
+  String get ftTabPass => p('Pass', 'Pass');
+  String get ftTabMethod => p('Metodo', 'Method');
+  String get ftTabTriggers => p('Trigger', 'Triggers');
+  String get ftTabAbsolutes => p('Assoluti', 'Absolutes');
+  String get ftTabCheat => p('Cheat', 'Cheat');
+  String get ftTabSigns => p('Segnali', 'Signs');
+  String get ftTabPlan => p('Piano', 'Plan');
+  String get ftPassBadge => p('PROMESSA PASS 100%', 'PASS PROMISE 100%');
+  String get ftPassHeadline => p(
+      'Se memorizzi tutti i tricks e le regole, passi l\'esame al 100%.',
+      'If you remember all the tricks and rules, you pass the exam 100%.');
+  String get ftPassBody => p(
+      'Questo non è studio normale. È un sistema privato di parole-chiave, forme e pattern. Impara l\'elenco, applica l\'ordine in 5 secondi, tocca VERO o FALSO.',
+      'This is not normal study. It is a private system of key words, shapes and patterns. Learn the list, use the 5-second order, tap VERO or FALSO.');
+  String get ftQLabel => p('domande', 'questions');
+  String get ftMinLabel => p('minuti', 'minutes');
+  String get ftErrLabel => p('errori max', 'errors max');
+  String get ftWhoTitle => p('Per chi è', 'Who this is for');
+  String get ftWhoBody => p(
+      'Solo admin e pochi utenti speciali. Non conosci l\'italiano. Devi passare in 1–4 giorni. Memorizzi tricks, non leggi teoria.',
+      'Only admin and a few special users. You do not know Italian. You must pass in 1–4 days. You memorize tricks — you do not read theory.');
+  String get ftMustMemorize => p('Devi memorizzare', 'You must memorize');
+  String get ftMust1 => p('I 25 trigger (VERO / FALSO)', 'The 25 triggers (VERO / FALSO)');
+  String get ftMust2 => p('Le parole assolute (solo, sempre, mai…)', 'Absolute words (solo, sempre, mai…)');
+  String get ftMust3 => p('Le parole safe e trap (cheat sheet)', 'Safe and trap words (cheat sheet)');
+  String get ftMust4 => p('Le 5 famiglie di segnali', 'The 5 sign families');
+  String get ftMust5 => p('L\'ordine in 5 secondi su ogni domanda', 'The 5-second order on every question');
+  String get ftSimpleRule => p('Regola semplice', 'Simple rule');
+  String get ftSimpleRuleBody => p(
+      'Non tradurre tutta la frase. Cerca una parola o una forma che conosci. Se la conosci → rispondi. Se non la conosci → usa la carta segnale o il default del topic.',
+      'Do not translate the whole sentence. Look for one word or one shape you know. If you know it → answer. If not → use the sign card or the topic default.');
+  String get ftStartDrill => p('Inizia drill', 'Start drill');
+  String get ftMethodHeadline => p(
+      'Non leggi l\'italiano. Leggi la forma.',
+      'You do not read Italian. You read the shape.');
+  String get ftMethodBody => p(
+      'Ogni domanda è una frase fissa. Guardi il segnale, trovi una parola trigger, tocchi VERO o FALSO. Massimo 20 secondi a domanda.',
+      'Every question is a fixed sentence. Look at the sign, find one trigger word, tap VERO or FALSO. Max 20 seconds per question.');
+  String get ftFiveSecond => p('Ordine in 5 secondi', 'Five-second order');
+  String get ftScoreLayers => p('Livelli di punteggio', 'Score layers');
+  String get ftScoreHint => p(
+      'Più livelli memorizzi, più alto è il tuo punteggio atteso.',
+      'The more layers you memorize, the higher your expected score.');
+  String get ftTriggersIntro => p(
+      'I 25 trigger sono lo strato più forte. Memorizzali tutti. La parola italiana è il segnale — l\'inglese spiega il significato.',
+      'The 25 triggers are the strongest layer. Memorize all of them. The Italian word is the signal — English explains the meaning.');
+  String ftPurityLine(int pct, num n) =>
+      p('Affidabilità $pct% · $n casi', 'Reliability $pct% · $n hits');
+  String get ftVetoTitle => p('Parole assolute → spesso FALSO', 'Absolute words → often FALSO');
+  String ftVetoBody(String pct) => p(
+      'solo / sempre / tutti / mai / esclusivamente… tendono a FALSO (~$pct%). È una tendenza, non una regola assoluta. Se c\'è un trigger, il trigger vince.',
+      'solo / sempre / tutti / mai / esclusivamente… lean FALSO (~$pct%). This is a lean, not a hard rule. If a trigger is present, the trigger wins.');
+  String get ftGreenTitle => p('Parole verdi → spesso VERO', 'Green words → often VERO');
+  String get ftCheatTitle => p('Cheat sheet — memoria veloce', 'Cheat sheet — fast memory');
+  String get ftCheatBody => p(
+      'Ponte in inglese semplice. Impara il ponte, riconosci la parola italiana all\'esame.',
+      'Simple English bridges. Learn the bridge, spot the Italian word in the exam.');
+  String get ftSafeWords => p('Parole SAFE → VERO', 'SAFE words → VERO');
+  String get ftTrapWords => p('Parole TRAP → FALSO', 'TRAP words → FALSO');
+  String get ftFamiliesTitle => p('Cinque famiglie di forma', 'Five shape families');
+  String get ftSignCardsTitle => p('Carte segnale top', 'Top sign cards');
+  String get ftPlanTitle => p('Piano 1–4 giorni', '1–4 day plan');
+  String get ftPlanBody => p(
+      'Segui i blocchi in ordine. Non saltare all\'esame finché non hai memorizzato trigger + assoluti + cheat sheet.',
+      'Follow the blocks in order. Do not jump to the exam until you have memorized triggers + absolutes + cheat sheet.');
+  String get ftPassFooter => p(
+      'Ricorda tutti i tricks e le regole → passi al 100%.',
+      'Remember every trick and rule → you pass 100%.');
   String get turboPlan => p('Piano Turbo', 'Turbo Plan');
   String get turboPlanSubtitle => p(
-      'Zero italiano → pronto per l\'esame\nin 1–2 giorni intensivi',
-      'Zero Italian → exam ready\nin 1–2 intensive days');
+      'Zero italiano → pronto per l\'esame\nin 1–4 giorni intensivi',
+      'Zero Italian → exam ready\nin 1–4 intensive days');
   String percentComplete(int pct) =>
       p('$pct% completato', '$pct% complete');
   String get day1 => p('Giorno 1', 'Day 1');
@@ -309,8 +382,8 @@ class L10n {
   // ── Fast Track gate ────────────────────────────────────────────────────────
   String get reservedArea => p('Area riservata', 'Restricted area');
   String get privateSectionBody => p(
-      'Questa sezione è privata.\nInserisci le credenziali fornite dall\'amministratore.',
-      'This section is private.\nEnter the credentials provided by the administrator.');
+      'Area admin riservata.\nPer chi non parla italiano e deve passare l\'esame in 1–4 giorni.\nInserisci le credenziali dell\'amministratore.',
+      'Private admin area.\nFor people who do not speak Italian and must pass in 1–4 days.\nEnter the administrator credentials.');
   String get username => p('Nome utente', 'Username');
   String get password => p('Password', 'Password');
   String get unlock => p('Sblocca', 'Unlock');

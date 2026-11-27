@@ -188,6 +188,9 @@ void main() {
       expect(it.hubWeak, isNot(en.hubWeak));
       expect(it.hubMini, isNot(en.hubMini));
       expect(it.practiceSection, isNot(en.practiceSection));
+      expect(it.ftPassHeadline, contains('100'));
+      expect(en.ftPassHeadline, contains('100'));
+      expect(it.ftAdminOnly, isNot(en.ftAdminOnly));
     });
   });
 }

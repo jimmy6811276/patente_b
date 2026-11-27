@@ -6,7 +6,8 @@ import '../theme/app_colors.dart';
 import '../widgets/premium_scaffold.dart';
 import 'quiz_screen.dart';
 
-/// Private Fast Track — same rules/tricks engine as website `/10113198194`.
+/// Private Fast Track — same rules/tricks as website `/10113198194`.
+/// Admin sprint tool for people who do not speak Italian.
 class FastTrackScreen extends StatefulWidget {
   const FastTrackScreen({super.key});
 
@@ -43,14 +44,33 @@ class _FastTrackScreenState extends State<FastTrackScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            l.fastTrackScreenTitle,
-                            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
+                          Row(
+                            children: [
+                              Text(
+                                l.fastTrackScreenTitle,
+                                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
+                              ),
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: AppColors.ink,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  l.ftAdminOnly,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: 0.4,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                           Text(
-                            l.isEn
-                                ? 'Same rules as private web · /10113198194'
-                                : 'Stesse regole del sito privato · /10113198194',
+                            l.ftHeaderSub,
                             style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
                           ),
                         ],
@@ -60,26 +80,30 @@ class _FastTrackScreenState extends State<FastTrackScreen> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
                 child: SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Row(
                     children: [
-                      _Tab(label: l.isEn ? 'Method' : 'Metodo', selected: _tab == 0, onTap: () => setState(() => _tab = 0)),
-                      _Tab(label: l.isEn ? 'Triggers' : 'Trigger', selected: _tab == 1, onTap: () => setState(() => _tab = 1)),
-                      _Tab(label: l.isEn ? 'Absolutes' : 'Assoluti', selected: _tab == 2, onTap: () => setState(() => _tab = 2)),
-                      _Tab(label: l.isEn ? 'Signs' : 'Segnali', selected: _tab == 3, onTap: () => setState(() => _tab = 3)),
-                      _Tab(label: l.isEn ? 'Plan' : 'Piano', selected: _tab == 4, onTap: () => setState(() => _tab = 4)),
+                      _Tab(label: l.ftTabPass, selected: _tab == 0, onTap: () => setState(() => _tab = 0)),
+                      _Tab(label: l.ftTabMethod, selected: _tab == 1, onTap: () => setState(() => _tab = 1)),
+                      _Tab(label: l.ftTabTriggers, selected: _tab == 2, onTap: () => setState(() => _tab = 2)),
+                      _Tab(label: l.ftTabAbsolutes, selected: _tab == 3, onTap: () => setState(() => _tab = 3)),
+                      _Tab(label: l.ftTabCheat, selected: _tab == 4, onTap: () => setState(() => _tab = 4)),
+                      _Tab(label: l.ftTabSigns, selected: _tab == 5, onTap: () => setState(() => _tab = 5)),
+                      _Tab(label: l.ftTabPlan, selected: _tab == 6, onTap: () => setState(() => _tab = 6)),
                     ],
                   ),
                 ),
               ),
               Expanded(
                 child: switch (_tab) {
-                  0 => _MethodTab(tricks: tricks, l: l),
-                  1 => _TriggersTab(tricks: tricks, l: l),
-                  2 => _VetoTab(tricks: tricks, l: l),
-                  3 => _SignsTab(tricks: tricks, l: l),
+                  0 => _PassTab(tricks: tricks, l: l),
+                  1 => _MethodTab(tricks: tricks, l: l),
+                  2 => _TriggersTab(tricks: tricks, l: l),
+                  3 => _VetoTab(tricks: tricks, l: l),
+                  4 => _CheatTab(tricks: tricks, l: l),
+                  5 => _SignsTab(tricks: tricks, l: l),
                   _ => _PlanTab(tricks: tricks, l: l),
                 },
               ),
@@ -111,6 +135,9 @@ class _Tab extends StatelessWidget {
             color: selected ? null : AppColors.surface,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: selected ? Colors.transparent : AppColors.stroke),
+            boxShadow: selected
+                ? const [BoxShadow(color: AppColors.neonGlow, blurRadius: 12, offset: Offset(0, 4))]
+                : null,
           ),
           child: Text(
             label,
@@ -126,8 +153,9 @@ class _Tab extends StatelessWidget {
   }
 }
 
-class _MethodTab extends StatelessWidget {
-  const _MethodTab({required this.tricks, required this.l});
+/// Clear promise + how the system works for non-Italian speakers.
+class _PassTab extends StatelessWidget {
+  const _PassTab({required this.tricks, required this.l});
   final FastTrackTricks tricks;
   final L10n l;
 
@@ -137,40 +165,201 @@ class _MethodTab extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 28),
       children: [
-        PremiumCard(
-          borderColor: AppColors.emerald.withValues(alpha: 0.25),
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF0B1220), Color(0xFF16324F)],
+            ),
+            borderRadius: BorderRadius.circular(26),
+            boxShadow: const [
+              BoxShadow(color: Color(0x330B1220), blurRadius: 24, offset: Offset(0, 12)),
+            ],
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                l.isEn ? 'You do not read Italian. You read the shape.' : 'Non leggi l\'italiano. Leggi la forma.',
-                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, height: 1.15, letterSpacing: -0.4),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                l.isEn
-                    ? 'Every exam question is one fixed sentence from a closed bank. Spot one sign, one word, tap VERO or FALSO.'
-                    : 'Ogni domanda è una frase fissa della banca. Individua un segnale, una parola, tocca VERO o FALSO.',
-                style: const TextStyle(color: AppColors.textSecondary, height: 1.4),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  color: AppColors.emerald,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  l.ftPassBadge,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 11,
+                    letterSpacing: 0.6,
+                  ),
+                ),
               ),
               const SizedBox(height: 14),
+              Text(
+                l.ftPassHeadline,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 26,
+                  fontWeight: FontWeight.w900,
+                  height: 1.15,
+                  letterSpacing: -0.5,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                l.ftPassBody,
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.82),
+                  height: 1.45,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 16),
               Row(
                 children: [
-                  _StatPill('${meta['drawTotal']}', l.isEn ? 'questions' : 'domande'),
+                  _DarkPill('30', l.ftQLabel),
                   const SizedBox(width: 8),
-                  _StatPill('20:00', l.isEn ? 'minutes' : 'minuti'),
+                  _DarkPill('20', l.ftMinLabel),
                   const SizedBox(width: 8),
-                  _StatPill('${meta['maxErrors']}', l.isEn ? 'errors max' : 'errori max'),
+                  _DarkPill('${meta['maxErrors']}', l.ftErrLabel),
                 ],
               ),
             ],
           ),
         ),
         const SizedBox(height: 14),
-        Text(
-          l.isEn ? 'Five-second order' : 'Ordine in 5 secondi',
-          style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16),
+        PremiumCard(
+          borderColor: AppColors.emerald.withValues(alpha: 0.28),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(l.ftWhoTitle, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
+              const SizedBox(height: 8),
+              Text(l.ftWhoBody, style: const TextStyle(color: AppColors.textSecondary, height: 1.45)),
+            ],
+          ),
         ),
+        const SizedBox(height: 12),
+        Text(l.ftMustMemorize, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 15)),
+        const SizedBox(height: 8),
+        _MustRow('1', l.ftMust1, AppColors.emerald),
+        _MustRow('2', l.ftMust2, AppColors.blue),
+        _MustRow('3', l.ftMust3, AppColors.coral),
+        _MustRow('4', l.ftMust4, AppColors.amber),
+        _MustRow('5', l.ftMust5, AppColors.pink),
+        const SizedBox(height: 8),
+        PremiumCard(
+          padding: const EdgeInsets.all(16),
+          borderColor: AppColors.blue.withValues(alpha: 0.25),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(l.ftSimpleRule, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
+              const SizedBox(height: 8),
+              Text(l.ftSimpleRuleBody, style: const TextStyle(color: AppColors.textSecondary, height: 1.45)),
+            ],
+          ),
+        ),
+        const SizedBox(height: 14),
+        NeonButton(
+          label: l.ftStartDrill,
+          icon: Icons.bolt_rounded,
+          onPressed: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => QuizScreen(title: l.fastTrackQuiz, hardMode: true),
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+}
+
+class _MustRow extends StatelessWidget {
+  const _MustRow(this.n, this.text, this.color);
+  final String n;
+  final String text;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: PremiumCard(
+        padding: const EdgeInsets.all(14),
+        child: Row(
+          children: [
+            Container(
+              width: 32,
+              height: 32,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(11)),
+              child: Text(n, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900)),
+            ),
+            const SizedBox(width: 12),
+            Expanded(child: Text(text, style: const TextStyle(fontWeight: FontWeight.w700, height: 1.3))),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _DarkPill extends StatelessWidget {
+  const _DarkPill(this.big, this.small);
+  final String big;
+  final String small;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+        ),
+        child: Column(
+          children: [
+            Text(big, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 16)),
+            Text(small, style: TextStyle(color: Colors.white.withValues(alpha: 0.65), fontSize: 10)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _MethodTab extends StatelessWidget {
+  const _MethodTab({required this.tricks, required this.l});
+  final FastTrackTricks tricks;
+  final L10n l;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 28),
+      children: [
+        PremiumCard(
+          borderColor: AppColors.emerald.withValues(alpha: 0.25),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(l.ftMethodHeadline, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, height: 1.15, letterSpacing: -0.4)),
+              const SizedBox(height: 8),
+              Text(l.ftMethodBody, style: const TextStyle(color: AppColors.textSecondary, height: 1.45)),
+            ],
+          ),
+        ),
+        const SizedBox(height: 14),
+        Text(l.ftFiveSecond, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
         const SizedBox(height: 8),
         ...tricks.order.map((o) {
           final m = o as Map<String, dynamic>;
@@ -184,14 +373,8 @@ class _MethodTab extends StatelessWidget {
                     width: 34,
                     height: 34,
                     alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: AppColors.blueDim,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      '${m['n']}',
-                      style: const TextStyle(fontWeight: FontWeight.w900, color: AppColors.blue),
-                    ),
+                    decoration: BoxDecoration(color: AppColors.blueDim, borderRadius: BorderRadius.circular(12)),
+                    child: Text('${m['n']}', style: const TextStyle(fontWeight: FontWeight.w900, color: AppColors.blue)),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -209,10 +392,9 @@ class _MethodTab extends StatelessWidget {
           );
         }),
         const SizedBox(height: 8),
-        Text(
-          l.isEn ? 'Score layers' : 'Livelli di punteggio',
-          style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16),
-        ),
+        Text(l.ftScoreLayers, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
+        const SizedBox(height: 6),
+        Text(l.ftScoreHint, style: const TextStyle(fontSize: 12, color: AppColors.textMuted, height: 1.35)),
         const SizedBox(height: 8),
         ...tricks.scoreMath.map((row) {
           final m = row as Map<String, dynamic>;
@@ -258,11 +440,9 @@ class _TriggersTab extends StatelessWidget {
       separatorBuilder: (context, index) => const SizedBox(height: 10),
       itemBuilder: (context, i) {
         if (i == 0) {
-          return Text(
-            l.isEn
-                ? 'The 25 triggers — most reliable layer in the bank'
-                : 'I 25 trigger — lo strato più affidabile della banca',
-            style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 15),
+          return PremiumCard(
+            borderColor: AppColors.emerald.withValues(alpha: 0.25),
+            child: Text(l.ftTriggersIntro, style: const TextStyle(fontWeight: FontWeight.w700, height: 1.4)),
           );
         }
         final d = tricks.deck[i - 1] as Map<String, dynamic>;
@@ -275,10 +455,7 @@ class _TriggersTab extends StatelessWidget {
               Row(
                 children: [
                   Expanded(
-                    child: Text(
-                      '«${d['phrase']}»',
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
-                    ),
+                    child: Text('«${d['phrase']}»', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900)),
                   ),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
@@ -298,21 +475,27 @@ class _TriggersTab extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 4),
-              Text('${d['en']}', style: const TextStyle(color: AppColors.textSecondary, fontStyle: FontStyle.italic)),
+              Text('${d['en']}', style: const TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.w600)),
               const SizedBox(height: 8),
               Text('${d['why']}', style: const TextStyle(fontSize: 13, height: 1.35)),
               if ((d['test'] as String?)?.isNotEmpty == true) ...[
                 const SizedBox(height: 8),
-                Text(
-                  '${d['test']}',
-                  style: const TextStyle(fontSize: 12, color: AppColors.blue, fontWeight: FontWeight.w700),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: AppColors.blueDim,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    '${d['test']}',
+                    style: const TextStyle(fontSize: 12, color: AppColors.blue, fontWeight: FontWeight.w700, height: 1.35),
+                  ),
                 ),
               ],
               const SizedBox(height: 8),
               Text(
-                l.isEn
-                    ? 'Purity ${((d['purity'] as num) * 100).round()}% · ${d['n']} hits'
-                    : 'Purezza ${((d['purity'] as num) * 100).round()}% · ${d['n']} casi',
+                l.ftPurityLine(((d['purity'] as num) * 100).round(), d['n'] as num),
                 style: const TextStyle(fontSize: 11, color: AppColors.textMuted, fontWeight: FontWeight.w700),
               ),
             ],
@@ -339,15 +522,10 @@ class _VetoTab extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                l.isEn ? 'Absolute words lean FALSO' : 'Le parole assolute tendono a FALSO',
-                style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16),
-              ),
+              Text(l.ftVetoTitle, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
               const SizedBox(height: 6),
               Text(
-                l.isEn
-                    ? 'solo / sempre / tutti / mai / esclusivamente… lean FALSO at ~${total['falsoPct'] ?? 71}%. A lean, not a verdict. Trigger beats absolute word.'
-                    : 'solo / sempre / tutti / mai / esclusivamente… tendono a FALSO (~${total['falsoPct'] ?? 71}%). Una tendenza, non un verdetto. Il trigger batte la parola assoluta.',
+                l.ftVetoBody('${total['falsoPct'] ?? 71}'),
                 style: const TextStyle(color: AppColors.textSecondary, height: 1.4),
               ),
             ],
@@ -387,10 +565,7 @@ class _VetoTab extends StatelessWidget {
           );
         }),
         const SizedBox(height: 8),
-        Text(
-          l.isEn ? 'Green lean (VERO words)' : 'Parole verdi (tendono a VERO)',
-          style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 15),
-        ),
+        Text(l.ftGreenTitle, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 15)),
         const SizedBox(height: 8),
         ...tricks.green.map((g) {
           final m = g as Map<String, dynamic>;
@@ -424,6 +599,102 @@ class _VetoTab extends StatelessWidget {
   }
 }
 
+class _CheatTab extends StatelessWidget {
+  const _CheatTab({required this.tricks, required this.l});
+  final FastTrackTricks tricks;
+  final L10n l;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 28),
+      children: [
+        PremiumCard(
+          borderColor: AppColors.amber.withValues(alpha: 0.35),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(l.ftCheatTitle, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 18)),
+              const SizedBox(height: 6),
+              Text(l.ftCheatBody, style: const TextStyle(color: AppColors.textSecondary, height: 1.4)),
+            ],
+          ),
+        ),
+        const SizedBox(height: 14),
+        Text(l.ftSafeWords, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 15, color: AppColors.emerald)),
+        const SizedBox(height: 8),
+        ...tricks.safeWords.map((s) {
+          final m = s as Map<String, dynamic>;
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: PremiumCard(
+              borderColor: AppColors.emerald.withValues(alpha: 0.22),
+              padding: const EdgeInsets.all(14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text('«${m['word']}»', style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
+                      ),
+                      Text(
+                        '${m['label']}',
+                        style: const TextStyle(fontWeight: FontWeight.w900, color: AppColors.emerald),
+                      ),
+                    ],
+                  ),
+                  Text('${m['en']}', style: const TextStyle(fontSize: 12, color: AppColors.textMuted)),
+                  const SizedBox(height: 6),
+                  Text(
+                    '${m['bridge']}',
+                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.blue, height: 1.3),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }),
+        const SizedBox(height: 10),
+        Text(l.ftTrapWords, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 15, color: AppColors.coral)),
+        const SizedBox(height: 8),
+        ...tricks.trapWords.map((s) {
+          final m = s as Map<String, dynamic>;
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: PremiumCard(
+              borderColor: AppColors.coral.withValues(alpha: 0.22),
+              padding: const EdgeInsets.all(14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text('«${m['word']}»', style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
+                      ),
+                      Text(
+                        '${m['label']}',
+                        style: const TextStyle(fontWeight: FontWeight.w900, color: AppColors.coral),
+                      ),
+                    ],
+                  ),
+                  Text('${m['en']}', style: const TextStyle(fontSize: 12, color: AppColors.textMuted)),
+                  const SizedBox(height: 6),
+                  Text(
+                    '${m['bridge']}',
+                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.coral, height: 1.3),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }),
+      ],
+    );
+  }
+}
+
 class _SignsTab extends StatelessWidget {
   const _SignsTab({required this.tricks, required this.l});
   final FastTrackTricks tricks;
@@ -434,10 +705,7 @@ class _SignsTab extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 28),
       children: [
-        Text(
-          l.isEn ? 'Five families' : 'Cinque famiglie',
-          style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16),
-        ),
+        Text(l.ftFamiliesTitle, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
@@ -465,10 +733,7 @@ class _SignsTab extends StatelessWidget {
           }).toList(),
         ),
         const SizedBox(height: 16),
-        Text(
-          l.isEn ? 'Top sign cards' : 'Carte segnale top',
-          style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16),
-        ),
+        Text(l.ftSignCardsTitle, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
         const SizedBox(height: 8),
         ...tricks.signCards.map((s) {
           final m = s as Map<String, dynamic>;
@@ -482,10 +747,7 @@ class _SignsTab extends StatelessWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: Text(
-                          '${m['topicIt']}',
-                          style: const TextStyle(fontWeight: FontWeight.w900),
-                        ),
+                        child: Text('${m['topicIt']}', style: const TextStyle(fontWeight: FontWeight.w900)),
                       ),
                       Text(
                         '${m['majority']}',
@@ -504,12 +766,8 @@ class _SignsTab extends StatelessWidget {
                     spacing: 6,
                     runSpacing: 6,
                     children: [
-                      ...(m['veroWords'] as List? ?? []).map(
-                        (w) => _Chip(text: '$w', color: AppColors.emerald),
-                      ),
-                      ...(m['falsoWords'] as List? ?? []).map(
-                        (w) => _Chip(text: '$w', color: AppColors.coral),
-                      ),
+                      ...(m['veroWords'] as List? ?? []).map((w) => _Chip(text: '$w', color: AppColors.emerald)),
+                      ...(m['falsoWords'] as List? ?? []).map((w) => _Chip(text: '$w', color: AppColors.coral)),
                     ],
                   ),
                 ],
@@ -532,16 +790,16 @@ class _PlanTab extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 28),
       children: [
-        Text(
-          l.isEn ? 'Two days, four blocks' : 'Due giorni, quattro blocchi',
-          style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 18),
-        ),
-        const SizedBox(height: 6),
-        Text(
-          l.isEn
-              ? 'Do them in order. Do not jump to the exam — the plan only works if the blocks stay in this sequence.'
-              : 'Segui l\'ordine. Non saltare all\'esame: il piano funziona solo se i blocchi restano in sequenza.',
-          style: const TextStyle(color: AppColors.textSecondary, height: 1.4),
+        PremiumCard(
+          borderColor: AppColors.emerald.withValues(alpha: 0.25),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(l.ftPlanTitle, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 18)),
+              const SizedBox(height: 6),
+              Text(l.ftPlanBody, style: const TextStyle(color: AppColors.textSecondary, height: 1.4)),
+            ],
+          ),
         ),
         const SizedBox(height: 14),
         ...tricks.plan.map((p) {
@@ -579,7 +837,7 @@ class _PlanTab extends StatelessWidget {
         }),
         const SizedBox(height: 8),
         NeonButton(
-          label: l.isEn ? 'Practice with quiz' : 'Esercitati con un quiz',
+          label: l.ftStartDrill,
           icon: Icons.play_arrow_rounded,
           onPressed: () {
             Navigator.of(context).push(
@@ -589,41 +847,15 @@ class _PlanTab extends StatelessWidget {
             );
           },
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 12),
         Center(
           child: Text(
-            l.isEn
-                ? 'Progress stays on this device · unlocked Fast Track'
-                : 'Progressi sul dispositivo · Fast Track sbloccato',
-            style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
+            l.ftPassFooter,
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 12, color: AppColors.emerald, fontWeight: FontWeight.w800, height: 1.35),
           ),
         ),
       ],
-    );
-  }
-}
-
-class _StatPill extends StatelessWidget {
-  const _StatPill(this.big, this.small);
-  final String big;
-  final String small;
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        decoration: BoxDecoration(
-          color: AppColors.emeraldDim,
-          borderRadius: BorderRadius.circular(14),
-        ),
-        child: Column(
-          children: [
-            Text(big, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
-            Text(small, style: const TextStyle(fontSize: 10, color: AppColors.textMuted)),
-          ],
-        ),
-      ),
     );
   }
 }

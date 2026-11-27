@@ -159,7 +159,27 @@ class _FastTrackLockScreenState extends State<FastTrackLockScreen> {
                     fontWeight: FontWeight.w500,
                   ),
                 ),
-                const SizedBox(height: 28),
+                const SizedBox(height: 14),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: AppColors.emeraldDim,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: AppColors.emerald.withValues(alpha: 0.3)),
+                  ),
+                  child: Text(
+                    l.ftPassHeadline,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: AppColors.emerald,
+                      fontWeight: FontWeight.w900,
+                      height: 1.35,
+                      fontSize: 13,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 22),
                 PremiumCard(
                   padding: const EdgeInsets.fromLTRB(16, 18, 16, 20),
                   borderColor: AppColors.neon.withValues(alpha: 0.22),
