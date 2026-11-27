@@ -6,12 +6,11 @@ import '../data/app_state.dart';
 import '../l10n/strings.dart';
 import '../models/models.dart';
 import '../theme/app_colors.dart';
+import '../theme/exam_tokens.dart';
 import '../utils/app_haptics.dart';
-import '../widgets/bilingual_statement.dart';
-import '../widgets/exam_answer_buttons.dart';
+import '../widgets/official_exam_ui.dart';
 import '../widgets/premium_scaffold.dart';
 import '../widgets/question_image.dart';
-import '../widgets/readiness_ring.dart';
 
 class ExamScreen extends StatefulWidget {
   const ExamScreen({super.key});
@@ -75,8 +74,6 @@ class _ExamScreenState extends State<ExamScreen> {
   }
 
   int get _answeredCount => _answers.length;
-  int get _flaggedCount => _marked.length;
-  int get _remainingCount => _qs.length - _answeredCount;
 
   void _openQuestionMap() {
     final l = L10n.of(context);
@@ -238,181 +235,156 @@ class _ExamScreenState extends State<ExamScreen> {
     final q = _qs[_index];
     final selected = _answers[_index];
     final l = L10n.of(context);
+    final flagged = _marked.contains(_index);
 
-    return PremiumScaffold(
+    return ExamShell(
       child: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
-            child: Column(
-              children: [
-                TimerRing(
-                  progress: _seconds / (20 * 60),
-                  label: _clock,
-                  caption: l.timeRemaining,
-                  size: 120,
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _ScoreChip(
-                        label: l.examAnswered,
-                        value: '$_answeredCount/${_qs.length}',
-                        color: AppColors.emerald,
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: _ScoreChip(
-                        label: l.examFlagged,
-                        value: '$_flaggedCount',
-                        color: AppColors.amber,
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: _ScoreChip(
-                        label: l.examRemaining,
-                        value: '$_remainingCount',
-                        color: AppColors.blue,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    Expanded(
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(6),
-                        child: LinearProgressIndicator(
-                          value: _answeredCount / _qs.length,
-                          minHeight: 5,
-                          backgroundColor: AppColors.navyElevated,
-                          color: AppColors.emerald,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    IconButton(
-                      tooltip: l.examNavTitle,
-                      onPressed: _openQuestionMap,
-                      icon: const Icon(Icons.grid_view_rounded),
-                    ),
-                    TranslationModeChip(
-                      mode: context.watch<AppState>().translationMode,
-                      onChanged: (m) => context.read<AppState>().setTranslationMode(m),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+          ExamMitHeader(
+            title: l.isEn
+                ? 'Theory exam — License B · Simulation'
+                : 'Esame di Teoria — Patente B · Simulazione',
+            timerLabel: _clock,
+            timerHot: _seconds <= 60,
+            onClose: () => Navigator.pop(context),
           ),
           Expanded(
             child: ListView(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+              padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
               physics: const BouncingScrollPhysics(),
               children: [
-                QuestionImage(
-                  key: ValueKey('exam-qi-${q.id}'),
-                  image: q.image,
-                  chapterId: q.chapterId,
-                  chapterLabel: q.chapterName(l.isEn),
-                  height: 168,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  '${l.scoreQuestion} ${_index + 1}/${_qs.length}',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textMuted,
+                ExamBezel(
+                  padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l.isEn
+                            ? 'QUESTION SHEET · $_answeredCount/${_qs.length} answered'
+                            : 'SCHEDA DOMANDE · $_answeredCount/${_qs.length} risposte',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: ExamTokens.inkSoft,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      ExamQuestionGrid(
+                        count: _qs.length,
+                        current: _index,
+                        isAnswered: (i) => _answers.containsKey(i),
+                        isFlagged: (i) => _marked.contains(i),
+                        onSelect: (i) => setState(() => _index = i),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 8),
-                BilingualStatement(
-                  question: q,
-                  mode: context.watch<AppState>().translationMode,
-                  primaryStyle: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w800,
-                    height: 1.35,
-                    color: AppColors.ink,
-                  ),
-                ),
-                const SizedBox(height: 18),
-                ExamAnswerButtons(
-                  examMode: true,
-                  selected: selected,
-                  enabled: true,
-                  onTrue: () => _pick(true),
-                  onFalse: () => _pick(false),
-                ),
-                const SizedBox(height: 8),
-                TextButton.icon(
-                  onPressed: () => setState(() {
-                    if (_marked.contains(_index)) {
-                      _marked.remove(_index);
-                    } else {
-                      _marked.add(_index);
-                    }
-                  }),
-                  icon: Icon(
-                    _marked.contains(_index)
-                        ? Icons.flag_rounded
-                        : Icons.outlined_flag_rounded,
-                    color: AppColors.orange,
-                  ),
-                  label: Text(
-                    _marked.contains(_index)
-                        ? l.markedForReview
-                        : l.markForReview,
-                    style: const TextStyle(
-                      color: AppColors.orange,
-                      fontWeight: FontWeight.w700,
-                    ),
+                const SizedBox(height: 10),
+                ExamBezel(
+                  padding: const EdgeInsets.fromLTRB(14, 14, 14, 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            '${l.scoreQuestion} ${_index + 1} ${l.isEn ? 'of' : 'di'} ${_qs.length}'
+                                .toUpperCase(),
+                            style: ExamTokens.mitEyebrow,
+                          ),
+                          const Spacer(),
+                          TextButton.icon(
+                            onPressed: () => setState(() {
+                              if (flagged) {
+                                _marked.remove(_index);
+                              } else {
+                                _marked.add(_index);
+                              }
+                            }),
+                            icon: Icon(
+                              flagged ? Icons.flag_rounded : Icons.outlined_flag_rounded,
+                              color: flagged ? const Color(0xFF8A6400) : ExamTokens.muted,
+                              size: 18,
+                            ),
+                            label: Text(
+                              flagged ? l.markedForReview : l.markForReview,
+                              style: TextStyle(
+                                fontWeight: FontWeight.w800,
+                                fontSize: 12,
+                                color: flagged ? const Color(0xFF8A6400) : ExamTokens.muted,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      QuestionImage(
+                        key: ValueKey('exam-qi-${q.id}'),
+                        image: q.image,
+                        chapterId: q.chapterId,
+                        chapterLabel: q.chapterNameIt,
+                        height: 160,
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        q.chapterNameIt.toUpperCase(),
+                        style: ExamTokens.chapter,
+                      ),
+                      const SizedBox(height: 6),
+                      // Official exam: Italian statement only — no translation help.
+                      Text(q.textIt, style: ExamTokens.statement),
+                      const SizedBox(height: 6),
+                      Text(
+                        l.isEn
+                            ? 'Italian only · no translation (real exam rule)'
+                            : 'Solo italiano · nessuna traduzione (come in Motorizzazione)',
+                        style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.8,
+                          color: Color(0xFF8F2222),
+                        ),
+                      ),
+                      const SizedBox(height: 22),
+                      ExamCircleButtons(
+                        selected: selected,
+                        enabled: true,
+                        onTrue: () => _pick(true),
+                        onFalse: () => _pick(false),
+                      ),
+                      const SizedBox(height: 10),
+                      Center(
+                        child: Text(
+                          l.isEn ? 'Touch V (True) or F (False)' : 'Tocca V (Vero) o F (Falso)',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: ExamTokens.muted,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-            child: Row(
-              children: [
-                Expanded(
-                  child: _NavBtn(
-                    label: l.previous,
-                    onTap: _index == 0 ? null : () => setState(() => _index--),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _NavBtn(
-                    label: l.skip,
-                    onTap: () {
-                      if (_index < _qs.length - 1) setState(() => _index++);
-                    },
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: NeonButton(
-                    label: _index >= _qs.length - 1 ? l.submit : l.advance,
-                    height: 48,
-                    gradient: AppColors.pinkGradient,
-                    glow: AppColors.pinkGlow,
-                    onPressed: () {
-                      if (_index >= _qs.length - 1) {
-                        _submit();
-                      } else {
-                        setState(() => _index++);
-                      }
-                    },
-                  ),
-                ),
-              ],
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+            child: ExamNavBar(
+              canPrevious: _index > 0,
+              onPrevious: () => setState(() => _index--),
+              previousLabel: l.previous,
+              nextLabel: _index >= _qs.length - 1 ? l.submit : l.advance,
+              summaryLabel: l.examNavTitle,
+              onSummary: _openQuestionMap,
+              onNext: () {
+                if (_index >= _qs.length - 1) {
+                  _submit();
+                } else {
+                  setState(() => _index++);
+                }
+              },
             ),
           ),
         ],
@@ -539,56 +511,3 @@ class _Rule extends StatelessWidget {
   }
 }
 
-class _ScoreChip extends StatelessWidget {
-  const _ScoreChip({
-    required this.label,
-    required this.value,
-    required this.color,
-  });
-
-  final String label;
-  final String value;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return PremiumCard(
-      padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 8),
-      borderColor: color.withValues(alpha: 0.3),
-      child: Column(
-        children: [
-          Text(
-            value,
-            style: TextStyle(fontSize: 21, fontWeight: FontWeight.w900, color: color),
-          ),
-          Text(
-            label,
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 10, color: AppColors.textMuted, fontWeight: FontWeight.w600),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _NavBtn extends StatelessWidget {
-  const _NavBtn({required this.label, this.onTap});
-  final String label;
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return OutlinedButton(
-      onPressed: onTap,
-      style: OutlinedButton.styleFrom(
-        foregroundColor: AppColors.textPrimary,
-        disabledForegroundColor: AppColors.textMuted,
-        side: const BorderSide(color: AppColors.strokeStrong),
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-      ),
-      child: Text(label, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12)),
-    );
-  }
-}

@@ -7,9 +7,10 @@ import '../l10n/strings.dart';
 import '../models/models.dart';
 import '../models/translation_mode.dart';
 import '../theme/app_colors.dart';
+import '../theme/exam_tokens.dart';
 import '../utils/app_haptics.dart';
 import '../widgets/bilingual_statement.dart';
-import '../widgets/exam_answer_buttons.dart';
+import '../widgets/official_exam_ui.dart';
 import '../widgets/premium_scaffold.dart';
 import '../widgets/question_image.dart';
 
@@ -328,318 +329,186 @@ class _QuizSessionState extends State<_QuizSession> {
     final l = L10n.of(context);
     final answered = _answeredTrue != null;
     final wasCorrect = answered && (_answeredTrue == _q.correctIsTrue);
+    final chapter = _q.chapterName(l.isEn);
 
-    return PremiumScaffold(
+    return ExamShell(
       child: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(8, 0, 16, 0),
-            child: Row(
-              children: [
-                IconButton(
-                  onPressed: () => Navigator.pop(context),
-                  icon: const Icon(Icons.close_rounded),
-                ),
-                Expanded(
-                  child: Text(
-                    widget.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        AppColors.gold.withValues(alpha: 0.2),
-                        AppColors.orange.withValues(alpha: 0.12),
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppColors.gold.withValues(alpha: 0.4)),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.timer_outlined, size: 15, color: AppColors.gold),
-                      const SizedBox(width: 5),
-                      Text(
-                        _clock,
-                        style: const TextStyle(
-                          color: AppColors.gold,
-                          fontWeight: FontWeight.w900,
-                          fontFeatures: [FontFeature.tabularFigures()],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Text(
-                  '${_index + 1}/${_questions.length}',
-                  style: const TextStyle(
-                    color: AppColors.textSecondary,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(6),
-              child: LinearProgressIndicator(
-                value: (_index + 1) / _questions.length,
-                minHeight: 5,
-                backgroundColor: AppColors.navyElevated,
-                color: AppColors.electric,
-              ),
-            ),
+          ExamMitHeader(
+            title: widget.title,
+            timerLabel: _clock,
+            timerHot: _seconds <= 5 && !answered,
+            onClose: () => Navigator.pop(context),
           ),
           Expanded(
             child: ListView(
-              padding: const EdgeInsets.fromLTRB(20, 10, 20, 16),
+              padding: const EdgeInsets.fromLTRB(14, 12, 14, 16),
               physics: const BouncingScrollPhysics(),
               children: [
-                QuestionImage(
-                  key: ValueKey('qi-${_q.id}'),
-                  image: _q.image,
-                  chapterId: _q.chapterId,
-                  chapterLabel: _q.chapterName(l.isEn).isEmpty
-                      ? l.defaultSignLabel
-                      : _q.chapterName(l.isEn),
-                ),
-                const SizedBox(height: 20),
-                BilingualStatement(
-                  question: _q,
-                  mode: _translationMode,
-                  primaryStyle: const TextStyle(
-                    fontSize: 21,
-                    fontWeight: FontWeight.w800,
-                    height: 1.35,
-                    letterSpacing: 0,
-                    color: AppColors.ink,
-                  ),
-                ),
-                const SizedBox(height: 14),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    if (_q.tags.contains('sign')) l.tagSigns,
-                    if (_q.tags.contains('num')) l.tagNumbers,
-                    _q.chapterName(l.isEn).isEmpty
-                        ? l.chapterShort(_q.chapterId)
-                        : _q.chapterName(l.isEn),
-                  ]
-                      .map(
-                        (k) => Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: AppColors.electric.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(
-                              color: AppColors.electric.withValues(alpha: 0.35),
+                ExamBezel(
+                  padding: const EdgeInsets.fromLTRB(14, 14, 14, 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            '${l.scoreQuestion} ${_index + 1} / ${_questions.length}'.toUpperCase(),
+                            style: ExamTokens.mitEyebrow,
+                          ),
+                          const Spacer(),
+                          TranslationModeChip(
+                            mode: _translationMode,
+                            onChanged: (m) {
+                              setState(() => _translationMode = m);
+                              context.read<AppState>().setTranslationMode(m);
+                            },
+                          ),
+                          IconButton(
+                            tooltip: l.bookmarks,
+                            onPressed: () async {
+                              final state = context.read<AppState>();
+                              final now = await state.isBookmarked(_q.id);
+                              await state.toggleBookmark(_q.id);
+                              if (!mounted) return;
+                              setState(() => _bookmarked = !now);
+                            },
+                            icon: Icon(
+                              _bookmarked ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
+                              color: _bookmarked ? ExamTokens.flag : ExamTokens.muted,
                             ),
                           ),
-                          child: Text(
-                            k,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: AppColors.electricSoft,
-                              fontWeight: FontWeight.w700,
-                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      QuestionImage(
+                        key: ValueKey('qi-${_q.id}'),
+                        image: _q.image,
+                        chapterId: _q.chapterId,
+                        chapterLabel: chapter.isEmpty ? l.defaultSignLabel : chapter,
+                        height: 168,
+                      ),
+                      const SizedBox(height: 14),
+                      if (chapter.isNotEmpty)
+                        Text(chapter.toUpperCase(), style: ExamTokens.chapter),
+                      const SizedBox(height: 6),
+                      BilingualStatement(
+                        question: _q,
+                        mode: _translationMode,
+                        primaryStyle: ExamTokens.statement,
+                      ),
+                      const SizedBox(height: 22),
+                      ExamCircleButtons(
+                        selected: _answeredTrue,
+                        result: answered ? _q.correctIsTrue : null,
+                        enabled: !answered,
+                        onTrue: () => _answer(true),
+                        onFalse: () => _answer(false),
+                      ),
+                      const SizedBox(height: 10),
+                      Center(
+                        child: Text(
+                          l.isEn ? 'Tap V (True) or F (False)' : 'Tocca V (Vero) o F (Falso)',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: ExamTokens.muted,
                           ),
                         ),
-                      )
-                      .toList(),
+                      ),
+                      if (answered) ...[
+                        const SizedBox(height: 16),
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: wasCorrect ? ExamTokens.veroSoft : ExamTokens.falsoSoft,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: wasCorrect ? ExamTokens.vero : ExamTokens.falso,
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                wasCorrect ? l.correct : l.incorrect,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w900,
+                                  color: wasCorrect ? ExamTokens.vero : ExamTokens.falso,
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                l.correctAnswer(_q.correctIsTrue),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  color: ExamTokens.ink,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                l.isEn ? _q.explanationEn : _q.explanationIt,
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  height: 1.35,
+                                  color: ExamTokens.inkSoft,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
                 Row(
                   children: [
-                    _Tool(
-                      icon: Icons.lightbulb_outline_rounded,
-                      label: l.hint,
-                      active: _showHint,
-                      onTap: () => setState(() => _showHint = !_showHint),
-                    ),
-                    const SizedBox(width: 8),
-                    TranslationModeChip(
-                      mode: _translationMode,
-                      onChanged: (m) {
-                        setState(() => _translationMode = m);
-                        context.read<AppState>().setTranslationMode(m);
-                      },
-                    ),
-                    const Spacer(),
-                    IconButton(
-                      onPressed: () async {
-                        final state = context.read<AppState>();
-                        final now = await state.isBookmarked(_q.id);
-                        await state.toggleBookmark(_q.id);
-                        if (!mounted) return;
-                        setState(() => _bookmarked = !now);
-                      },
+                    TextButton.icon(
+                      onPressed: () => setState(() => _showHint = !_showHint),
                       icon: Icon(
-                        _bookmarked ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
-                        color: _bookmarked ? AppColors.gold : AppColors.textMuted,
+                        Icons.lightbulb_outline_rounded,
+                        color: _showHint ? ExamTokens.flag : ExamTokens.muted,
+                      ),
+                      label: Text(
+                        l.hint,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          color: _showHint ? ExamTokens.ink : ExamTokens.muted,
+                        ),
                       ),
                     ),
                   ],
                 ),
-                if (_showHint) ...[
-                  const SizedBox(height: 8),
-                  PremiumCard(
-                    padding: const EdgeInsets.all(14),
-                    borderColor: AppColors.gold.withValues(alpha: 0.35),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Icon(Icons.tips_and_updates_rounded, color: AppColors.gold, size: 18),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Text(
-                            l.isEn ? _q.hintEn : _q.hintIt,
-                            style: const TextStyle(color: AppColors.gold, fontSize: 13, height: 1.35),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-                if (answered) ...[
-                  const SizedBox(height: 14),
-                  PremiumCard(
-                    borderColor: wasCorrect
-                        ? AppColors.neon.withValues(alpha: 0.4)
-                        : AppColors.red.withValues(alpha: 0.4),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: wasCorrect ? AppColors.neonDim : AppColors.redDim,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      padding: const EdgeInsets.all(12),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            wasCorrect ? l.correct : l.incorrect,
-                            style: TextStyle(
-                              fontWeight: FontWeight.w900,
-                              color: wasCorrect ? AppColors.neonSoft : AppColors.redSoft,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            l.correctAnswer(_q.correctIsTrue),
-                            style: const TextStyle(fontWeight: FontWeight.w700, height: 1.35),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            l.isEn ? _q.explanationEn : _q.explanationIt,
-                            style: const TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.textSecondary,
-                              height: 1.4,
-                            ),
-                          ),
-                          if (_translationMode != TranslationMode.off) ...[
-                            const SizedBox(height: 6),
-                            Text(
-                              l.questionTextSecondary(_q),
-                              style: const TextStyle(
-                                fontSize: 13,
-                                fontStyle: FontStyle.italic,
-                                color: AppColors.textSecondary,
-                                height: 1.4,
-                              ),
-                            ),
-                          ],
-                        ],
+                if (_showHint)
+                  ExamBezel(
+                    padding: const EdgeInsets.all(12),
+                    child: Text(
+                      l.isEn ? _q.hintEn : _q.hintIt,
+                      style: const TextStyle(
+                        color: ExamTokens.inkSoft,
+                        fontWeight: FontWeight.w600,
+                        height: 1.35,
                       ),
                     ),
                   ),
-                ],
               ],
             ),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 18),
-            child: Column(
-              children: [
-                ExamAnswerButtons(
-                  examMode: false,
-                  selected: _answeredTrue,
-                  result: answered ? _q.correctIsTrue : null,
-                  enabled: !answered,
-                  onTrue: () => _answer(true),
-                  onFalse: () => _answer(false),
-                ),
-                if (answered) ...[
-                  const SizedBox(height: 12),
-                  NeonButton(
-                    label: _index >= _questions.length - 1 ? l.seeResult : l.next,
-                    icon: Icons.arrow_forward_rounded,
-                    onPressed: _next,
-                  ),
-                ],
-              ],
-            ),
+            padding: const EdgeInsets.fromLTRB(14, 0, 14, 12),
+            child: answered
+                ? ExamNavBar(
+                    canPrevious: false,
+                    onPrevious: null,
+                    previousLabel: l.back,
+                    nextLabel: _index >= _questions.length - 1 ? l.seeResult : l.next,
+                    onNext: _next,
+                  )
+                : const SizedBox.shrink(),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _Tool extends StatelessWidget {
-  const _Tool({
-    required this.icon,
-    required this.label,
-    required this.active,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String label;
-  final bool active;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: active
-          ? AppColors.electric.withValues(alpha: 0.16)
-          : Colors.white.withValues(alpha: 0.05),
-      borderRadius: BorderRadius.circular(12),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 9),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                icon,
-                size: 16,
-                color: active ? AppColors.electricSoft : AppColors.textMuted,
-              ),
-              const SizedBox(width: 5),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: active ? AppColors.electricSoft : AppColors.textMuted,
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }
