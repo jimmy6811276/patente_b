@@ -177,12 +177,12 @@ workflows:
         notify:
           success: true
           failure: true
-      # TestFlight upload requires the App Store Connect key to have App Manager
-      # rights and an app record for com.patenteb.patenteb to exist in App Store Connect.
-      # Remove the leading "#" from the block below once that app record exists.
-      # app_store_connect:
-      #   auth: integration
-      #   submit_to_testflight: true
+      # Uploads the signed IPA to TestFlight. Requires the App Store Connect
+      # integration key (App Manager rights) and an existing app record:
+      # "Patente B 2026" / com.patenteb.patenteb.
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
 
   # ─────────────────────────────────────────────────────────────────────────
   # BOTH — triggered by tagging a release: git tag v1.0.0 && git push --tags
@@ -251,3 +251,6 @@ workflows:
         notify:
           success: true
           failure: true
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
