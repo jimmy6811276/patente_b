@@ -246,6 +246,31 @@ class LocalStore {
     return rows.map(_mapQuestion).toList();
   }
 
+  /// Unique ministerial sign images for the Signs Atlas (competitive apps have this).
+  Future<List<SignAtlasItem>> distinctSignImages() async {
+    final rows = await db.rawQuery('''
+      SELECT q.image AS image, MIN(q.chapter_id) AS chapter_id,
+             MIN(c.name_it) AS name_it, MIN(c.name_en) AS name_en,
+             COUNT(*) AS n
+      FROM questions q
+      JOIN chapters c ON c.id = q.chapter_id
+      WHERE q.image IS NOT NULL AND TRIM(q.image) != ''
+      GROUP BY q.image
+      ORDER BY q.image
+    ''');
+    return rows
+        .map(
+          (r) => SignAtlasItem(
+            image: r['image'] as String,
+            chapterId: (r['chapter_id'] as int?) ?? 0,
+            chapterNameIt: (r['name_it'] as String?) ?? '',
+            chapterNameEn: (r['name_en'] as String?) ?? '',
+            questionCount: (r['n'] as int?) ?? 0,
+          ),
+        )
+        .toList();
+  }
+
   QuizQuestion _mapQuestion(Map<String, Object?> r) => QuizQuestion(
         id: r['id'] as String,
         chapterId: r['chapter_id'] as int,

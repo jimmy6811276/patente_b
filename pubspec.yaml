@@ -28,3 +28,5 @@ flutter:
     - assets/data/fast_track_tricks.json
     - assets/images/
     - assets/tiles/
+    - assets/branding/
+    - assets/aso/

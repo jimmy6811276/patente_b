@@ -541,6 +541,15 @@ class L10n {
   String get toolsSection => p('Strumenti', 'Tools');
   String get hubChapters => p('Capitoli', 'Chapters');
   String get hubSigns => p('Segnali', 'Signs');
+  String get signsAtlasTitle => p('Atlante segnali', 'Signs atlas');
+  String get signsAtlasSubtitle => p(
+      'Tutti i diagrammi ministeriali, cerca e apri il capitolo',
+      'Every ministerial diagram — search and open the chapter');
+  String get searchSign => p('Cerca segnale o capitolo', 'Search sign or chapter');
+  String get noSignsFound => p('Nessun segnale trovato', 'No signs found');
+  String get signsAtlasTileSub => p('Sfoglia tutti i cartelli', 'Browse every road sign');
+  String get practiceAllTitle => p('Tutte le domande', 'All questions');
+  String get practiceAllSub => p('Banca completa in ordine casuale', 'Full bank in random order');
   String get hubHard => p('Difficili', 'Hard');
   String get hubDaily => p('Sfida', 'Daily');
   String get hubBookmarks => p('Segnalibri', 'Bookmarks');

@@ -19,6 +19,7 @@ import 'mistakes_screen.dart';
 import 'quiz_screen.dart';
 import 'settings_screen.dart';
 import 'sign_games_screen.dart';
+import 'signs_atlas_screen.dart';
 import 'vocabulary_screen.dart';
 
 /// Home — one visual composition, no duplicate destinations.
@@ -68,8 +69,6 @@ class HomeScreen extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(AppLayout.pagePad, 4, AppLayout.pagePad, 0),
               child: _Header(
                 lang: state.lang,
-                streak: stats.streak,
-                offline: state.offlineReady,
                 onOpenProfile: onOpenProfile,
               ),
             ),
@@ -213,11 +212,19 @@ class HomeScreen extends StatelessWidget {
               ),
               delegate: SliverChildListDelegate([
                 DsGridTile(
-                  icon: Icons.signpost_rounded,
+                  icon: Icons.map_rounded,
+                  title: l.signsAtlasTitle,
+                  subtitle: l.signsAtlasTileSub,
+                  color: AppColors.amber,
+                  imageAsset: PracticeMedia.signs,
+                  onTap: () => _push(context, const SignsAtlasScreen()),
+                ),
+                DsGridTile(
+                  icon: Icons.sports_esports_rounded,
                   title: l.hubSigns,
                   subtitle: l.signsSubtitle,
                   color: AppColors.amber,
-                  imageAsset: PracticeMedia.signs,
+                  imageAsset: PracticeMedia.chapters,
                   onTap: () => _push(context, const SignGamesScreen()),
                 ),
                 DsGridTile(
@@ -230,6 +237,14 @@ class HomeScreen extends StatelessWidget {
                     context,
                     QuizScreen(title: l.hardQuizTitle, hardMode: true),
                   ),
+                ),
+                DsGridTile(
+                  icon: Icons.all_inclusive_rounded,
+                  title: l.practiceAllTitle,
+                  subtitle: l.practiceAllSub,
+                  color: AppColors.blue,
+                  imageAsset: PracticeMedia.quiz,
+                  onTap: () => _push(context, QuizScreen(title: l.practiceAllTitle)),
                 ),
                 DsGridTile(
                   icon: Icons.translate_rounded,
@@ -589,14 +604,10 @@ class _WeakChapterChip extends StatelessWidget {
 class _Header extends StatelessWidget {
   const _Header({
     required this.lang,
-    required this.streak,
-    required this.offline,
     this.onOpenProfile,
   });
 
   final AppLang lang;
-  final int streak;
-  final bool offline;
   final VoidCallback? onOpenProfile;
 
   @override
@@ -604,43 +615,46 @@ class _Header extends StatelessWidget {
     final l = L10n(lang);
     final other = lang == AppLang.it ? AppLang.en : AppLang.it;
 
+    // Only real actions in the header: brand mark, language, profile.
+    // Streak / offline badges lived here as dummy icons — they already appear in the hero.
     return Row(
       children: [
-        Container(
-          width: 40,
-          height: 40,
-          decoration: BoxDecoration(
-            gradient: AppColors.neonGradient,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          alignment: Alignment.center,
-          child: const Text(
-            'P',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 18),
-          ),
-        ),
-        const Spacer(),
-        _HeaderIcon(
-          tooltip: l.statStreak,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.local_fire_department_rounded, size: 16, color: AppColors.coral),
-              const SizedBox(width: 2),
-              Text('$streak', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13)),
-            ],
+        ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: Image.asset(
+            'assets/branding/app_logo.jpg',
+            width: 40,
+            height: 40,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) => Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                gradient: AppColors.neonGradient,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              alignment: Alignment.center,
+              child: const Text(
+                'B',
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 18),
+              ),
+            ),
           ),
         ),
-        const SizedBox(width: 6),
-        _HeaderIcon(
-          tooltip: offline ? l.offlineBadge : l.onlineBadge,
-          child: Icon(
-            offline ? Icons.cloud_off_rounded : Icons.cloud_done_rounded,
-            size: 18,
-            color: offline ? AppColors.emerald : AppColors.blue,
+        const SizedBox(width: 10),
+        Expanded(
+          child: Text(
+            l.appTitle,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontSize: 17,
+              fontWeight: FontWeight.w900,
+              letterSpacing: -0.3,
+              color: AppColors.ink,
+            ),
           ),
         ),
-        const SizedBox(width: 6),
         _HeaderIcon(
           tooltip: lang.code.toUpperCase(),
           onTap: () {

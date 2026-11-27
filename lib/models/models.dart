@@ -210,3 +210,23 @@ class ExamRecord {
   final bool passed;
   final DateTime createdAt;
 }
+
+/// One unique road-sign diagram for the Signs Atlas browser.
+class SignAtlasItem {
+  const SignAtlasItem({
+    required this.image,
+    required this.chapterId,
+    required this.chapterNameIt,
+    required this.chapterNameEn,
+    required this.questionCount,
+  });
+
+  final String image;
+  final int chapterId;
+  final String chapterNameIt;
+  final String chapterNameEn;
+  final int questionCount;
+
+  String chapterName(bool english) =>
+      english && chapterNameEn.isNotEmpty ? chapterNameEn : chapterNameIt;
+}

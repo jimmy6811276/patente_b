@@ -10,6 +10,7 @@ import '../models/models.dart';
 import '../theme/app_colors.dart';
 import '../widgets/premium_scaffold.dart';
 import '../widgets/sign_art.dart';
+import 'signs_atlas_screen.dart';
 
 class SignGamesScreen extends StatelessWidget {
   const SignGamesScreen({super.key});
@@ -36,6 +37,17 @@ class SignGamesScreen extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
+          _GameCard(
+            title: l.signsAtlasTitle,
+            subtitle: l.signsAtlasTileSub,
+            gradient: AppColors.neonGradient,
+            glow: AppColors.neonGlow,
+            icon: Icons.map_rounded,
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const SignsAtlasScreen()),
+            ),
+          ),
+          const SizedBox(height: 14),
           _GameCard(
             title: l.guessSign,
             subtitle: l.guessSignSub,
