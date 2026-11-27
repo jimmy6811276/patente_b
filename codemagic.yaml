@@ -114,6 +114,8 @@ workflows:
       flutter: 3.41.9
       xcode: latest
       cocoapods: default
+      groups:
+        - patente_b_credentials
       vars:
         BUNDLE_ID: com.patenteb.patenteb
         APP_NAME: Patente B
