@@ -191,6 +191,9 @@ void main() {
       expect(it.ftPassHeadline, contains('100'));
       expect(en.ftPassHeadline, contains('100'));
       expect(it.ftAdminOnly, isNot(en.ftAdminOnly));
+      expect(it.ftStep1Title, isNot(en.ftStep1Title));
+      expect(it.ftLearnedNext, isNot(en.ftLearnedNext));
+      expect(it.ftRulesTestTitle, isNot(en.ftRulesTestTitle));
     });
   });
 }

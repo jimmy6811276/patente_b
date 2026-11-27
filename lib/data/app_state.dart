@@ -32,6 +32,9 @@ class AppState extends ChangeNotifier {
   bool _readableFont = false;
   bool _dailyChallengeDone = false;
   List<ExamRecord> _examHistory = const [];
+  int _ftMaxSlide = 0;
+  bool _ftMasteryPassed = false;
+  int _ftMasteryScore = 0;
 
   bool get loading => _loading;
   String? get error => _error;
@@ -48,6 +51,9 @@ class AppState extends ChangeNotifier {
   bool get readableFont => _readableFont;
   bool get dailyChallengeDone => _dailyChallengeDone;
   List<ExamRecord> get examHistory => _examHistory;
+  int get ftMaxSlide => _ftMaxSlide;
+  bool get ftMasteryPassed => _ftMasteryPassed;
+  int get ftMasteryScore => _ftMasteryScore;
   LocalStore get store => _store;
 
   Future<void> init() async {
@@ -81,6 +87,24 @@ class AppState extends ChangeNotifier {
     _readableFont = await _store.isReadableFont();
     _dailyChallengeDone = await _store.isDailyChallengeDone();
     _examHistory = await _store.getExamHistory();
+    _ftMaxSlide = await _store.getFtMaxSlide();
+    _ftMasteryPassed = await _store.isFtMasteryPassed();
+    _ftMasteryScore = await _store.getFtMasteryScore();
+    notifyListeners();
+  }
+
+  Future<void> markFtSlideReached(int index) async {
+    await _store.setFtMaxSlide(index);
+    if (index > _ftMaxSlide) {
+      _ftMaxSlide = index;
+      notifyListeners();
+    }
+  }
+
+  Future<void> setFtMasteryResult({required bool passed, required int scorePct}) async {
+    await _store.setFtMasteryPassed(passed: passed, scorePct: scorePct);
+    _ftMasteryPassed = passed;
+    _ftMasteryScore = scorePct;
     notifyListeners();
   }
 

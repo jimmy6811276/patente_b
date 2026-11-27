@@ -358,6 +358,65 @@ class L10n {
   String get ftPassFooter => p(
       'Ricorda tutti i tricks e le regole → passi al 100%.',
       'Remember every trick and rule → you pass 100%.');
+  String get ftGuidedSub => p(
+      'Percorso guidato · 1 regola per slide',
+      'Guided path · 1 rule per slide');
+  String get ftGuidedPathIntro => p(
+      'Prima impari. Poi ti testiamo sulle regole. Solo dopo apri l\'esame.',
+      'First you learn. Then we test you on the rules. Only then you open the exam.');
+  String get ftFollowPath => p('Segui questo percorso', 'Follow this path');
+  String get ftStep1Title => p('1. Impara tutte le regole', '1. Learn every rule');
+  String ftStep1Sub(int current, int total) => p(
+      'Slide $current di $total · una regola alla volta',
+      'Slide $current of $total · one rule at a time');
+  String get ftStartLearning => p('Inizia a imparare', 'Start learning');
+  String get ftReviewRules => p('Rivedi le regole', 'Review the rules');
+  String get ftStep2Title => p('2. Test memoria regole', '2. Rules memory test');
+  String get ftStep2Ready =>
+      p('Pronto: quiz solo sulle regole (non sull\'esame)', 'Ready: quiz on rules only (not the exam)');
+  String get ftStep2Locked =>
+      p('Bloccato finché non finisci tutte le slide', 'Locked until you finish every slide');
+  String ftStep2Done(int pct) =>
+      p('Superato · $pct%', 'Passed · $pct%');
+  String get ftTakeRulesTest => p('Fai il test regole', 'Take rules test');
+  String get ftStep3Title => p('3. Esame ufficiale', '3. Official exam');
+  String get ftStep3Ready =>
+      p('Sbloccato: ora puoi fare la simulazione', 'Unlocked: you can take the mock exam');
+  String get ftStep3Locked =>
+      p('Bloccato finché non passi il test regole (≥85%)', 'Locked until you pass the rules test (≥85%)');
+  String get ftOpenExam => p('Apri l\'esame', 'Open exam');
+  String get ftHowItWorks => p('Come funziona', 'How it works');
+  String get ftHowItWorksBody => p(
+      'Ogni slide ti dice: «Ora impara questa regola». Tocchi «Ho imparato →» e passi alla successiva. Alla fine, un test verifica se ricordi i trigger, gli assoluti e il cheat sheet. Solo dopo puoi andare all\'esame.',
+      'Every slide tells you: “Learn this rule now.” Tap “I learned this →” and move on. At the end, a test checks if you remember triggers, absolutes and the cheat sheet. Only then can you go to the exam.');
+  String get ftFinishSlidesFirst => p(
+      'Prima finisci tutte le slide delle regole.',
+      'Finish all rule slides first.');
+  String get ftPassRulesFirst => p(
+      'Prima passa il test memoria regole (≥85%).',
+      'Pass the rules memory test first (≥85%).');
+  String ftLessonProgress(int current, int total) =>
+      p('Regola $current / $total', 'Rule $current / $total');
+  String get ftLearnedNext => p('Ho imparato → prossima', 'I learned this → next');
+  String get ftFinishLesson => p('Ho finito le regole', 'I finished the rules');
+  String get ftExample => p('ESEMPIO', 'EXAMPLE');
+  String get ftRulesTestTitle => p('Test memoria regole', 'Rules memory test');
+  String get ftRulesTestHint => p(
+      'Questo NON è l\'esame ufficiale — solo le regole Fast Track',
+      'This is NOT the official exam — Fast Track rules only');
+  String get ftSeeResult => p('Vedi risultato', 'See result');
+  String get ftMasteryPassTitle => p('Regole memorizzate', 'Rules memorized');
+  String get ftMasteryFailTitle => p('Ancora non abbastanza', 'Not enough yet');
+  String ftMasteryScore(int correct, int total, int pct) =>
+      p('$correct / $total corrette · $pct%', '$correct / $total correct · $pct%');
+  String get ftMasteryPassBody => p(
+      'Ora puoi aprire l\'esame. Se ricordi tutte le regole, passi al 100%.',
+      'You can open the exam now. If you remember all the rules, you pass 100%.');
+  String get ftMasteryFailBody => p(
+      'Ripassa le slide e riprova il test. Serve almeno 85%.',
+      'Review the slides and retry the test. You need at least 85%.');
+  String get ftGoExam => p('Vai all\'esame', 'Go to exam');
+  String get ftRetryRules => p('Riprova il test', 'Retry the test');
   String get turboPlan => p('Piano Turbo', 'Turbo Plan');
   String get turboPlanSubtitle => p(
       'Zero italiano → pronto per l\'esame\nin 1–4 giorni intensivi',

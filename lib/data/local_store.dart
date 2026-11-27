@@ -497,6 +497,66 @@ class LocalStore {
     );
   }
 
+  // Guided Fast Track curriculum progress (not cleared with unlock).
+  static const _ftSlideKey = 'ft_guided_max_slide';
+  static const _ftMasteryKey = 'ft_rules_mastery_passed';
+  static const _ftMasteryScoreKey = 'ft_rules_mastery_score';
+
+  Future<int> getFtMaxSlide() async {
+    final rows = await db.query(
+      'meta',
+      where: 'key = ?',
+      whereArgs: [_ftSlideKey],
+      limit: 1,
+    );
+    if (rows.isEmpty) return 0;
+    return int.tryParse(rows.first['value'] as String? ?? '0') ?? 0;
+  }
+
+  Future<void> setFtMaxSlide(int index) async {
+    final current = await getFtMaxSlide();
+    if (index <= current) return;
+    await db.insert(
+      'meta',
+      {'key': _ftSlideKey, 'value': '$index'},
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<bool> isFtMasteryPassed() async {
+    final rows = await db.query(
+      'meta',
+      where: 'key = ?',
+      whereArgs: [_ftMasteryKey],
+      limit: 1,
+    );
+    return rows.isNotEmpty && rows.first['value'] == '1';
+  }
+
+  Future<int> getFtMasteryScore() async {
+    final rows = await db.query(
+      'meta',
+      where: 'key = ?',
+      whereArgs: [_ftMasteryScoreKey],
+      limit: 1,
+    );
+    if (rows.isEmpty) return 0;
+    return int.tryParse(rows.first['value'] as String? ?? '0') ?? 0;
+  }
+
+  Future<void> setFtMasteryPassed({required bool passed, required int scorePct}) async {
+    await db.insert(
+      'meta',
+      {'key': _ftMasteryKey, 'value': passed ? '1' : '0'},
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+    await db.insert(
+      'meta',
+      {'key': _ftMasteryScoreKey, 'value': '$scorePct'},
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
   static const _langKey = 'app_language';
   static const _langChosenKey = 'app_language_chosen';
 
