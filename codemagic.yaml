@@ -111,9 +111,6 @@ workflows:
       flutter: 3.41.9
       xcode: latest
       cocoapods: default
-      ios_signing:
-        distribution_type: app_store
-        bundle_identifier: com.patenteb.patenteb
       vars:
         BUNDLE_ID: com.patenteb.patenteb
         APP_NAME: Patente B
@@ -128,6 +125,16 @@ workflows:
           flutter pub get
           cd ios && pod install
       - *flutter_quality_script
+      - name: Set up code signing
+        script: |
+          set -e
+          # Creates the App ID on first run, then fetches (or creates) the
+          # App Store distribution certificate and provisioning profile.
+          keychain initialize
+          app-store-connect create-bundle-id "$BUNDLE_ID" --name "$APP_NAME" || true
+          app-store-connect fetch-signing-files "$BUNDLE_ID" --type IOS_APP_STORE --create
+          keychain add-certificates
+          xcode-project use-profiles
       - name: Set unique CFBundleVersion
         script: |
           set -e
@@ -140,7 +147,8 @@ workflows:
           set -e
           flutter build ipa --release \
             --build-number="$BUILD_NUMBER" \
-            --build-name="1.0.0"
+            --build-name="1.0.0" \
+            --export-options-plist="$HOME/export_options.plist"
           IPA=$(ls -1 build/ios/ipa/*.ipa | head -1)
           echo "IPA: $IPA"
           TMP=$(mktemp -d)
@@ -189,16 +197,24 @@ workflows:
       java: 17
       groups:
         - patente_b_credentials
-      ios_signing:
-        distribution_type: app_store
-        bundle_identifier: com.patenteb.patenteb
       vars:
         BUNDLE_ID: com.patenteb.patenteb
     scripts:
       - name: Get Flutter packages
-        script: flutter pub get
+        script: |
+          set -e
+          flutter pub get
+          cd ios && pod install
       - *flutter_quality_script
       - *android_signing_script
+      - name: Set up iOS code signing
+        script: |
+          set -e
+          keychain initialize
+          app-store-connect create-bundle-id "$BUNDLE_ID" --name "Patente B" || true
+          app-store-connect fetch-signing-files "$BUNDLE_ID" --type IOS_APP_STORE --create
+          keychain add-certificates
+          xcode-project use-profiles
       - name: Build Android artifacts
         script: |
           set -e
@@ -210,7 +226,8 @@ workflows:
           set -e
           BUILD_NUMBER=$(date -u +%y%m%d%H%M%S)
           echo "→ CFBundleVersion=$BUILD_NUMBER"
-          flutter build ipa --release --build-number="$BUILD_NUMBER" --build-name="1.0.0"
+          flutter build ipa --release --build-number="$BUILD_NUMBER" --build-name="1.0.0" \
+            --export-options-plist="$HOME/export_options.plist"
     artifacts:
       - build/app/outputs/flutter-apk/*.apk
       - build/app/outputs/bundle/release/*.aab
