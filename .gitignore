@@ -48,3 +48,9 @@ app.*.map.json
 android/key.properties
 **/*.jks
 **/*.keystore
+
+# iOS distribution certificate private key / CSR (local only, uploaded to Codemagic as env var)
+.signing/
+**/*.certSigningRequest
+**/*.key
+**/*.p12

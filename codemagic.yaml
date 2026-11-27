@@ -11,10 +11,13 @@
 #
 # Required environment variable group (created in App settings → Environment variables):
 #   group: patente_b_credentials
-#     CM_KEYSTORE            base64 of android release .jks
-#     CM_KEYSTORE_PASSWORD   keystore password
-#     CM_KEY_ALIAS           key alias (patente_b)
-#     CM_KEY_PASSWORD        key password
+#     CM_KEYSTORE              base64 of android release .jks
+#     CM_KEYSTORE_PASSWORD     keystore password
+#     CM_KEY_ALIAS             key alias (patente_b)
+#     CM_KEY_PASSWORD          key password
+#     CERTIFICATE_PRIVATE_KEY  PEM private key for the Apple Distribution certificate.
+#                              codemagic-cli-tools picks it up automatically and creates
+#                              (or reuses) the distribution certificate + App Store profile.
 #
 # Workflows:
 #   • android-release  → signed APK + AAB artifacts
@@ -132,7 +135,11 @@ workflows:
           # App Store distribution certificate and provisioning profile.
           keychain initialize
           app-store-connect create-bundle-id "$BUNDLE_ID" --name "$APP_NAME" || true
-          app-store-connect fetch-signing-files "$BUNDLE_ID" --type IOS_APP_STORE --create
+          # The certificate private key comes from the CERTIFICATE_PRIVATE_KEY env var.
+          app-store-connect fetch-signing-files "$BUNDLE_ID" \
+            --type IOS_APP_STORE \
+            --create \
+            --certificate-key=@env:CERTIFICATE_PRIVATE_KEY
           keychain add-certificates
           xcode-project use-profiles
       - name: Set unique CFBundleVersion
@@ -212,7 +219,10 @@ workflows:
           set -e
           keychain initialize
           app-store-connect create-bundle-id "$BUNDLE_ID" --name "Patente B" || true
-          app-store-connect fetch-signing-files "$BUNDLE_ID" --type IOS_APP_STORE --create
+          app-store-connect fetch-signing-files "$BUNDLE_ID" \
+            --type IOS_APP_STORE \
+            --create \
+            --certificate-key=@env:CERTIFICATE_PRIVATE_KEY
           keychain add-certificates
           xcode-project use-profiles
       - name: Build Android artifacts
