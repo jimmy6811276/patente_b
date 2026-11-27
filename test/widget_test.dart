@@ -217,8 +217,10 @@ void main() {
       expect(it.hubWeak, isNot(en.hubWeak));
       expect(it.hubMini, isNot(en.hubMini));
       expect(it.practiceSection, isNot(en.practiceSection));
-      expect(it.ftPassHeadline, contains('100'));
-      expect(en.ftPassHeadline, contains('100'));
+      expect(it.ftPassHeadline.toLowerCase(), contains('zero'));
+      expect(en.ftPassHeadline.toLowerCase(), contains('zero'));
+      expect(it.ftMust1.toLowerCase(), contains('visiv'));
+      expect(en.ftMust1.toLowerCase(), contains('visual'));
       expect(it.ftAdminOnly, isNot(en.ftAdminOnly));
       expect(it.ftStep1Title, isNot(en.ftStep1Title));
       expect(it.ftLearnedNext, isNot(en.ftLearnedNext));

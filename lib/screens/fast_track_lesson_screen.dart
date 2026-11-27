@@ -183,6 +183,30 @@ class _FastTrackLessonScreenState extends State<FastTrackLessonScreen> {
                         letterSpacing: -0.5,
                       ),
                     ),
+                    if (slide.imageAsset != null) ...[
+                      const SizedBox(height: 16),
+                      Container(
+                        height: 160,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(22),
+                          border: Border.all(color: AppColors.stroke),
+                          boxShadow: [
+                            BoxShadow(
+                              color: _badgeColor.withValues(alpha: 0.18),
+                              blurRadius: 18,
+                              offset: const Offset(0, 8),
+                            ),
+                          ],
+                        ),
+                        padding: const EdgeInsets.all(16),
+                        child: Image.asset(
+                          slide.imageAsset!,
+                          fit: BoxFit.contain,
+                          errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+                        ),
+                      ),
+                    ],
                     if (slide.accent != null) ...[
                       const SizedBox(height: 18),
                       Container(

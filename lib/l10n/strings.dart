@@ -341,43 +341,43 @@ class L10n {
   String get ftTabPlan => p('Piano', 'Plan');
   String get ftPassBadge => p('PROMESSA PASS 100%', 'PASS PROMISE 100%');
   String get ftPassHeadline => p(
-      'Se memorizzi tutti i tricks e le regole, passi l\'esame al 100%.',
-      'If you remember all the tricks and rules, you pass the exam 100%.');
+      'Zero italiano: forme + combinazioni + francobolli di lettere → passi.',
+      'Zero Italian: shapes + combos + letter stamps → you pass.');
   String get ftPassBody => p(
-      'Questo non è studio normale. È un sistema privato di parole-chiave, forme e pattern. Impara l\'elenco, applica l\'ordine in 5 secondi, tocca VERO o FALSO.',
-      'This is not normal study. It is a private system of key words, shapes and patterns. Learn the list, use the 5-second order, tap VERO or FALSO.');
+      'Non leggi la frase. Riconosci la forma del segnale, una combinazione kill, o un gruppo di lettere memorizzato, poi tocchi VERO o FALSO.',
+      'You do not read the sentence. You recognize the sign shape, a kill combo, or a memorized letter cluster, then tap VERO or FALSO.');
   String get ftQLabel => p('domande', 'questions');
   String get ftMinLabel => p('minuti', 'minutes');
   String get ftErrLabel => p('errori max', 'errors max');
   String get ftWhoTitle => p('Per chi è', 'Who this is for');
   String get ftWhoBody => p(
-      'Solo admin e pochi utenti speciali. Non conosci l\'italiano. Devi passare in 1–4 giorni. Memorizzi tricks, non leggi teoria.',
-      'Only admin and a few special users. You do not know Italian. You must pass in 1–4 days. You memorize tricks — you do not read theory.');
+      'Solo admin e pochi utenti speciali. Non conosci l\'italiano. Devi passare in 1–4 giorni. Memorizzi forme, combinazioni e francobolli — non leggi teoria.',
+      'Only admin and a few special users. You do not know Italian. You must pass in 1–4 days. You memorize shapes, combos and letter stamps — you do not read theory.');
   String get ftMustMemorize => p('Devi memorizzare', 'You must memorize');
-  String get ftMust1 => p('I 25 trigger (VERO / FALSO)', 'The 25 triggers (VERO / FALSO)');
-  String get ftMust2 => p('Le parole assolute (solo, sempre, mai…)', 'Absolute words (solo, sempre, mai…)');
-  String get ftMust3 => p('Le parole safe e trap (cheat sheet)', 'Safe and trap words (cheat sheet)');
-  String get ftMust4 => p('Le 5 famiglie di segnali', 'The 5 sign families');
-  String get ftMust5 => p('L\'ordine in 5 secondi su ogni domanda', 'The 5-second order on every question');
+  String get ftMust1 => p('Le 5 famiglie VISIVE (forma + colore)', 'The 5 VISUAL families (shape + color)');
+  String get ftMust2 => p('Le combinazioni kill (es. triangolo + vieta)', 'Kill combos (e.g. triangle + vieta)');
+  String get ftMust3 => p('I 25 francobolli di lettere (spot → tap)', 'The 25 letter stamps (spot → tap)');
+  String get ftMust4 => p('Assoluti (solo/sempre/mai) come tendenza', 'Absolutes (solo/sempre/mai) as a lean');
+  String get ftMust5 => p('La scansione in 5 secondi su ogni domanda', 'The 5-second scan on every question');
   String get ftSimpleRule => p('Regola semplice', 'Simple rule');
   String get ftSimpleRuleBody => p(
-      'Non tradurre tutta la frase. Cerca una parola o una forma che conosci. Se la conosci → rispondi. Se non la conosci → usa la carta segnale o il default del topic.',
-      'Do not translate the whole sentence. Look for one word or one shape you know. If you know it → answer. If not → use the sign card or the topic default.');
+      'Non tradurre. Guarda la forma, cerca una combo o un francobollo di lettere, tocca VERO/FALSO. Mai giudicare il “senso” della frase.',
+      'Do not translate. Check the shape, hunt a combo or letter stamp, tap VERO/FALSO. Never judge the “meaning” of the sentence.');
   String get ftStartDrill => p('Inizia drill', 'Start drill');
   String get ftMethodHeadline => p(
-      'Non leggi l\'italiano. Leggi la forma.',
-      'You do not read Italian. You read the shape.');
+      'Non leggi l\'italiano. Leggi forma + lettere.',
+      'You do not read Italian. You read shape + letters.');
   String get ftMethodBody => p(
-      'Ogni domanda è una frase fissa. Guardi il segnale, trovi una parola trigger, tocchi VERO o FALSO. Massimo 20 secondi a domanda.',
-      'Every question is a fixed sentence. Look at the sign, find one trigger word, tap VERO or FALSO. Max 20 seconds per question.');
+      'Ogni domanda è una frase fissa. Guardi il segnale, cerchi una combo o un francobollo, tocchi VERO o FALSO. Massimo 10–15 secondi a domanda.',
+      'Every question is a fixed sentence. Look at the sign, hunt a combo or letter stamp, tap VERO or FALSO. Max 10–15 seconds per question.');
   String get ftFiveSecond => p('Ordine in 5 secondi', 'Five-second order');
   String get ftScoreLayers => p('Livelli di punteggio', 'Score layers');
   String get ftScoreHint => p(
       'Più livelli memorizzi, più alto è il tuo punteggio atteso.',
       'The more layers you memorize, the higher your expected score.');
   String get ftTriggersIntro => p(
-      'I 25 trigger sono lo strato più forte. Memorizzali tutti. La parola italiana è il segnale — l\'inglese spiega il significato.',
-      'The 25 triggers are the strongest layer. Memorize all of them. The Italian word is the signal — English explains the meaning.');
+      'I 25 francobolli sono cluster di lettere. Non capisci la parola: la riconosci e tocchi. L\'inglese è solo un ponte di memoria.',
+      'The 25 stamps are letter clusters. You do not understand the word: you spot it and tap. English is only a memory bridge.');
   String ftPurityLine(int pct, num n) =>
       p('Affidabilità $pct% · $n casi', 'Reliability $pct% · $n hits');
   String get ftVetoTitle => p('Parole assolute → spesso FALSO', 'Absolute words → often FALSO');
@@ -401,11 +401,11 @@ class L10n {
       'Ricorda tutti i tricks e le regole → passi al 100%.',
       'Remember every trick and rule → you pass 100%.');
   String get ftGuidedSub => p(
-      'Percorso guidato · 1 regola per slide',
-      'Guided path · 1 rule per slide');
+      'Zero Italian · forme · combo · francobolli',
+      'Zero Italian · shapes · combos · stamps');
   String get ftGuidedPathIntro => p(
-      'Prima impari. Poi ti testiamo sulle regole. Solo dopo apri l\'esame.',
-      'First you learn. Then we test you on the rules. Only then you open the exam.');
+      'Prima forme e combinazioni. Poi francobolli. Poi test memoria. Solo dopo l\'esame.',
+      'First shapes and combos. Then letter stamps. Then memory test. Only then the exam.');
   String get ftFollowPath => p('Segui questo percorso', 'Follow this path');
   String get ftStep1Title => p('1. Impara tutte le regole', '1. Learn every rule');
   String ftStep1Sub(int current, int total) => p(
