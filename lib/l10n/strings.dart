@@ -58,9 +58,11 @@ class L10n {
 
   // ── Navigation ─────────────────────────────────────────────────────────────
   String get navHome => p('Home', 'Home');
-  String get navStats => p('Statistiche', 'Stats');
+  String get navStats => p('Stats', 'Stats');
   String get navChapters => p('Capitoli', 'Chapters');
   String get navSettings => p('Impostazioni', 'Settings');
+  String get navQuiz => p('Quiz', 'Quiz');
+  String get navProfile => p('Profilo', 'Profile');
 
   String get appTitle => p('Patente B', 'Patente B');
 
@@ -68,7 +70,9 @@ class L10n {
   String get readinessAlmost => p('Quasi pronto', 'Almost ready');
   String get readinessGood => p('Buon progresso', 'Good progress');
   String get readinessPreparing => p('In preparazione', 'Getting there');
-  String get readinessStart => p('Inizia il percorso', 'Start your journey');
+  String get readinessStart => p('Inizia', 'Start');
+  String get progressCaption => p('Progresso', 'Progress');
+  String get progressCaptionStart => p('Inizia', 'Start');
 
   String readinessLabel(AppStats s) {
     if (s.readiness >= 0.85) return readinessAlmost;
@@ -78,14 +82,34 @@ class L10n {
   }
 
   // ── Home ───────────────────────────────────────────────────────────────────
-  String greeting(String name) => p('Ciao $name', 'Hi $name');
+  String greeting(String name) {
+    final n = name.trim();
+    if (n.isEmpty || n.toLowerCase() == 'studente' || n.toLowerCase() == 'student') {
+      return p('Ciao', 'Hi');
+    }
+    return p('Ciao $n', 'Hi $n');
+  }
+
   String get homeSubtitle =>
-      p('Il tuo coach intelligente per l\'esame', 'Your smart exam coach');
-  String get offlineBadge => p('OFFLINE', 'OFFLINE');
+      p('Il tuo coach per l\'esame', 'Your exam coach');
+  String get offlineBadge => p('Offline', 'Offline');
   String get nextActionLabel =>
-      p('Prossima azione consigliata', 'Suggested next step');
+      p('Prossimo passo', 'Next step');
   String get reviewTopic => p('Rivedi', 'Review');
   String get startFirstQuiz => p('Inizia il primo quiz', 'Start your first quiz');
+  String get startQuizCta => p('Inizia quiz', 'Start quiz');
+  String get continueQuizCta => p('Continua', 'Continue');
+  String get continueSection => p('Continua', 'Continue');
+  String get continueWhereLeft => p('Continua da dove eri', 'Continue where you left off');
+  String get mistakesToReview => p('Errori da rivedere', 'Mistakes to review');
+  String get weakChaptersSection => p('Capitoli deboli', 'Weak chapters');
+  String get officialExamInfo => p(
+      'Esame ufficiale: 30 domande, 20 minuti, massimo 3 errori.',
+      'Official exam: 30 questions, 20 minutes, max 3 errors.');
+  String get statStreak => p('Streak', 'Streak');
+  String get statAccuracy => p('Accuratezza', 'Accuracy');
+  String get statQuestions => p('Domande', 'Questions');
+  String streakValue(int days) => p('$days giorni', '$days days');
   String daysShort(int d) => p('$d gg', '${d}d');
   String get streakLabel => p('giorni streak', 'day streak');
   String get accuracyLabel => p('accuratezza', 'accuracy');
@@ -474,7 +498,7 @@ class L10n {
   String get continueLabel => p('Continua', 'Continue');
 
   // ── Advanced hub ───────────────────────────────────────────────────────────
-  String get chooseLicense => p('Scegli la patente', 'Choose your licence');
+  String get chooseLicense => p('Scegli la patente', 'Choose your license');
   String get studyModes => p('Modalità di studio', 'Study modes');
   String get practiceSection => p('Pratica', 'Practice');
   String get examSection => p('Esame e ripasso', 'Exam & review');

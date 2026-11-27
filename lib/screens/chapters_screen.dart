@@ -5,6 +5,7 @@ import '../data/app_state.dart';
 import '../l10n/strings.dart';
 import '../models/models.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_layout.dart';
 import '../widgets/premium_scaffold.dart';
 import '../widgets/sign_placeholder.dart';
 import 'quiz_screen.dart';
@@ -126,7 +127,7 @@ class _ChaptersScreenState extends State<ChaptersScreen> {
                     ),
                   )
                 : ListView.separated(
-                    padding: const EdgeInsets.fromLTRB(20, 8, 20, 110),
+                    padding: EdgeInsets.fromLTRB(20, 8, 20, AppLayout.bottomClearance(context)),
                     physics: const BouncingScrollPhysics(),
                     itemCount: chapters.length + 1,
                     separatorBuilder: (context, index) => const SizedBox(height: 10),

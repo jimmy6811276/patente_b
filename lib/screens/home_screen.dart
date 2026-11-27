@@ -6,7 +6,8 @@ import '../data/app_state.dart';
 import '../l10n/app_lang.dart';
 import '../l10n/strings.dart';
 import '../theme/app_colors.dart';
-import '../widgets/grid_icons.dart';
+import '../theme/app_layout.dart';
+import '../widgets/design_system.dart';
 import '../widgets/license_chip.dart';
 import '../widgets/premium_scaffold.dart';
 import '../widgets/readiness_ring.dart';
@@ -17,8 +18,8 @@ import 'fast_track_screen.dart';
 import 'license_coming_soon_screen.dart';
 import 'mistakes_screen.dart';
 import 'quiz_screen.dart';
+import 'settings_screen.dart';
 import 'sign_games_screen.dart';
-import 'stats_screen.dart';
 import 'vocabulary_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -30,7 +31,9 @@ class HomeScreen extends StatelessWidget {
     final l = L10n(state.lang);
     final stats = state.stats;
     final weak = state.weakTopics;
-    final nextAction = weak.isNotEmpty
+    final bottomPad = AppLayout.bottomClearance(context);
+
+    final continueTitle = weak.isNotEmpty
         ? '${l.reviewTopic} ${l.topicName(weak.first)}'
         : l.startFirstQuiz;
 
@@ -41,91 +44,29 @@ class HomeScreen extends StatelessWidget {
         slivers: [
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 6, 20, 0),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Container(
-                              width: 9,
-                              height: 9,
-                              decoration: const BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: AppColors.emerald,
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              'PATENTE ${state.selectedLicense.code}',
-                              style: const TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: 1.1,
-                                color: AppColors.textMuted,
-                              ),
-                            ),
-                            const Spacer(),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: AppColors.emeraldDim,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
-                                l.offlineBadge,
-                                style: const TextStyle(
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.w900,
-                                  color: AppColors.emerald,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          l.greeting(state.userName),
-                          style: const TextStyle(
-                            fontSize: 26,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: -0.7,
-                            height: 1.05,
-                            color: AppColors.ink,
-                          ),
-                        ),
-                        const SizedBox(height: 3),
-                        Text(
-                          l.homeSubtitle,
-                          style: const TextStyle(
-                            color: AppColors.textSecondary,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  _LangButton(lang: state.lang),
-                ],
+              padding: const EdgeInsets.fromLTRB(AppLayout.pagePad, 8, AppLayout.pagePad, 0),
+              child: _Header(lang: state.lang, streak: stats.streak, offline: state.offlineReady),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(AppLayout.pagePad, 16, AppLayout.pagePad, 8),
+              child: Text(
+                l.greeting(state.userName),
+                style: const TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0,
+                  height: 1.15,
+                  color: AppColors.ink,
+                ),
               ),
             ),
           ),
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 14, 20, 6),
-              child: Text(
-                l.chooseLicense,
-                style: const TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.textMuted,
-                ),
-              ),
+              padding: const EdgeInsets.fromLTRB(AppLayout.pagePad, 0, AppLayout.pagePad, 8),
+              child: DsSectionLabel(l.chooseLicense),
             ),
           ),
           SliverToBoxAdapter(
@@ -140,69 +81,101 @@ class HomeScreen extends StatelessWidget {
               },
             ),
           ),
+          // Hero readiness + single CTA
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
-              child: PremiumCard(
-                padding: const EdgeInsets.all(14),
-                borderColor: AppColors.emerald.withValues(alpha: 0.2),
-                child: Row(
+              padding: const EdgeInsets.fromLTRB(AppLayout.pagePad, 16, AppLayout.pagePad, 0),
+              child: DsCard(
+                borderColor: AppColors.emerald.withValues(alpha: 0.22),
+                child: Column(
                   children: [
-                    ReadinessRing(
-                      progress: stats.readiness,
-                      label: l.readinessLabel(stats),
-                      size: 96,
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            l.nextActionLabel,
-                            style: const TextStyle(
-                              fontSize: 10,
-                              color: AppColors.textMuted,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          const SizedBox(height: 3),
-                          Text(
-                            nextAction,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w900,
-                              height: 1.2,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Row(
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        ReadinessRing(
+                          progress: stats.readiness,
+                          caption: stats.totalAnswers == 0 ? l.progressCaptionStart : l.progressCaption,
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _MiniStat(Icons.local_fire_department_rounded, '${stats.streak}'),
-                              const SizedBox(width: 6),
-                              _MiniStat(
-                                Icons.insights_rounded,
-                                stats.totalAnswers == 0
-                                    ? '—'
-                                    : '${(stats.accuracy * 100).round()}%',
+                              Text(
+                                l.nextActionLabel,
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.textMuted,
+                                  letterSpacing: 0,
+                                ),
                               ),
-                              const SizedBox(width: 6),
-                              _MiniStat(Icons.quiz_outlined, '${state.totalQuestions}'),
+                              const SizedBox(height: 4),
+                              Text(
+                                continueTitle,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w800,
+                                  height: 1.25,
+                                  letterSpacing: 0,
+                                  color: AppColors.ink,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              Row(
+                                children: [
+                                  DsStatBadge(
+                                    icon: Icons.local_fire_department_rounded,
+                                    value: l.streakValue(stats.streak),
+                                    label: l.statStreak,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  DsStatBadge(
+                                    icon: Icons.insights_rounded,
+                                    value: stats.totalAnswers == 0
+                                        ? '0%'
+                                        : '${(stats.accuracy * 100).round()}%',
+                                    label: l.statAccuracy,
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  DsStatBadge(
+                                    icon: Icons.quiz_outlined,
+                                    value: '${state.totalQuestions}',
+                                    label: l.statQuestions,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  const Expanded(child: SizedBox()),
+                                ],
+                              ),
                             ],
                           ),
-                          const SizedBox(height: 10),
-                          SizedBox(
-                            width: double.infinity,
-                            child: NeonButton(
-                              label: l.quizTitle,
-                              height: 42,
-                              icon: Icons.play_arrow_rounded,
-                              onPressed: () => _push(context, QuizScreen(title: l.quizTitle)),
-                            ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 14),
+                    SizedBox(
+                      width: double.infinity,
+                      height: AppLayout.touchMin,
+                      child: FilledButton.icon(
+                        onPressed: () => _push(context, QuizScreen(title: l.quizTitle)),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: AppColors.emerald,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
                           ),
-                        ],
+                        ),
+                        icon: const Icon(Icons.play_arrow_rounded),
+                        label: Text(
+                          stats.totalAnswers == 0 ? l.startQuizCta : l.continueQuizCta,
+                          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
+                        ),
                       ),
                     ),
                   ],
@@ -210,16 +183,17 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
           ),
-          // Quick launch strip
+          // Quick pills — no duplicate of main CTA
           SliverToBoxAdapter(
             child: SizedBox(
-              height: 52,
+              height: 56,
               child: ListView(
                 scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
+                padding: const EdgeInsets.fromLTRB(AppLayout.pagePad, 14, AppLayout.pagePad, 0),
                 children: [
-                  _QuickChip(
+                  DsQuickPill(
                     label: l.hubDaily,
+                    icon: Icons.today_rounded,
                     color: AppColors.emerald,
                     done: state.dailyChallengeDone,
                     onTap: () {
@@ -239,252 +213,200 @@ class HomeScreen extends StatelessWidget {
                       );
                     },
                   ),
-                  _QuickChip(
+                  DsQuickPill(
                     label: l.hubQuick,
+                    icon: Icons.bolt_rounded,
                     color: AppColors.blue,
                     onTap: () => _push(
                       context,
                       QuizScreen(title: l.quickQuizTitle, quickMode: true, secondsPerQuestion: 20),
                     ),
                   ),
-                  _QuickChip(
+                  DsQuickPill(
                     label: l.simulationTitle,
+                    icon: Icons.flag_rounded,
                     color: AppColors.coral,
                     onTap: () => _push(context, const ExamScreen()),
                   ),
-                  _QuickChip(
+                  DsQuickPill(
                     label: l.hubSigns,
+                    icon: Icons.signpost_rounded,
                     color: AppColors.amber,
                     onTap: () => _push(context, const SignGamesScreen()),
-                  ),
-                  _QuickChip(
-                    label: l.hubVocab,
-                    color: AppColors.blueSoft,
-                    onTap: () => _push(context, const VocabularyScreen()),
                   ),
                 ],
               ),
             ),
           ),
-          ..._section(
-            context,
-            title: l.practiceSection,
-            tiles: [
-              _TileSpec(
-                title: l.quizTitle,
-                subtitle: l.questionsCount(state.totalQuestions),
-                color: AppColors.blue,
-                kind: HubIconKind.quiz,
-                onTap: () => _push(context, QuizScreen(title: l.quizTitle)),
-              ),
-              _TileSpec(
-                title: l.hubQuick,
-                subtitle: l.quickSub,
-                color: const Color(0xFF0EA5E9),
-                kind: HubIconKind.quick,
-                onTap: () => _push(
-                  context,
-                  QuizScreen(title: l.quickQuizTitle, quickMode: true, secondsPerQuestion: 20),
-                ),
-              ),
-              _TileSpec(
-                title: l.hubTimed,
-                subtitle: l.timedSub,
-                color: AppColors.amber,
-                kind: HubIconKind.timed,
-                onTap: () => _push(
-                  context,
-                  QuizScreen(
-                    title: l.hubTimed,
-                    quickMode: true,
-                    limit: 12,
-                    secondsPerQuestion: 15,
-                  ),
-                ),
-              ),
-              _TileSpec(
-                title: l.hubHard,
-                subtitle: l.hardSubtitle,
-                color: AppColors.coral,
-                kind: HubIconKind.hard,
-                onTap: () => _push(
-                  context,
-                  QuizScreen(title: l.hardQuizTitle, hardMode: true),
-                ),
-              ),
-              _TileSpec(
-                title: l.hubWeak,
-                subtitle: l.weakSub,
-                color: const Color(0xFFEA580C),
-                kind: HubIconKind.weak,
-                onTap: () => _push(
-                  context,
-                  QuizScreen(title: l.hubWeak, weakMode: true, limit: 20),
-                ),
-              ),
-              _TileSpec(
-                title: l.hubDaily,
-                subtitle: state.dailyChallengeDone ? l.dailyDone : l.dailyAvailable,
-                color: AppColors.emerald,
-                kind: HubIconKind.daily,
-                dimmed: state.dailyChallengeDone,
-                onTap: () {
-                  if (state.dailyChallengeDone) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(l.dailyAlreadyDone)),
-                    );
-                    return;
-                  }
-                  _push(
-                    context,
-                    QuizScreen(
-                      title: l.dailyChallengeTitle,
-                      dailyMode: true,
-                      secondsPerQuestion: 25,
+          // Official exam info
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(AppLayout.pagePad, 16, AppLayout.pagePad, 0),
+              child: DsCard(
+                borderColor: AppColors.blue.withValues(alpha: 0.22),
+                padding: const EdgeInsets.all(14),
+                child: Row(
+                  children: [
+                    const Icon(Icons.info_outline_rounded, color: AppColors.blue),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        l.officialExamInfo,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          height: 1.35,
+                          color: AppColors.inkSoft,
+                          letterSpacing: 0,
+                        ),
+                      ),
                     ),
-                  );
-                },
+                  ],
+                ),
               ),
-            ],
+            ),
           ),
-          ..._section(
-            context,
-            title: l.examSection,
-            tiles: [
-              _TileSpec(
-                title: l.simulationTitle,
-                subtitle: l.officialExam,
-                color: AppColors.pink,
-                kind: HubIconKind.exam,
-                onTap: () => _push(context, const ExamScreen()),
+          // Continue / mistakes / bookmarks
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(AppLayout.pagePad, 20, AppLayout.pagePad, 8),
+              child: DsSectionLabel(l.continueSection),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppLayout.pagePad),
+              child: Column(
+                children: [
+                  DsListRow(
+                    icon: Icons.play_circle_outline_rounded,
+                    title: l.continueWhereLeft,
+                    subtitle: continueTitle,
+                    color: AppColors.emerald,
+                    onTap: () => _push(context, QuizScreen(title: l.quizTitle)),
+                  ),
+                  const SizedBox(height: 8),
+                  DsListRow(
+                    icon: Icons.error_outline_rounded,
+                    title: l.mistakesToReview,
+                    subtitle: l.toReview(state.mistakes.length),
+                    color: AppColors.coral,
+                    onTap: () => _push(context, const MistakesScreen()),
+                  ),
+                  const SizedBox(height: 8),
+                  DsListRow(
+                    icon: Icons.bookmark_rounded,
+                    title: l.hubBookmarks,
+                    subtitle: l.hubBookmarksSub,
+                    color: AppColors.blue,
+                    onTap: () => _push(
+                      context,
+                      QuizScreen(title: l.hubBookmarks, bookmarkMode: true),
+                    ),
+                  ),
+                ],
               ),
-              _TileSpec(
-                title: l.hubMini,
-                subtitle: l.miniSub,
-                color: const Color(0xFFDB2777),
-                kind: HubIconKind.mini,
-                onTap: () => _push(
-                  context,
-                  QuizScreen(
-                    title: l.hubMini,
-                    limit: 15,
-                    secondsPerQuestion: 40,
+            ),
+          ),
+          if (weak.isNotEmpty)
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(AppLayout.pagePad, 20, AppLayout.pagePad, 8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    DsSectionLabel(l.weakChaptersSection),
+                    const SizedBox(height: 8),
+                    ...weak.take(3).map(
+                      (w) => Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: DsListRow(
+                          icon: Icons.trending_down_rounded,
+                          title: l.topicName(w),
+                          subtitle: '${(w.accuracy * 100).round()}%',
+                          color: AppColors.amber,
+                          onTap: () => _push(context, const ChaptersScreen()),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          // Practice grid — equal height tiles
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(AppLayout.pagePad, 12, AppLayout.pagePad, 8),
+              child: DsSectionLabel(l.practiceSection),
+            ),
+          ),
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: AppLayout.pagePad),
+            sliver: SliverGrid(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                mainAxisSpacing: 10,
+                crossAxisSpacing: 10,
+                childAspectRatio: 0.88,
+              ),
+              delegate: SliverChildListDelegate([
+                DsGridTile(
+                  icon: Icons.quiz_rounded,
+                  title: l.quizTitle,
+                  subtitle: l.questionsCount(state.totalQuestions),
+                  color: AppColors.blue,
+                  onTap: () => _push(context, QuizScreen(title: l.quizTitle)),
+                ),
+                DsGridTile(
+                  icon: Icons.menu_book_rounded,
+                  title: l.hubChapters,
+                  subtitle: l.chaptersShort,
+                  color: AppColors.blueSoft,
+                  onTap: () => _push(context, const ChaptersScreen()),
+                ),
+                DsGridTile(
+                  icon: Icons.signpost_rounded,
+                  title: l.hubSigns,
+                  subtitle: l.signsSubtitle,
+                  color: AppColors.amber,
+                  onTap: () => _push(context, const SignGamesScreen()),
+                ),
+                DsGridTile(
+                  icon: Icons.local_fire_department_rounded,
+                  title: l.hubHard,
+                  subtitle: l.hardSubtitle,
+                  color: AppColors.coral,
+                  onTap: () => _push(
+                    context,
+                    QuizScreen(title: l.hardQuizTitle, hardMode: true),
                   ),
                 ),
-              ),
-              _TileSpec(
-                title: l.myMistakes,
-                subtitle: l.toReview(state.mistakes.length),
-                color: AppColors.coral,
-                kind: HubIconKind.mistakes,
-                onTap: () => _push(context, const MistakesScreen()),
-              ),
-              _TileSpec(
-                title: l.hubBookmarks,
-                subtitle: l.hubBookmarksSub,
-                color: AppColors.blue,
-                kind: HubIconKind.bookmarks,
-                onTap: () => _push(
-                  context,
-                  QuizScreen(title: l.hubBookmarks, bookmarkMode: true),
+                DsGridTile(
+                  icon: Icons.translate_rounded,
+                  title: l.hubVocab,
+                  subtitle: l.vocabSub,
+                  color: const Color(0xFF0891B2),
+                  onTap: () => _push(context, const VocabularyScreen()),
                 ),
-              ),
-              _TileSpec(
-                title: l.hubStats,
-                subtitle: l.statsSub,
-                color: const Color(0xFF6366F1),
-                kind: HubIconKind.stats,
-                onTap: () => _push(context, const StatsScreen()),
-              ),
-            ],
-          ),
-          ..._section(
-            context,
-            title: l.studySection,
-            tiles: [
-              _TileSpec(
-                title: l.hubChapters,
-                subtitle: l.chaptersShort,
-                color: AppColors.blueSoft,
-                kind: HubIconKind.chapters,
-                onTap: () => _push(context, const ChaptersScreen()),
-              ),
-              _TileSpec(
-                title: l.hubVocab,
-                subtitle: l.vocabSub,
-                color: const Color(0xFF0891B2),
-                kind: HubIconKind.vocab,
-                onTap: () => _push(context, const VocabularyScreen()),
-              ),
-              _TileSpec(
-                title: l.hubSigns,
-                subtitle: l.signsSubtitle,
-                color: AppColors.amber,
-                kind: HubIconKind.signs,
-                onTap: () => _push(context, const SignGamesScreen()),
-              ),
-              _TileSpec(
-                title: l.fastTrackSectionRow,
-                subtitle: l.fastTrackSubtitle,
-                color: AppColors.emerald,
-                kind: HubIconKind.fastTrack,
-                locked: !state.fastTrackUnlocked,
-                lockedLabel: l.privateBadge,
-                onTap: () => _push(
-                  context,
-                  state.fastTrackUnlocked
-                      ? const FastTrackScreen()
-                      : const FastTrackLockScreen(),
+                DsGridTile(
+                  icon: Icons.bolt_rounded,
+                  title: l.fastTrackSectionRow,
+                  subtitle: l.fastTrackSubtitle,
+                  color: AppColors.emerald,
+                  onTap: () => _push(
+                    context,
+                    state.fastTrackUnlocked
+                        ? const FastTrackScreen()
+                        : const FastTrackLockScreen(),
+                  ),
                 ),
-              ),
-            ],
-            bottomPad: 120,
+              ]),
+            ),
           ),
+          SliverToBoxAdapter(child: SizedBox(height: bottomPad)),
         ],
       ),
     );
-  }
-
-  List<Widget> _section(
-    BuildContext context, {
-    required String title,
-    required List<_TileSpec> tiles,
-    double bottomPad = 8,
-  }) {
-    return [
-      SliverToBoxAdapter(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 18, 20, 8),
-          child: Text(
-            title.toUpperCase(),
-            style: const TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 1.0,
-              color: AppColors.textMuted,
-            ),
-          ),
-        ),
-      ),
-      SliverPadding(
-        padding: EdgeInsets.fromLTRB(16, 0, 16, bottomPad),
-        sliver: SliverGrid(
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 3,
-            mainAxisSpacing: 10,
-            crossAxisSpacing: 10,
-            childAspectRatio: 0.92,
-          ),
-          delegate: SliverChildBuilderDelegate(
-            (context, i) {
-              final t = tiles[i];
-              return _HubTile(tile: t);
-            },
-            childCount: tiles.length,
-          ),
-        ),
-      ),
-    ];
   }
 
   void _push(BuildContext context, Widget page) {
@@ -508,232 +430,142 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-class _TileSpec {
-  const _TileSpec({
-    required this.title,
-    required this.subtitle,
-    required this.color,
-    required this.kind,
-    required this.onTap,
-    this.locked = false,
-    this.lockedLabel = 'Privato',
-    this.dimmed = false,
+class _Header extends StatelessWidget {
+  const _Header({
+    required this.lang,
+    required this.streak,
+    required this.offline,
   });
 
-  final String title;
-  final String subtitle;
-  final Color color;
-  final HubIconKind kind;
-  final VoidCallback onTap;
-  final bool locked;
-  final String lockedLabel;
-  final bool dimmed;
-}
-
-class _HubTile extends StatelessWidget {
-  const _HubTile({required this.tile});
-  final _TileSpec tile;
-
-  @override
-  Widget build(BuildContext context) {
-    return Opacity(
-      opacity: tile.dimmed ? 0.62 : 1,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {
-            HapticFeedback.selectionClick();
-            tile.onTap();
-          },
-          borderRadius: BorderRadius.circular(20),
-          child: Ink(
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: AppColors.stroke),
-              boxShadow: const [
-                BoxShadow(color: Color(0x100B1220), blurRadius: 12, offset: Offset(0, 5)),
-              ],
-            ),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(10, 12, 10, 10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          tile.color,
-                          Color.lerp(tile.color, Colors.black, 0.18)!,
-                        ],
-                      ),
-                      borderRadius: BorderRadius.circular(14),
-                      boxShadow: [
-                        BoxShadow(
-                          color: tile.color.withValues(alpha: 0.35),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    alignment: Alignment.center,
-                    child: HubGridIcon(kind: tile.kind, size: 22, color: Colors.white),
-                  ),
-                  const Spacer(),
-                  Text(
-                    tile.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w900,
-                      fontSize: 12.5,
-                      height: 1.1,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    tile.locked ? tile.lockedLabel : tile.subtitle,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 10,
-                      height: 1.2,
-                      fontWeight: FontWeight.w600,
-                      color: tile.locked ? AppColors.coral : AppColors.textMuted,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _QuickChip extends StatelessWidget {
-  const _QuickChip({
-    required this.label,
-    required this.color,
-    required this.onTap,
-    this.done = false,
-  });
-
-  final String label;
-  final Color color;
-  final VoidCallback onTap;
-  final bool done;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 8),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(16),
-          child: Ink(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-            decoration: BoxDecoration(
-              color: done ? AppColors.canvasDeep : color.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: color.withValues(alpha: done ? 0.15 : 0.28)),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  done ? Icons.check_circle_rounded : Icons.bolt_rounded,
-                  size: 16,
-                  color: color,
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w800,
-                    fontSize: 12,
-                    color: color,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _LangButton extends StatelessWidget {
-  const _LangButton({required this.lang});
   final AppLang lang;
+  final int streak;
+  final bool offline;
 
   @override
   Widget build(BuildContext context) {
+    final l = L10n(lang);
     final other = lang == AppLang.it ? AppLang.en : AppLang.it;
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () {
-          HapticFeedback.selectionClick();
-          context.read<AppState>().setLanguage(other);
-        },
-        borderRadius: BorderRadius.circular(16),
-        child: Ink(
-          width: 46,
-          height: 46,
+
+    return Row(
+      children: [
+        Container(
+          width: 40,
+          height: 40,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            color: AppColors.blueDim,
-            border: Border.all(color: AppColors.blue.withValues(alpha: 0.25)),
+            gradient: AppColors.neonGradient,
+            borderRadius: BorderRadius.circular(12),
           ),
+          alignment: Alignment.center,
+          child: const Text(
+            'P',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 18),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(Icons.translate_rounded, color: AppColors.blue, size: 16),
               Text(
-                lang.code.toUpperCase(),
+                l.appTitle,
                 style: const TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w900,
-                  color: AppColors.blue,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0,
+                  color: AppColors.ink,
+                ),
+              ),
+              Text(
+                l.homeSubtitle,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.textMuted,
                 ),
               ),
             ],
           ),
         ),
-      ),
+        _HeaderIcon(
+          tooltip: l.statStreak,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.local_fire_department_rounded, size: 16, color: AppColors.coral),
+              const SizedBox(width: 2),
+              Text(
+                '$streak',
+                style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 6),
+        _HeaderIcon(
+          tooltip: offline ? l.offlineBadge : 'Online',
+          child: Icon(
+            offline ? Icons.cloud_off_rounded : Icons.cloud_done_rounded,
+            size: 18,
+            color: offline ? AppColors.emerald : AppColors.blue,
+          ),
+        ),
+        const SizedBox(width: 6),
+        _HeaderIcon(
+          tooltip: lang.code.toUpperCase(),
+          onTap: () {
+            HapticFeedback.selectionClick();
+            context.read<AppState>().setLanguage(other);
+          },
+          child: Text(
+            lang.code.toUpperCase(),
+            style: const TextStyle(
+              fontWeight: FontWeight.w800,
+              fontSize: 12,
+              color: AppColors.blue,
+            ),
+          ),
+        ),
+        const SizedBox(width: 6),
+        _HeaderIcon(
+          tooltip: l.navProfile,
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const SettingsScreen()),
+          ),
+          child: const Icon(Icons.person_rounded, size: 18, color: AppColors.inkSoft),
+        ),
+      ],
     );
   }
 }
 
-class _MiniStat extends StatelessWidget {
-  const _MiniStat(this.icon, this.value);
-  final IconData icon;
-  final String value;
+class _HeaderIcon extends StatelessWidget {
+  const _HeaderIcon({required this.child, this.onTap, this.tooltip});
+  final Widget child;
+  final VoidCallback? onTap;
+  final String? tooltip;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-      decoration: BoxDecoration(
-        color: AppColors.canvasDeep,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, size: 13, color: AppColors.textMuted),
-          const SizedBox(width: 3),
-          Text(value, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 12)),
-        ],
+    final box = Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Ink(
+          width: AppLayout.touchMin,
+          height: AppLayout.touchMin,
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppColors.stroke),
+          ),
+          child: Center(child: child),
+        ),
       ),
     );
+    if (tooltip == null) return box;
+    return Tooltip(message: tooltip!, child: box);
   }
 }

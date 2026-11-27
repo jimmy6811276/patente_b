@@ -11,7 +11,7 @@ import 'local_store.dart';
 /// Everything (questions, vocabulary, progress, mistakes, exams, bookmarks)
 /// lives in the on-device SQLite database. No network calls anywhere.
 class AppState extends ChangeNotifier {
-  AppState({LocalStore? store, this.userName = 'Studente'})
+  AppState({LocalStore? store, this.userName = ''})
       : _store = store ?? LocalStore();
 
   final LocalStore _store;

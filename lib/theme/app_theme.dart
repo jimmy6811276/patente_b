@@ -36,44 +36,52 @@ abstract final class AppTheme {
       textTheme: textTheme.copyWith(
         displayLarge: readableStyle(
           textTheme.displayLarge?.copyWith(
-            fontWeight: FontWeight.w900,
-            letterSpacing: -1.4,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 0,
             color: AppColors.ink,
           ),
-          extraSpace: 0.2,
         ),
         headlineMedium: readableStyle(
           textTheme.headlineMedium?.copyWith(
             fontWeight: FontWeight.w800,
-            letterSpacing: -0.6,
+            letterSpacing: 0,
             color: AppColors.ink,
           ),
         ),
         titleLarge: readableStyle(
           textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.w700,
+            letterSpacing: 0,
             color: AppColors.ink,
           ),
         ),
         titleMedium: readableStyle(
           textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w700,
+            letterSpacing: 0,
             color: AppColors.ink,
           ),
         ),
         bodyLarge: readableStyle(
-          textTheme.bodyLarge?.copyWith(height: 1.45, color: AppColors.ink),
+          textTheme.bodyLarge?.copyWith(
+            height: 1.45,
+            fontSize: 16,
+            letterSpacing: 0,
+            color: AppColors.ink,
+          ),
         ),
         bodyMedium: readableStyle(
           textTheme.bodyMedium?.copyWith(
             color: AppColors.textSecondary,
+            fontSize: 14,
             height: 1.4,
+            letterSpacing: 0,
           ),
         ),
         labelLarge: readableStyle(
           textTheme.labelLarge?.copyWith(
             fontWeight: FontWeight.w700,
-            letterSpacing: 0.2,
+            letterSpacing: 0,
             color: AppColors.ink,
           ),
         ),

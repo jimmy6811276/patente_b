@@ -2,7 +2,7 @@ import '../models/models.dart';
 
 /// Static, bundled learning plan (no network). All quiz content lives in SQLite.
 abstract final class AppData {
-  static const userName = 'Studente';
+  static const userName = '';
 
   static List<FastTrackTask> fastTrackTasks() => [
         const FastTrackTask(id: 'd1-1', titleIt: 'Segnali di pericolo essenziali', titleEn: 'Essential danger signs', day: 1, done: true, minutes: 20),

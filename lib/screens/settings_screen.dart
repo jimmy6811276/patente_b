@@ -5,6 +5,7 @@ import '../data/app_state.dart';
 import '../l10n/app_lang.dart';
 import '../l10n/strings.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_layout.dart';
 import '../widgets/premium_scaffold.dart';
 import 'quiz_screen.dart';
 
@@ -63,7 +64,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return PremiumScaffold(
       safeBottom: false,
       child: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 12, 20, 120),
+        padding: EdgeInsets.fromLTRB(20, 12, 20, AppLayout.bottomClearance(context)),
         children: [
           Text(
             l.settingsTitle,

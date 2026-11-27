@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../data/app_state.dart';
 import '../l10n/strings.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_layout.dart';
 import '../widgets/premium_scaffold.dart';
 
 class StatsScreen extends StatefulWidget {
@@ -31,7 +32,7 @@ class _StatsScreenState extends State<StatsScreen> {
     return PremiumScaffold(
       safeBottom: false,
       child: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 12, 20, 120),
+        padding: EdgeInsets.fromLTRB(20, 12, 20, AppLayout.bottomClearance(context)),
         physics: const BouncingScrollPhysics(),
         children: [
           if (canPop)
