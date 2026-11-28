@@ -48,7 +48,10 @@ class _AppShellState extends State<AppShell> {
     final reviewBadge = state.mistakes.length;
 
     final pages = <Widget>[
-      HomeScreen(onOpenProfile: () => setState(() => _index = 4)),
+      HomeScreen(
+        onOpenProfile: () => setState(() => _index = 4),
+        onOpenStats: () => setState(() => _index = 3),
+      ),
       const ChaptersScreen(),
       const StatsScreen(),
       SettingsScreen(onBackToHome: () => setState(() => _index = 0)),

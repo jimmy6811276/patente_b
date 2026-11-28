@@ -558,6 +558,10 @@ class L10n {
   String get hubWeak => p('Punti deboli', 'Weak spots');
   String get hubVocab => p('Vocabolario', 'Vocabulary');
   String get hubMini => p('Mini esame', 'Mini exam');
+  String get hubMiniSub => p('10 domande · timer breve', '10 questions · short timer');
+  String get heroReady => p('PRONTO', 'READY');
+  String get heroAccuracy => p('PREC.', 'ACC');
+  String get heroStreak => p('SERIE', 'STREAK');
   String get hubStats => p('Progressi', 'Progress');
   String get dailyAvailable => p('Disponibile', 'Available');
   String get dailyDone => p('Completata', 'Done');

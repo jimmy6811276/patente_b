@@ -20,14 +20,16 @@ import 'quiz_screen.dart';
 import 'settings_screen.dart';
 import 'sign_games_screen.dart';
 import 'signs_atlas_screen.dart';
+import 'stats_screen.dart';
 import 'vocabulary_screen.dart';
 
 /// Home — one visual composition, no duplicate destinations.
 /// Quiz = center nav · Chapters = chapters tab · everything else appears once.
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key, this.onOpenProfile});
+  const HomeScreen({super.key, this.onOpenProfile, this.onOpenStats});
 
   final VoidCallback? onOpenProfile;
+  final VoidCallback? onOpenStats;
 
   @override
   Widget build(BuildContext context) {
@@ -88,6 +90,9 @@ class HomeScreen extends StatelessWidget {
                     ? '—'
                     : '${(stats.accuracy * 100).round()}%',
                 streakLabel: '${stats.streak}',
+                readyLabel: l.heroReady,
+                accLabel: l.heroAccuracy,
+                streakMetricLabel: l.heroStreak,
                 onCta: openContinue,
               ),
             ),
@@ -161,10 +166,27 @@ class HomeScreen extends StatelessWidget {
                   ),
                   const SizedBox(width: 12),
                   DsFeatureRail(
-                    title: l.hubQuick,
-                    subtitle: l.quickQuizTitle,
+                    title: l.hubMini,
+                    subtitle: l.hubMiniSub,
                     color: AppColors.blue,
                     imageAsset: PracticeMedia.quick,
+                    badge: '10Q',
+                    onTap: () => _push(
+                      context,
+                      QuizScreen(
+                        title: l.hubMini,
+                        quickMode: true,
+                        limit: 10,
+                        secondsPerQuestion: 40,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  DsFeatureRail(
+                    title: l.hubQuick,
+                    subtitle: l.quickQuizTitle,
+                    color: AppColors.blueSoft,
+                    imageAsset: PracticeMedia.quiz,
                     badge: '20s',
                     onTap: () => _push(
                       context,
@@ -188,6 +210,21 @@ class HomeScreen extends StatelessWidget {
                           ? const FastTrackScreen()
                           : const FastTrackLockScreen(),
                     ),
+                  ),
+                  const SizedBox(width: 12),
+                  DsFeatureRail(
+                    title: l.examHistory,
+                    subtitle: l.statsSub,
+                    color: AppColors.violet,
+                    imageAsset: PracticeMedia.bookmarks,
+                    badge: '${state.examHistory.length}',
+                    onTap: () {
+                      if (onOpenStats != null) {
+                        onOpenStats!();
+                        return;
+                      }
+                      _push(context, const StatsScreen());
+                    },
                   ),
                 ],
               ),
@@ -351,6 +388,9 @@ class _HomeHero extends StatelessWidget {
     required this.readiness,
     required this.accuracyLabel,
     required this.streakLabel,
+    required this.readyLabel,
+    required this.accLabel,
+    required this.streakMetricLabel,
     required this.onCta,
   });
 
@@ -361,6 +401,9 @@ class _HomeHero extends StatelessWidget {
   final double readiness;
   final String accuracyLabel;
   final String streakLabel;
+  final String readyLabel;
+  final String accLabel;
+  final String streakMetricLabel;
   final VoidCallback onCta;
 
   @override
@@ -433,11 +476,11 @@ class _HomeHero extends StatelessWidget {
                   const Spacer(),
                   Row(
                     children: [
-                      _HeroMetric(label: 'READY', value: '${(readiness * 100).round()}%'),
+                      _HeroMetric(label: readyLabel, value: '${(readiness * 100).round()}%'),
                       const SizedBox(width: 8),
-                      _HeroMetric(label: 'ACC', value: accuracyLabel),
+                      _HeroMetric(label: accLabel, value: accuracyLabel),
                       const SizedBox(width: 8),
-                      _HeroMetric(label: 'STREAK', value: streakLabel),
+                      _HeroMetric(label: streakMetricLabel, value: streakLabel),
                     ],
                   ),
                   const SizedBox(height: 12),
@@ -615,8 +658,7 @@ class _Header extends StatelessWidget {
     final l = L10n(lang);
     final other = lang == AppLang.it ? AppLang.en : AppLang.it;
 
-    // Only real actions in the header: brand mark, language, profile.
-    // Streak / offline badges lived here as dummy icons — they already appear in the hero.
+    // Real actions only: logo + title + language + profile. No dummy badges.
     return Row(
       children: [
         ClipRRect(
@@ -626,19 +668,6 @@ class _Header extends StatelessWidget {
             width: 40,
             height: 40,
             fit: BoxFit.cover,
-            errorBuilder: (context, error, stackTrace) => Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                gradient: AppColors.neonGradient,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              alignment: Alignment.center,
-              child: const Text(
-                'B',
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 18),
-              ),
-            ),
           ),
         ),
         const SizedBox(width: 10),
@@ -655,21 +684,25 @@ class _Header extends StatelessWidget {
             ),
           ),
         ),
-        _HeaderIcon(
-          tooltip: lang.code.toUpperCase(),
-          onTap: () {
+        TextButton(
+          onPressed: () {
             HapticFeedback.selectionClick();
             context.read<AppState>().setLanguage(other);
           },
+          style: TextButton.styleFrom(
+            foregroundColor: AppColors.blue,
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            minimumSize: const Size(44, 44),
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          ),
           child: Text(
             lang.code.toUpperCase(),
-            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12, color: AppColors.blue),
+            style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13),
           ),
         ),
-        const SizedBox(width: 6),
-        _HeaderIcon(
+        IconButton(
           tooltip: l.navProfile,
-          onTap: () {
+          onPressed: () {
             HapticFeedback.selectionClick();
             if (onOpenProfile != null) {
               onOpenProfile!();
@@ -679,39 +712,9 @@ class _Header extends StatelessWidget {
               MaterialPageRoute(builder: (_) => const SettingsScreen()),
             );
           },
-          child: const Icon(Icons.person_rounded, size: 18, color: AppColors.inkSoft),
+          icon: const Icon(Icons.person_outline_rounded, color: AppColors.inkSoft),
         ),
       ],
     );
-  }
-}
-
-class _HeaderIcon extends StatelessWidget {
-  const _HeaderIcon({required this.child, this.onTap, this.tooltip});
-  final Widget child;
-  final VoidCallback? onTap;
-  final String? tooltip;
-
-  @override
-  Widget build(BuildContext context) {
-    final box = Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Ink(
-          width: AppLayout.touchMin,
-          height: AppLayout.touchMin,
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppColors.stroke),
-          ),
-          child: Center(child: child),
-        ),
-      ),
-    );
-    if (tooltip == null) return box;
-    return Tooltip(message: tooltip!, child: box);
   }
 }
